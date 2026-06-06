@@ -49,3 +49,39 @@ Tracks stock movement: purchase, sale, return, adjustment.
 
 ### AuditLogs
 Tracks important actions for security and traceability.
+
+------------------------------------------------
+
+## Table Relationships
+
+Users
+- One user can have many roles through UserRoles.
+- One user can become one vendor.
+- One customer can have one cart.
+- One customer can place many orders.
+
+Vendors
+- One vendor can have many products.
+- One vendor can receive many orders through order items.
+
+Brands
+- One brand can have many products.
+
+Categories
+- One category can have many products.
+- A category can have a parent category.
+
+Products
+- One product belongs to one vendor.
+- One product belongs to one category.
+- One product belongs to one brand.
+- One product can have many images.
+- One product can have many inventory transactions.
+
+Orders
+- One order belongs to one customer.
+- One order has many order items.
+
+Cart
+- One cart belongs to one customer.
+- One cart has many cart items.
