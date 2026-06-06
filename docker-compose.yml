@@ -1,2 +1,16 @@
-version: '3.9'
-services: {}
+services:
+  postgres:
+    image: postgres:16
+    container_name: fragrance_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: fragrance_db
+      POSTGRES_USER: fragrance_user
+      POSTGRES_PASSWORD: fragrance_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - fragrance_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  fragrance_postgres_data:
