@@ -62,4 +62,67 @@ public class ProductsController : ControllerBase
             return BadRequest(ex.Message);
         }
     }
+
+    [Authorize(Roles = "Vendor")]
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateProduct(
+        Guid id,
+        UpdateProductDto dto)
+    {
+        try
+        {
+            var userIdClaim =
+                User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+                return Unauthorized();
+
+            var currentUserId =
+                Guid.Parse(userIdClaim.Value);
+
+            var updated = await _productService.UpdateAsync(
+                id,
+                dto,
+                currentUserId);
+
+            if (!updated)
+                return NotFound();
+
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [Authorize(Roles = "Vendor")]
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteProduct(Guid id)
+    {
+        try
+        {
+            var userIdClaim =
+                User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+                return Unauthorized();
+
+            var currentUserId =
+                Guid.Parse(userIdClaim.Value);
+
+            var deleted = await _productService.DeleteAsync(
+                id,
+                currentUserId);
+
+            if (!deleted)
+                return NotFound();
+
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
 }

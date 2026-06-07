@@ -9,4 +9,12 @@ public interface IProductService
     Task<ProductDto> CreateAsync(
         CreateProductDto dto,
         Guid currentUserId);
+    Task<bool> UpdateAsync(
+        Guid id,
+        UpdateProductDto dto,
+        Guid currentUserId);
+
+    Task<bool> DeleteAsync(
+        Guid id,
+        Guid currentUserId);
 }

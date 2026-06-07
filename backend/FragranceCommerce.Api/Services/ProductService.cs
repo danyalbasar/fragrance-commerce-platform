@@ -216,4 +216,70 @@ public class ProductService : IProductService
             }).ToList()
         };
     }
+    public async Task<bool> UpdateAsync(
+        Guid id,
+        UpdateProductDto dto,
+        Guid currentUserId)
+    {
+        var vendor = await _vendorRepository.GetByUserIdAsync(currentUserId);
+
+        if (vendor == null)
+            throw new InvalidOperationException("Vendor profile not found for current user.");
+
+        var product = await _productRepository.GetByIdAsync(id);
+
+        if (product == null)
+            return false;
+
+        if (product.VendorId != vendor.Id)
+            throw new InvalidOperationException("You are not allowed to update this product.");
+
+        var brand = await _brandRepository.GetByIdAsync(dto.BrandId);
+
+        if (brand == null)
+            throw new InvalidOperationException("Brand not found.");
+
+        var category = await _categoryRepository.GetByIdAsync(dto.CategoryId);
+
+        if (category == null)
+            throw new InvalidOperationException("Category not found.");
+
+        product.BrandId = dto.BrandId;
+        product.CategoryId = dto.CategoryId;
+        product.Name = dto.Name;
+        product.Description = dto.Description;
+        product.IsActive = dto.IsActive;
+        product.UpdatedAt = DateTime.UtcNow;
+
+        _productRepository.Update(product);
+        await _productRepository.SaveChangesAsync();
+
+        return true;
+    }
+
+    public async Task<bool> DeleteAsync(
+        Guid id,
+        Guid currentUserId)
+    {
+        var vendor = await _vendorRepository.GetByUserIdAsync(currentUserId);
+
+        if (vendor == null)
+            throw new InvalidOperationException("Vendor profile not found for current user.");
+
+        var product = await _productRepository.GetByIdAsync(id);
+
+        if (product == null)
+            return false;
+
+        if (product.VendorId != vendor.Id)
+            throw new InvalidOperationException("You are not allowed to delete this product.");
+
+        product.IsActive = false;
+        product.UpdatedAt = DateTime.UtcNow;
+
+        _productRepository.Update(product);
+        await _productRepository.SaveChangesAsync();
+
+        return true;
+    }
 }
