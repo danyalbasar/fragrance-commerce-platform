@@ -25,13 +25,104 @@ public class ProductService : IProductService
 
     public async Task<List<ProductDto>> GetAllAsync()
     {
-        throw new NotImplementedException();
+        var products = await _productRepository.GetAllAsync();
+
+        return products.Select(product => new ProductDto
+        {
+            Id = product.Id,
+            VendorId = product.VendorId,
+            VendorName = product.Vendor.BusinessName,
+
+            BrandId = product.BrandId,
+            BrandName = product.Brand.Name,
+
+            CategoryId = product.CategoryId,
+            CategoryName = product.Category.Name,
+
+            Name = product.Name,
+            Description = product.Description,
+            IsActive = product.IsActive,
+
+            Variants = product.Variants.Select(v => new ProductVariantDto
+            {
+                Id = v.Id,
+                VariantName = v.VariantName,
+                SKU = v.SKU,
+                MRP = v.MRP,
+                SellingPrice = v.SellingPrice,
+                CostPrice = v.CostPrice,
+                StockQuantity = v.StockQuantity,
+
+                Images = v.Images.Select(i => new ProductVariantImageDto
+                {
+                    Id = i.Id,
+                    ImageUrl = i.ImageUrl,
+                    DisplayOrder = i.DisplayOrder,
+                    IsPrimary = i.IsPrimary
+                }).ToList()
+            }).ToList(),
+
+            Images = product.Images.Select(i => new ProductImageDto
+            {
+                Id = i.Id,
+                ImageUrl = i.ImageUrl,
+                DisplayOrder = i.DisplayOrder,
+                IsPrimary = i.IsPrimary
+            }).ToList()
+        }).ToList();
     }
 
     public async Task<ProductDto?> GetByIdAsync(Guid id)
+{
+    var product = await _productRepository.GetByIdAsync(id);
+
+    if (product == null)
+        return null;
+
+    return new ProductDto
     {
-        throw new NotImplementedException();
-    }
+        Id = product.Id,
+        VendorId = product.VendorId,
+        VendorName = product.Vendor.BusinessName,
+
+        BrandId = product.BrandId,
+        BrandName = product.Brand.Name,
+
+        CategoryId = product.CategoryId,
+        CategoryName = product.Category.Name,
+
+        Name = product.Name,
+        Description = product.Description,
+        IsActive = product.IsActive,
+
+        Variants = product.Variants.Select(v => new ProductVariantDto
+        {
+            Id = v.Id,
+            VariantName = v.VariantName,
+            SKU = v.SKU,
+            MRP = v.MRP,
+            SellingPrice = v.SellingPrice,
+            CostPrice = v.CostPrice,
+            StockQuantity = v.StockQuantity,
+
+            Images = v.Images.Select(i => new ProductVariantImageDto
+            {
+                Id = i.Id,
+                ImageUrl = i.ImageUrl,
+                DisplayOrder = i.DisplayOrder,
+                IsPrimary = i.IsPrimary
+            }).ToList()
+        }).ToList(),
+
+        Images = product.Images.Select(i => new ProductImageDto
+        {
+            Id = i.Id,
+            ImageUrl = i.ImageUrl,
+            DisplayOrder = i.DisplayOrder,
+            IsPrimary = i.IsPrimary
+        }).ToList()
+    };
+}
 
     public async Task<ProductDto> CreateAsync(
         CreateProductDto dto,
@@ -66,7 +157,14 @@ public class ProductService : IProductService
                 MRP = v.MRP,
                 SellingPrice = v.SellingPrice,
                 CostPrice = v.CostPrice,
-                StockQuantity = v.StockQuantity
+                StockQuantity = v.StockQuantity,
+
+                Images = v.Images.Select(i => new ProductVariantImage
+                {
+                    ImageUrl = i.ImageUrl,
+                    DisplayOrder = i.DisplayOrder,
+                    IsPrimary = i.IsPrimary
+                }).ToList()
             }).ToList(),
             Images = dto.Images.Select(i => new ProductImage
             {
@@ -99,7 +197,15 @@ public class ProductService : IProductService
                 MRP = v.MRP,
                 SellingPrice = v.SellingPrice,
                 CostPrice = v.CostPrice,
-                StockQuantity = v.StockQuantity
+                StockQuantity = v.StockQuantity,
+
+                Images = v.Images.Select(i => new ProductVariantImageDto
+                {
+                    Id = i.Id,
+                    ImageUrl = i.ImageUrl,
+                    DisplayOrder = i.DisplayOrder,
+                    IsPrimary = i.IsPrimary
+                }).ToList()
             }).ToList(),
             Images = product.Images.Select(i => new ProductImageDto
             {

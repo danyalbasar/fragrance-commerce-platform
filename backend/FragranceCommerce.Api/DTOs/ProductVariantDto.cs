@@ -11,9 +11,10 @@ public class ProductVariantDto
     public decimal CostPrice { get; set; }
 
     public int StockQuantity { get; set; }
-
     public string StockStatus =>
         StockQuantity == 0 ? "Out of Stock" :
         StockQuantity <= 5 ? $"Only {StockQuantity} left" :
         "In Stock";
+
+    public List<ProductVariantImageDto> Images { get; set; } = new();
 }

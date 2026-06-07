@@ -16,6 +16,12 @@ public class ProductRepository : IProductRepository
     public async Task<List<Product>> GetAllAsync()
     {
         return await _context.Products
+            .Include(p => p.Brand)
+            .Include(p => p.Category)
+            .Include(p => p.Vendor)
+            .Include(p => p.Variants)
+                .ThenInclude(v => v.Images)
+            .Include(p => p.Images)
             .AsNoTracking()
             .ToListAsync();
     }
@@ -23,7 +29,13 @@ public class ProductRepository : IProductRepository
     public async Task<Product?> GetByIdAsync(Guid id)
     {
         return await _context.Products
-            .FirstOrDefaultAsync(b => b.Id == id);
+            .Include(p => p.Brand)
+            .Include(p => p.Category)
+            .Include(p => p.Vendor)
+            .Include(p => p.Variants)
+                .ThenInclude(v => v.Images)
+            .Include(p => p.Images)
+            .FirstOrDefaultAsync(p => p.Id == id);
     }
 
     public async Task AddAsync(Product product)

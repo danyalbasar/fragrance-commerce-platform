@@ -24,4 +24,14 @@ public class VendorRepository : IVendorRepository
         return await _context.Vendors
             .FirstOrDefaultAsync(v => v.UserId == userId);
     }
+
+    public async Task AddAsync(Vendor vendor)
+    {
+        await _context.Vendors.AddAsync(vendor);
+    }
+
+    public async Task SaveChangesAsync()
+    {
+        await _context.SaveChangesAsync();
+    }
 }

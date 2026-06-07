@@ -6,4 +6,6 @@ public interface IVendorRepository
 {
     Task<Vendor?> GetByIdAsync(Guid id);
     Task<Vendor?> GetByUserIdAsync(Guid userId);
+    Task AddAsync(Vendor vendor);
+    Task SaveChangesAsync();
 }

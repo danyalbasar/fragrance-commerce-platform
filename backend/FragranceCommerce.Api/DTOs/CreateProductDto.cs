@@ -22,6 +22,8 @@ public class CreateProductVariantDto
     public decimal CostPrice { get; set; }
 
     public int StockQuantity { get; set; }
+    
+    public List<CreateProductVariantImageDto> Images { get; set; } = new();
 }
 
 public class CreateProductImageDto
