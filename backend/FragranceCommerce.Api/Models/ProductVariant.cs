@@ -14,4 +14,5 @@ public class ProductVariant : BaseEntity
 
     public int StockQuantity { get; set; }
     public bool IsActive { get; set; } = true;
+    public ICollection<ProductVariantImage> Images { get; set; } = new List<ProductVariantImage>();
 }

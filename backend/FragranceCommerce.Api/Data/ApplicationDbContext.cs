@@ -19,6 +19,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Product> Products => Set<Product>();
     public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
     public DbSet<ProductImage> ProductImages => Set<ProductImage>();
+    public DbSet<ProductVariantImage> ProductVariantImages => Set<ProductVariantImage>();
     public DbSet<Review> Reviews => Set<Review>();
     public DbSet<ReviewImage> ReviewImages => Set<ReviewImage>();
 
@@ -101,6 +102,11 @@ public class ApplicationDbContext : DbContext
         });
 
         modelBuilder.Entity<ProductImage>(entity =>
+        {
+            entity.Property(i => i.ImageUrl).IsRequired();
+        });
+
+        modelBuilder.Entity<ProductVariantImage>(entity =>
         {
             entity.Property(i => i.ImageUrl).IsRequired();
         });

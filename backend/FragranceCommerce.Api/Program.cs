@@ -76,6 +76,8 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 
+builder.Services.AddScoped<IVendorRepository, VendorRepository>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
