@@ -1,0 +1,12 @@
+using FragranceCommerce.Api.DTOs;
+
+namespace FragranceCommerce.Api.Services;
+
+public interface IOrderService
+{
+    Task<OrderDto> CreateOrderAsync(Guid currentUserId);
+    Task<OrderDto?> GetByIdAsync(
+        Guid orderId,
+        Guid currentUserId);
+    Task<List<OrderDto>> GetMyOrdersAsync(Guid currentUserId);
+}
