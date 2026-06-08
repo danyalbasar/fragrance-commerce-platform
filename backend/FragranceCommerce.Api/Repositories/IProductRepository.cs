@@ -1,3 +1,4 @@
+using FragranceCommerce.Api.DTOs;
 using FragranceCommerce.Api.Models;
 
 namespace FragranceCommerce.Api.Repositories;
@@ -10,4 +11,5 @@ public interface IProductRepository
     void Update(Product product);
     void Delete(Product product);
     Task SaveChangesAsync();
+    Task<(List<Product> Products, int TotalCount)> SearchAsync(ProductSearchRequestDto request);
 }

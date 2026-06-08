@@ -13,8 +13,8 @@ public interface IProductService
         Guid id,
         UpdateProductDto dto,
         Guid currentUserId);
-
     Task<bool> DeleteAsync(
         Guid id,
         Guid currentUserId);
+    Task<PagedResultDto<ProductDto>> SearchAsync(ProductSearchRequestDto request);
 }

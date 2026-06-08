@@ -1,6 +1,7 @@
 using FragranceCommerce.Api.Data;
 using FragranceCommerce.Api.Models;
 using Microsoft.EntityFrameworkCore;
+using FragranceCommerce.Api.DTOs;
 
 namespace FragranceCommerce.Api.Repositories;
 
@@ -56,5 +57,73 @@ public class ProductRepository : IProductRepository
     public async Task SaveChangesAsync()
     {
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<(List<Product> Products, int TotalCount)> SearchAsync(ProductSearchRequestDto request)
+    {
+        var query = _context.Products
+            .Include(p => p.Brand)
+            .Include(p => p.Category)
+            .Include(p => p.Vendor)
+            .Include(p => p.Variants)
+                .ThenInclude(v => v.Images)
+            .Include(p => p.Images)
+            .Where(p => p.IsActive)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var search = request.Search.ToLower();
+
+            query = query.Where(p =>
+                p.Name.ToLower().Contains(search) ||
+                (p.Description != null && p.Description.ToLower().Contains(search)) ||
+                p.Brand.Name.ToLower().Contains(search));
+        }
+
+        if (request.BrandId.HasValue)
+            query = query.Where(p => p.BrandId == request.BrandId.Value);
+
+        if (request.CategoryId.HasValue)
+            query = query.Where(p => p.CategoryId == request.CategoryId.Value);
+
+        if (request.MinPrice.HasValue)
+            query = query.Where(p => p.Variants.Any(v => v.SellingPrice >= request.MinPrice.Value));
+
+        if (request.MaxPrice.HasValue)
+            query = query.Where(p => p.Variants.Any(v => v.SellingPrice <= request.MaxPrice.Value));
+
+        if (request.InStockOnly.HasValue)
+        {
+            if (request.InStockOnly.Value)
+                query = query.Where(p => p.Variants.Any(v => v.StockQuantity > 0));
+            else
+                query = query.Where(p => p.Variants.All(v => v.StockQuantity <= 0));
+        }
+
+        query = request.SortBy?.ToLower() switch
+        {
+            "price" => request.SortDirection?.ToLower() == "desc"
+                ? query.OrderByDescending(p => p.Variants.Min(v => v.SellingPrice))
+                : query.OrderBy(p => p.Variants.Min(v => v.SellingPrice)),
+
+            "createdat" => request.SortDirection?.ToLower() == "desc"
+                ? query.OrderByDescending(p => p.CreatedAt)
+                : query.OrderBy(p => p.CreatedAt),
+
+            _ => request.SortDirection?.ToLower() == "desc"
+                ? query.OrderByDescending(p => p.Name)
+                : query.OrderBy(p => p.Name)
+        };
+
+        var totalCount = await query.CountAsync();
+
+        var products = await query
+            .Skip((request.PageNumber - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .AsNoTracking()
+            .ToListAsync();
+
+        return (products, totalCount);
     }
 }

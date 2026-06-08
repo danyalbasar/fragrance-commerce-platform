@@ -125,4 +125,12 @@ public class ProductsController : ControllerBase
             return BadRequest(ex.Message);
         }
     }
+
+    [HttpGet("search")]
+    public async Task<ActionResult<PagedResultDto<ProductDto>>> SearchProducts(
+        [FromQuery] ProductSearchRequestDto request)
+    {
+        var result = await _productService.SearchAsync(request);
+        return Ok(result);
+    }
 }
