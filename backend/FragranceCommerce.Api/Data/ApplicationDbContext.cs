@@ -26,6 +26,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<CartItem> CartItems => Set<CartItem>();
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
+    public DbSet<WishlistItem> WishlistItems => Set<WishlistItem>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -123,6 +124,12 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<ReviewImage>(entity =>
         {
             entity.Property(i => i.ImageUrl).IsRequired();
+        });
+
+        modelBuilder.Entity<WishlistItem>(entity =>
+        {
+            entity.HasIndex(w => new { w.UserId, w.ProductId })
+                .IsUnique();
         });
     }
 }
