@@ -3,6 +3,7 @@ using FragranceCommerce.Api.DTOs;
 using FragranceCommerce.Api.Models;
 using FragranceCommerce.Api.Repositories;
 using Microsoft.EntityFrameworkCore;
+using FragranceCommerce.Api.Enums;
 
 namespace FragranceCommerce.Api.Services;
 
@@ -45,7 +46,7 @@ public class OrderService : IOrderService
             {
                 UserId = currentUserId,
                 OrderNumber = GenerateOrderNumber(),
-                Status = "Pending",
+                Status = OrderStatus.Pending,
                 OrderedAt = DateTime.UtcNow,
                 Items = cart.Items.Select(item => new OrderItem
                 {
@@ -114,6 +115,75 @@ public class OrderService : IOrderService
                 Quantity = i.Quantity,
                 TotalPrice = i.UnitPrice * i.Quantity
             }).ToList()
+        };
+    }
+
+    public async Task<OrderDto> UpdateStatusAsync(
+        Guid orderId,
+        UpdateOrderStatusDto dto)
+    {
+        var order = await _orderRepository.GetByIdAsync(orderId);
+
+        if (order == null)
+            throw new InvalidOperationException("Order not found.");
+
+        if (!IsValidStatusTransition(order.Status, dto.Status))
+            throw new InvalidOperationException(
+                $"Cannot change order status from {order.Status} to {dto.Status}.");
+
+        using var transaction =
+            await _context.Database.BeginTransactionAsync();
+
+        try
+        {
+            if (dto.Status == OrderStatus.Cancelled)
+            {
+                foreach (var item in order.Items)
+                {
+                    item.ProductVariant.StockQuantity += item.Quantity;
+                }
+            }
+
+            order.Status = dto.Status;
+            order.UpdatedAt = DateTime.UtcNow;
+
+            await _orderRepository.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+
+            return MapToOrderDto(order);
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+
+    private static bool IsValidStatusTransition(
+        OrderStatus currentStatus,
+        OrderStatus newStatus)
+    {
+        return currentStatus switch
+        {
+            OrderStatus.Pending =>
+                newStatus == OrderStatus.Confirmed ||
+                newStatus == OrderStatus.Cancelled,
+
+            OrderStatus.Confirmed =>
+                newStatus == OrderStatus.Shipped ||
+                newStatus == OrderStatus.Cancelled,
+
+            OrderStatus.Shipped =>
+                newStatus == OrderStatus.Delivered,
+
+            OrderStatus.Delivered =>
+                false,
+
+            OrderStatus.Cancelled =>
+                false,
+
+            _ => false
         };
     }
 

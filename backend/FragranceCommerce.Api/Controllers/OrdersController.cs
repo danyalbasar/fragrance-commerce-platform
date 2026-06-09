@@ -60,6 +60,23 @@ public class OrdersController : ControllerBase
         return Ok(order);
     }
 
+    [Authorize(Roles = "Vendor,Admin,SuperAdmin")]
+    [HttpPut("{id}/status")]
+    public async Task<ActionResult<OrderDto>> UpdateStatus(
+        Guid id,
+        UpdateOrderStatusDto dto)
+    {
+        try
+        {
+            var order = await _orderService.UpdateStatusAsync(id, dto);
+            return Ok(order);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
     private Guid GetCurrentUserId()
     {
         var userIdClaim =

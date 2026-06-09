@@ -9,4 +9,7 @@ public interface IOrderService
         Guid orderId,
         Guid currentUserId);
     Task<List<OrderDto>> GetMyOrdersAsync(Guid currentUserId);
+    Task<OrderDto> UpdateStatusAsync(
+        Guid orderId,
+        UpdateOrderStatusDto dto);
 }

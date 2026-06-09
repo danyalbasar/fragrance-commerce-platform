@@ -3,4 +3,3 @@ bin/
 obj/
 .env
 .vs/
-Controllers/TestController.cs
