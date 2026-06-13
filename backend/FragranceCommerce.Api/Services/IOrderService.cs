@@ -4,7 +4,9 @@ namespace FragranceCommerce.Api.Services;
 
 public interface IOrderService
 {
-    Task<OrderDto> CreateOrderAsync(Guid currentUserId);
+    Task<OrderDto> CreateOrderAsync(
+        CreateOrderDto dto,
+        Guid currentUserId);
     Task<OrderDto?> GetByIdAsync(
         Guid orderId,
         Guid currentUserId);

@@ -35,6 +35,16 @@ public class CartService : ICartService
             await _cartRepository.SaveChangesAsync();
         }
 
+        if (!cart.Items.Any() &&
+            (!string.IsNullOrWhiteSpace(cart.CouponCode) || cart.DiscountAmount > 0))
+        {
+            cart.CouponCode = null;
+            cart.DiscountAmount = 0;
+            cart.UpdatedAt = DateTime.UtcNow;
+
+            await _cartRepository.SaveChangesAsync();
+        }
+
         return MapToCartDto(cart);
     }
 

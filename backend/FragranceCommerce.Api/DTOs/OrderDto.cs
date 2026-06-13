@@ -12,5 +12,6 @@ public class OrderDto
     public string? CouponCode { get; set; }
     public decimal DiscountAmount { get; set; }
     public decimal FinalAmount { get; set; }
+    public OrderAddressDto? ShippingAddress { get; set; }
     public List<OrderItemDto> Items { get; set; } = new();
 }

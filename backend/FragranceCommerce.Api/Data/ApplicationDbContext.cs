@@ -29,6 +29,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<WishlistItem> WishlistItems => Set<WishlistItem>();
     public DbSet<Address> Addresses => Set<Address>();
     public DbSet<Coupon> Coupons => Set<Coupon>();
+    public DbSet<OrderAddress> OrderAddresses => Set<OrderAddress>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -150,6 +151,13 @@ public class ApplicationDbContext : DbContext
 
             entity.Property(c => c.MaxDiscountAmount)
                 .HasColumnType("decimal(18,2)");
+        });
+
+        modelBuilder.Entity<Order>(entity =>
+        {
+            entity.HasOne(o => o.ShippingAddress)
+                .WithOne(a => a.Order)
+                .HasForeignKey<OrderAddress>(a => a.OrderId);
         });
     }
 }

@@ -19,13 +19,13 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<OrderDto>> CreateOrder()
+    public async Task<ActionResult<OrderDto>> CreateOrder(CreateOrderDto dto)
     {
         try
         {
             var currentUserId = GetCurrentUserId();
 
-            var order = await _orderService.CreateOrderAsync(currentUserId);
+            var order = await _orderService.CreateOrderAsync(dto, currentUserId);
 
             return Ok(order);
         }

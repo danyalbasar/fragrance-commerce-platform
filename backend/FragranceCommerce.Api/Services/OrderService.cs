@@ -23,12 +23,20 @@ public class OrderService : IOrderService
         _orderRepository = orderRepository;
     }
 
-    public async Task<OrderDto> CreateOrderAsync(Guid currentUserId)
+    public async Task<OrderDto> CreateOrderAsync(CreateOrderDto dto, Guid currentUserId)
     {
         var cart = await _cartRepository.GetByUserIdAsync(currentUserId);
 
         if (cart == null || !cart.Items.Any())
             throw new InvalidOperationException("Cart is empty.");
+
+        var address = await _context.Addresses
+            .FirstOrDefaultAsync(a =>
+                a.Id == dto.AddressId &&
+                a.UserId == currentUserId);
+
+        if (address == null)
+            throw new InvalidOperationException("Address not found.");
 
         using var transaction =
             await _context.Database.BeginTransactionAsync();
@@ -68,7 +76,19 @@ public class OrderService : IOrderService
                     ProductVariantId = item.ProductVariantId,
                     UnitPrice = item.ProductVariant.SellingPrice,
                     Quantity = item.Quantity
-                }).ToList()
+                }).ToList(),
+
+                ShippingAddress = new OrderAddress
+                {
+                    FullName = address.FullName,
+                    PhoneNumber = address.PhoneNumber,
+                    AddressLine1 = address.AddressLine1,
+                    AddressLine2 = address.AddressLine2,
+                    City = address.City,
+                    State = address.State,
+                    PostalCode = address.PostalCode,
+                    Country = address.Country
+                },
             };
 
             order.TotalAmount = order.Items.Sum(i => i.UnitPrice * i.Quantity);
@@ -90,6 +110,10 @@ public class OrderService : IOrderService
             }
 
             _context.CartItems.RemoveRange(cart.Items);
+
+            cart.CouponCode = null;
+            cart.DiscountAmount = 0;
+            cart.UpdatedAt = DateTime.UtcNow;
 
             await _orderRepository.AddAsync(order);
             await _orderRepository.SaveChangesAsync();
@@ -145,7 +169,21 @@ public class OrderService : IOrderService
                 UnitPrice = i.UnitPrice,
                 Quantity = i.Quantity,
                 TotalPrice = i.UnitPrice * i.Quantity
-            }).ToList()
+            }).ToList(),
+
+            ShippingAddress = order.ShippingAddress == null
+                ? null
+                : new OrderAddressDto
+                {
+                    FullName = order.ShippingAddress.FullName,
+                    PhoneNumber = order.ShippingAddress.PhoneNumber,
+                    AddressLine1 = order.ShippingAddress.AddressLine1,
+                    AddressLine2 = order.ShippingAddress.AddressLine2,
+                    City = order.ShippingAddress.City,
+                    State = order.ShippingAddress.State,
+                    PostalCode = order.ShippingAddress.PostalCode,
+                    Country = order.ShippingAddress.Country
+                }
         };
     }
 
