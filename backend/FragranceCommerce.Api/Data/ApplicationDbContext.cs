@@ -28,6 +28,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
     public DbSet<WishlistItem> WishlistItems => Set<WishlistItem>();
     public DbSet<Address> Addresses => Set<Address>();
+    public DbSet<Coupon> Coupons => Set<Coupon>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -131,6 +132,24 @@ public class ApplicationDbContext : DbContext
         {
             entity.HasIndex(w => new { w.UserId, w.ProductId })
                 .IsUnique();
+        });
+
+        modelBuilder.Entity<Coupon>(entity =>
+        {
+            entity.HasIndex(c => c.Code).IsUnique();
+
+            entity.Property(c => c.Code)
+                .HasMaxLength(50)
+                .IsRequired();
+
+            entity.Property(c => c.DiscountValue)
+                .HasColumnType("decimal(18,2)");
+
+            entity.Property(c => c.MinimumOrderAmount)
+                .HasColumnType("decimal(18,2)");
+
+            entity.Property(c => c.MaxDiscountAmount)
+                .HasColumnType("decimal(18,2)");
         });
     }
 }
