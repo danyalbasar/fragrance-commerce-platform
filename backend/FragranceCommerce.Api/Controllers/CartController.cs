@@ -85,6 +85,43 @@ public class CartController : ControllerBase
         return NoContent();
     }
 
+    [HttpPost("apply-coupon")]
+    public async Task<ActionResult<CartDto>> ApplyCoupon(ApplyCouponDto dto)
+    {
+        try
+        {
+            var currentUserId = GetCurrentUserId();
+
+            var cart = await _cartService.ApplyCouponAsync(
+                dto,
+                currentUserId);
+
+            return Ok(cart);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpDelete("remove-coupon")]
+    public async Task<ActionResult<CartDto>> RemoveCoupon()
+    {
+        try
+        {
+            var currentUserId = GetCurrentUserId();
+
+            var cart = await _cartService.RemoveCouponAsync(
+                currentUserId);
+
+            return Ok(cart);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
     private Guid GetCurrentUserId()
     {
         var userIdClaim =

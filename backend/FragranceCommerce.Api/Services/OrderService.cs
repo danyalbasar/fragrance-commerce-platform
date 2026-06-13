@@ -42,12 +42,27 @@ public class OrderService : IOrderService
                         $"Insufficient stock for {item.ProductVariant.Product.Name} - {item.ProductVariant.VariantName}.");
             }
 
+            var totalAmount = cart.Items.Sum(i => i.ProductVariant.SellingPrice * i.Quantity);
+
+            var discountAmount = cart.DiscountAmount;
+
+            if (discountAmount > totalAmount)
+                discountAmount = totalAmount;
+
+            var finalAmount = totalAmount - discountAmount;
+
             var order = new Order
             {
                 UserId = currentUserId,
                 OrderNumber = GenerateOrderNumber(),
                 Status = OrderStatus.Pending,
                 OrderedAt = DateTime.UtcNow,
+
+                TotalAmount = totalAmount,
+                CouponCode = cart.CouponCode,
+                DiscountAmount = discountAmount,
+                FinalAmount = finalAmount,
+
                 Items = cart.Items.Select(item => new OrderItem
                 {
                     ProductVariantId = item.ProductVariantId,
@@ -61,6 +76,17 @@ public class OrderService : IOrderService
             foreach (var item in cart.Items)
             {
                 item.ProductVariant.StockQuantity -= item.Quantity;
+            }
+
+            if (!string.IsNullOrWhiteSpace(cart.CouponCode))
+            {
+                var coupon = await _context.Coupons
+                    .FirstOrDefaultAsync(c => c.Code == cart.CouponCode);
+
+                if (coupon != null)
+                {
+                    coupon.UsedCount++;
+                }
             }
 
             _context.CartItems.RemoveRange(cart.Items);
@@ -104,7 +130,12 @@ public class OrderService : IOrderService
             OrderNumber = order.OrderNumber,
             Status = order.Status,
             OrderedAt = order.OrderedAt,
+
             TotalAmount = order.TotalAmount,
+            CouponCode = order.CouponCode,
+            DiscountAmount = order.DiscountAmount,
+            FinalAmount = order.FinalAmount,
+
             Items = order.Items.Select(i => new OrderItemDto
             {
                 Id = i.Id,

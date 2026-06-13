@@ -15,4 +15,9 @@ public interface ICartService
     Task<bool> RemoveItemAsync(
         Guid cartItemId,
         Guid currentUserId);
+    Task<CartDto> ApplyCouponAsync(
+        ApplyCouponDto dto,
+        Guid currentUserId);
+    Task<CartDto> RemoveCouponAsync(
+        Guid currentUserId);
 }
