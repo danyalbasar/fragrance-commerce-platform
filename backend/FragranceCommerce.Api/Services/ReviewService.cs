@@ -2,6 +2,7 @@ using FragranceCommerce.Api.Data;
 using FragranceCommerce.Api.DTOs;
 using FragranceCommerce.Api.Models;
 using FragranceCommerce.Api.Repositories;
+using FragranceCommerce.Api.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace FragranceCommerce.Api.Services;
@@ -39,13 +40,15 @@ public class ReviewService : IReviewService
         if (alreadyReviewed != null)
             throw new InvalidOperationException("You have already reviewed this product.");
 
-        var hasPurchased = await _context.Orders
+        var hasDeliveredOrder = await _context.Orders
             .AnyAsync(o =>
                 o.UserId == currentUserId &&
+                o.Status == OrderStatus.Delivered &&
                 o.Items.Any(i => i.ProductVariant.ProductId == productId));
 
-        if (!hasPurchased)
-            throw new InvalidOperationException("You can only review products you have purchased.");
+        if (!hasDeliveredOrder)
+            throw new InvalidOperationException(
+                "You can only review products from delivered orders.");
 
         var review = new Review
         {

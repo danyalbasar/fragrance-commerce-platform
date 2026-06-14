@@ -122,6 +122,7 @@ public class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<Review>(entity =>
         {
+            entity.HasIndex(r => new { r.UserId, r.ProductId }).IsUnique();
             entity.Property(r => r.Rating).IsRequired();
         });
 
@@ -132,8 +133,7 @@ public class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<WishlistItem>(entity =>
         {
-            entity.HasIndex(w => new { w.UserId, w.ProductId })
-                .IsUnique();
+            entity.HasIndex(w => new { w.UserId, w.ProductId }).IsUnique();
         });
 
         modelBuilder.Entity<Coupon>(entity =>
