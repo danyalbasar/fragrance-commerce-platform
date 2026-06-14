@@ -77,10 +77,26 @@ public class OrdersController : ControllerBase
         }
     }
 
+    [HttpPost("{id}/cancel")]
+    public async Task<ActionResult<OrderDto>> CancelOrder(Guid id)
+    {
+        try
+        {
+            var currentUserId = GetCurrentUserId();
+
+            var order = await _orderService.CancelOrderAsync(id, currentUserId);
+
+            return Ok(order);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
     private Guid GetCurrentUserId()
     {
-        var userIdClaim =
-            User.FindFirst(ClaimTypes.NameIdentifier);
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
 
         if (userIdClaim == null)
             throw new UnauthorizedAccessException();

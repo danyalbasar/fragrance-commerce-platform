@@ -191,8 +191,8 @@ public class OrderService : IOrderService
                     PostalCode = order.ShippingAddress.PostalCode,
                     Country = order.ShippingAddress.Country
                 },
-                
-                Payment = order.Payment == null
+
+            Payment = order.Payment == null
                     ? null
                     : new PaymentDto
                     {
@@ -233,6 +233,45 @@ public class OrderService : IOrderService
             }
 
             order.Status = dto.Status;
+            order.UpdatedAt = DateTime.UtcNow;
+
+            await _orderRepository.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+
+            return MapToOrderDto(order);
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+
+    public async Task<OrderDto> CancelOrderAsync(
+        Guid orderId,
+        Guid currentUserId)
+    {
+        var order = await _orderRepository.GetByIdAsync(orderId);
+
+        if (order == null || order.UserId != currentUserId)
+            throw new InvalidOperationException("Order not found.");
+
+        if (order.Status != OrderStatus.Pending)
+            throw new InvalidOperationException(
+                "Only pending orders can be cancelled.");
+
+        using var transaction =
+            await _context.Database.BeginTransactionAsync();
+
+        try
+        {
+            foreach (var item in order.Items)
+            {
+                item.ProductVariant.StockQuantity += item.Quantity;
+            }
+
+            order.Status = OrderStatus.Cancelled;
             order.UpdatedAt = DateTime.UtcNow;
 
             await _orderRepository.SaveChangesAsync();

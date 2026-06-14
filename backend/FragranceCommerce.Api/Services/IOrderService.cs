@@ -14,4 +14,7 @@ public interface IOrderService
     Task<OrderDto> UpdateStatusAsync(
         Guid orderId,
         UpdateOrderStatusDto dto);
+    Task<OrderDto> CancelOrderAsync(
+        Guid orderId,
+        Guid currentUserId);
 }
