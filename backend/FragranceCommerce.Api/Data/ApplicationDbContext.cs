@@ -30,6 +30,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Address> Addresses => Set<Address>();
     public DbSet<Coupon> Coupons => Set<Coupon>();
     public DbSet<OrderAddress> OrderAddresses => Set<OrderAddress>();
+    public DbSet<Payment> Payments => Set<Payment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -158,6 +159,10 @@ public class ApplicationDbContext : DbContext
             entity.HasOne(o => o.ShippingAddress)
                 .WithOne(a => a.Order)
                 .HasForeignKey<OrderAddress>(a => a.OrderId);
+
+            entity.HasOne(o => o.Payment)
+                .WithOne(p => p.Order)
+                .HasForeignKey<Payment>(p => p.OrderId);
         });
     }
 }

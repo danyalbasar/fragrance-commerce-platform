@@ -13,5 +13,6 @@ public class OrderDto
     public decimal DiscountAmount { get; set; }
     public decimal FinalAmount { get; set; }
     public OrderAddressDto? ShippingAddress { get; set; }
+    public PaymentDto? Payment { get; set; }
     public List<OrderItemDto> Items { get; set; } = new();
 }

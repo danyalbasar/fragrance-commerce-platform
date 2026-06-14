@@ -14,5 +14,6 @@ public class Order : BaseEntity
     public OrderStatus Status { get; set; } = OrderStatus.Pending;
     public DateTime OrderedAt { get; set; } = DateTime.UtcNow;
     public OrderAddress? ShippingAddress { get; set; }
+    public Payment? Payment { get; set; }
     public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
 }

@@ -89,6 +89,13 @@ public class OrderService : IOrderService
                     PostalCode = address.PostalCode,
                     Country = address.Country
                 },
+
+                Payment = new Payment
+                {
+                    Amount = finalAmount,
+                    PaymentMethod = dto.PaymentMethod,
+                    PaymentStatus = PaymentStatus.Pending
+                }
             };
 
             order.TotalAmount = order.Items.Sum(i => i.UnitPrice * i.Quantity);
@@ -183,7 +190,19 @@ public class OrderService : IOrderService
                     State = order.ShippingAddress.State,
                     PostalCode = order.ShippingAddress.PostalCode,
                     Country = order.ShippingAddress.Country
-                }
+                },
+                
+                Payment = order.Payment == null
+                    ? null
+                    : new PaymentDto
+                    {
+                        Id = order.Payment.Id,
+                        Amount = order.Payment.Amount,
+                        PaymentMethod = order.Payment.PaymentMethod,
+                        PaymentStatus = order.Payment.PaymentStatus,
+                        TransactionId = order.Payment.TransactionId,
+                        PaidAt = order.Payment.PaidAt
+                    }
         };
     }
 
