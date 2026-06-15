@@ -105,6 +105,8 @@ builder.Services.AddScoped<ICouponService, CouponService>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 
+builder.Services.AddScoped<IVendorDashboardService, VendorDashboardService>();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

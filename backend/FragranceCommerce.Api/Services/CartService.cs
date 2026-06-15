@@ -149,6 +149,13 @@ public class CartService : ICartService
             return false;
 
         cart.Items.Remove(item);
+        
+        if (!cart.Items.Any())
+        {
+            cart.CouponCode = null;
+            cart.DiscountAmount = 0;
+        }
+
         await _cartRepository.SaveChangesAsync();
 
         return true;
