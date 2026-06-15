@@ -16,5 +16,10 @@ public interface IProductService
     Task<bool> DeleteAsync(
         Guid id,
         Guid currentUserId);
-    Task<PagedResultDto<ProductDto>> SearchAsync(ProductSearchRequestDto request);
+    Task<PagedResultDto<ProductDto>> SearchAsync(
+        ProductSearchRequestDto request);
+    Task<ProductVariantDto> UpdateStockAsync(
+        Guid variantId,
+        UpdateStockDto dto,
+        Guid currentUserId);
 }

@@ -71,14 +71,12 @@ public class ProductsController : ControllerBase
     {
         try
         {
-            var userIdClaim =
-                User.FindFirst(ClaimTypes.NameIdentifier);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
 
             if (userIdClaim == null)
                 return Unauthorized();
 
-            var currentUserId =
-                Guid.Parse(userIdClaim.Value);
+            var currentUserId = Guid.Parse(userIdClaim.Value);
 
             var updated = await _productService.UpdateAsync(
                 id,
@@ -102,8 +100,7 @@ public class ProductsController : ControllerBase
     {
         try
         {
-            var userIdClaim =
-                User.FindFirst(ClaimTypes.NameIdentifier);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
 
             if (userIdClaim == null)
                 return Unauthorized();
@@ -132,5 +129,33 @@ public class ProductsController : ControllerBase
     {
         var result = await _productService.SearchAsync(request);
         return Ok(result);
+    }
+
+    [Authorize(Roles = "Vendor")]
+    [HttpPut("variants/{variantId}/stock")]
+    public async Task<ActionResult<ProductVariantDto>> UpdateStock(
+        Guid variantId,
+        UpdateStockDto dto)
+    {
+        try
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+                return Unauthorized();
+
+            var currentUserId = Guid.Parse(userIdClaim.Value);
+
+            var variant = await _productService.UpdateStockAsync(
+                variantId,
+                dto,
+                currentUserId);
+
+            return Ok(variant);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 }
