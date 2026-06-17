@@ -12,20 +12,23 @@ public class ProductService : IProductService
     private readonly IProductRepository _productRepository;
     private readonly IBrandRepository _brandRepository;
     private readonly ICategoryRepository _categoryRepository;
-    private readonly IVendorRepository _vendorRepository;  
+    private readonly IVendorRepository _vendorRepository;
+    private readonly IImageUploadService _imageUploadService;
 
     public ProductService(
         ApplicationDbContext context,
         IProductRepository productRepository,
         IBrandRepository brandRepository,
         ICategoryRepository categoryRepository,
-        IVendorRepository vendorRepository)
+        IVendorRepository vendorRepository,
+        IImageUploadService imageUploadService)
     {
         _context = context;
         _productRepository = productRepository;
         _brandRepository = brandRepository;
         _categoryRepository = categoryRepository;
         _vendorRepository = vendorRepository;
+        _imageUploadService = imageUploadService;
     }
 
     public async Task<List<ProductDto>> GetAllAsync()
@@ -399,6 +402,59 @@ public class ProductService : IProductService
                 DisplayOrder = i.DisplayOrder,
                 IsPrimary = i.IsPrimary
             }).ToList()
+        };
+    }
+
+    public async Task<ProductImageDto> AddProductImageAsync(
+        Guid productId,
+        IFormFile file,
+        bool isPrimary,
+        int displayOrder,
+        Guid currentUserId)
+    {
+        var vendor = await _vendorRepository.GetByUserIdAsync(currentUserId);
+
+        if (vendor == null)
+            throw new InvalidOperationException("Vendor profile not found.");
+
+        var product = await _context.Products
+            .Include(p => p.Images)
+            .FirstOrDefaultAsync(p => p.Id == productId);
+
+        if (product == null)
+            throw new InvalidOperationException("Product not found.");
+
+        if (product.VendorId != vendor.Id)
+            throw new InvalidOperationException("You are not allowed to update this product.");
+
+        var imageUrl = await _imageUploadService.UploadImageAsync(file);
+
+        if (isPrimary)
+        {
+            foreach (var image in product.Images)
+            {
+                image.IsPrimary = false;
+            }
+        }
+
+        var productImage = new ProductImage
+        {
+            ProductId = product.Id,
+            ImageUrl = imageUrl,
+            IsPrimary = isPrimary,
+            DisplayOrder = displayOrder
+        };
+
+        _context.ProductImages.Add(productImage);
+
+        await _context.SaveChangesAsync();
+
+        return new ProductImageDto
+        {
+            Id = productImage.Id,
+            ImageUrl = productImage.ImageUrl,
+            IsPrimary = productImage.IsPrimary,
+            DisplayOrder = productImage.DisplayOrder
         };
     }
 }

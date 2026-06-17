@@ -22,4 +22,10 @@ public interface IProductService
         Guid variantId,
         UpdateStockDto dto,
         Guid currentUserId);
+    Task<ProductImageDto> AddProductImageAsync(
+        Guid productId,
+        IFormFile file,
+        bool isPrimary,
+        int displayOrder,
+        Guid currentUserId);
 }

@@ -158,4 +158,36 @@ public class ProductsController : ControllerBase
             return BadRequest(ex.Message);
         }
     }
+
+    [Authorize(Roles = "Vendor")]
+    [HttpPost("{productId}/images")]
+    public async Task<ActionResult<ProductImageDto>> AddProductImage(
+        Guid productId,
+        IFormFile file,
+        [FromForm] bool isPrimary,
+        [FromForm] int displayOrder)
+    {
+        try
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+                return Unauthorized();
+
+            var currentUserId = Guid.Parse(userIdClaim.Value);
+
+            var image = await _productService.AddProductImageAsync(
+                productId,
+                file,
+                isPrimary,
+                displayOrder,
+                currentUserId);
+
+            return Ok(image);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
 }

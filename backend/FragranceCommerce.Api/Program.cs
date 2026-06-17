@@ -4,8 +4,8 @@ using FragranceCommerce.Api.Repositories;
 using FragranceCommerce.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using FragranceCommerce.Api.Settings;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -107,6 +107,8 @@ builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 builder.Services.AddScoped<IVendorDashboardService, VendorDashboardService>();
+
+builder.Services.AddScoped<IImageUploadService, CloudinaryImageUploadService>();
 
 builder.Services.Configure<CloudinarySettings>(
     builder.Configuration.GetSection("CloudinarySettings"));
