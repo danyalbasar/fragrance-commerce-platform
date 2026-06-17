@@ -28,4 +28,10 @@ public interface IProductService
         bool isPrimary,
         int displayOrder,
         Guid currentUserId);
+    Task<ProductVariantImageDto> AddVariantImageAsync(
+        Guid variantId,
+        IFormFile file,
+        bool isPrimary,
+        int displayOrder,
+        Guid currentUserId);
 }

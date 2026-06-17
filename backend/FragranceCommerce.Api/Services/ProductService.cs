@@ -457,4 +457,59 @@ public class ProductService : IProductService
             DisplayOrder = productImage.DisplayOrder
         };
     }
+
+    public async Task<ProductVariantImageDto> AddVariantImageAsync(
+        Guid variantId,
+        IFormFile file,
+        bool isPrimary,
+        int displayOrder,
+        Guid currentUserId)
+    {
+        var vendor = await _vendorRepository.GetByUserIdAsync(currentUserId);
+
+        if (vendor == null)
+            throw new InvalidOperationException("Vendor profile not found.");
+
+        var variant = await _context.ProductVariants
+            .Include(v => v.Product)
+            .Include(v => v.Images)
+            .FirstOrDefaultAsync(v => v.Id == variantId);
+
+        if (variant == null)
+            throw new InvalidOperationException("Product variant not found.");
+
+        if (variant.Product.VendorId != vendor.Id)
+            throw new InvalidOperationException(
+                "You are not allowed to update this product variant.");
+
+        var imageUrl = await _imageUploadService.UploadImageAsync(file);
+
+        if (isPrimary)
+        {
+            foreach (var image in variant.Images)
+            {
+                image.IsPrimary = false;
+            }
+        }
+
+        var variantImage = new ProductVariantImage
+        {
+            ProductVariantId = variant.Id,
+            ImageUrl = imageUrl,
+            IsPrimary = isPrimary,
+            DisplayOrder = displayOrder
+        };
+
+        _context.ProductVariantImages.Add(variantImage);
+
+        await _context.SaveChangesAsync();
+
+        return new ProductVariantImageDto
+        {
+            Id = variantImage.Id,
+            ImageUrl = variantImage.ImageUrl,
+            IsPrimary = variantImage.IsPrimary,
+            DisplayOrder = variantImage.DisplayOrder
+        };
+    }
 }
