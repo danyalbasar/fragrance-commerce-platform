@@ -149,7 +149,7 @@ public class CartService : ICartService
             return false;
 
         cart.Items.Remove(item);
-        
+
         if (!cart.Items.Any())
         {
             cart.CouponCode = null;
@@ -175,7 +175,13 @@ public class CartService : ICartService
                 ProductName = i.ProductVariant.Product.Name,
                 VariantName = i.ProductVariant.VariantName,
                 UnitPrice = i.ProductVariant.SellingPrice,
-                Quantity = i.Quantity
+                Quantity = i.Quantity,
+                ImageUrl = i.ProductVariant.Images
+                    .OrderBy(img => img.DisplayOrder)
+                    .FirstOrDefault(img => img.IsPrimary)?.ImageUrl
+                    ?? i.ProductVariant.Product.Images
+                        .OrderBy(img => img.DisplayOrder)
+                        .FirstOrDefault(img => img.IsPrimary)?.ImageUrl,
             }).ToList()
         };
     }

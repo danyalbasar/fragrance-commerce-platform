@@ -18,7 +18,11 @@ public class CartRepository : ICartRepository
         return await _context.Carts
             .Include(c => c.Items)
                 .ThenInclude(i => i.ProductVariant)
+                    .ThenInclude(v => v.Images)
+            .Include(c => c.Items)
+                .ThenInclude(i => i.ProductVariant)
                     .ThenInclude(v => v.Product)
+                        .ThenInclude(p => p.Images)
             .AsSplitQuery()
             .FirstOrDefaultAsync(c => c.UserId == userId);
     }
@@ -28,7 +32,12 @@ public class CartRepository : ICartRepository
         return await _context.Carts
             .Include(c => c.Items)
                 .ThenInclude(i => i.ProductVariant)
+                    .ThenInclude(v => v.Images)
+            .Include(c => c.Items)
+                .ThenInclude(i => i.ProductVariant)
                     .ThenInclude(v => v.Product)
+                        .ThenInclude(p => p.Images)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(c => c.Id == id);
     }
 
