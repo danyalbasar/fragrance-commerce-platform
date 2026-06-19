@@ -12,5 +12,36 @@ services:
     volumes:
       - fragrance_postgres_data:/var/lib/postgresql/data
 
+  backend:
+    build:
+      context: ./backend/FragranceCommerce.Api
+      dockerfile: Dockerfile
+    container_name: fragrance_api
+    restart: always
+    ports:
+      - "5203:8080"
+    depends_on:
+      - postgres
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=fragrance_db;Username=fragrance_user;Password=fragrance_password
+      CloudinarySettings__CloudName: ${CLOUDINARY_CLOUD_NAME}
+      CloudinarySettings__ApiKey: ${CLOUDINARY_API_KEY}
+      CloudinarySettings__ApiSecret: ${CLOUDINARY_API_SECRET}
+
+  frontend:
+    build:
+      context: ./frontend/fragrance-commerce-web
+      dockerfile: Dockerfile
+    container_name: fragrance_web
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://backend:8080/api
+
 volumes:
   fragrance_postgres_data:
