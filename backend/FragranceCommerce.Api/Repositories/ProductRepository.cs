@@ -87,6 +87,9 @@ public class ProductRepository : IProductRepository
         if (request.CategoryId.HasValue)
             query = query.Where(p => p.CategoryId == request.CategoryId.Value);
 
+        if (request.Gender.HasValue)
+            query = query.Where(p => p.Gender == request.Gender.Value);
+
         if (request.MinPrice.HasValue)
             query = query.Where(p => p.Variants.Any(v => v.SellingPrice >= request.MinPrice.Value));
 

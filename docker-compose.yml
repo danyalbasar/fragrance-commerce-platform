@@ -41,6 +41,7 @@ services:
     depends_on:
       - backend
     environment:
+      NEXT_PUBLIC_DOCKER: "true"
       NEXT_PUBLIC_API_BASE_URL: http://backend:8080/api
 
 volumes:

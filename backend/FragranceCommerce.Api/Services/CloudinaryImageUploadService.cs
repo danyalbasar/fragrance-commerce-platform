@@ -45,4 +45,27 @@ public class CloudinaryImageUploadService : IImageUploadService
 
         return uploadResult.SecureUrl.ToString();
     }
+
+    public async Task<string> UploadImageAsync(
+        string filePath,
+        string publicId)
+    {
+        if (!File.Exists(filePath))
+            throw new FileNotFoundException(filePath);
+
+        var uploadParams = new ImageUploadParams
+        {
+            File = new FileDescription(filePath),
+            PublicId = publicId,
+            Overwrite = false,
+            Folder = "fragrance-commerce/demo-products"
+        };
+
+        var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+
+        if (uploadResult.Error != null)
+            throw new InvalidOperationException(uploadResult.Error.Message);
+
+        return uploadResult.SecureUrl.ToString();
+    }
 }

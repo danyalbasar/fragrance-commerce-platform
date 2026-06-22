@@ -47,6 +47,8 @@ public class ProductService : IProductService
             CategoryId = product.CategoryId,
             CategoryName = product.Category.Name,
 
+            Gender = product.Gender.ToString(),
+
             Name = product.Name,
             Description = product.Description,
             IsActive = product.IsActive,
@@ -98,6 +100,8 @@ public class ProductService : IProductService
 
             CategoryId = product.CategoryId,
             CategoryName = product.Category.Name,
+
+            Gender = product.Gender.ToString(),
 
             Name = product.Name,
             Description = product.Description,
@@ -188,15 +192,21 @@ public class ProductService : IProductService
         return new ProductDto
         {
             Id = product.Id,
-            VendorId = vendor.Id,
-            VendorName = vendor.BusinessName,
-            BrandId = brand.Id,
-            BrandName = brand.Name,
-            CategoryId = category.Id,
-            CategoryName = category.Name,
+            VendorId = product.VendorId,
+            VendorName = product.Vendor.BusinessName,
+
+            BrandId = product.BrandId,
+            BrandName = product.Brand.Name,
+
+            CategoryId = product.CategoryId,
+            CategoryName = product.Category.Name,
+
+            Gender = product.Gender.ToString(),
+
             Name = product.Name,
             Description = product.Description,
             IsActive = product.IsActive,
+
             Variants = product.Variants.Select(v => new ProductVariantDto
             {
                 Id = v.Id,
@@ -215,6 +225,7 @@ public class ProductService : IProductService
                     IsPrimary = i.IsPrimary
                 }).ToList()
             }).ToList(),
+
             Images = product.Images.Select(i => new ProductImageDto
             {
                 Id = i.Id,
@@ -315,6 +326,8 @@ public class ProductService : IProductService
 
             CategoryId = product.CategoryId,
             CategoryName = product.Category.Name,
+
+            Gender = product.Gender.ToString(),
 
             Name = product.Name,
             Description = product.Description,

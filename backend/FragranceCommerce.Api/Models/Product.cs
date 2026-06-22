@@ -1,4 +1,5 @@
 namespace FragranceCommerce.Api.Models;
+using FragranceCommerce.Api.Enums;
 
 public class Product : BaseEntity
 {
@@ -8,6 +9,7 @@ public class Product : BaseEntity
     public Brand Brand { get; set; } = null!;
     public Guid CategoryId { get; set; }
     public Category Category { get; set; } = null!;
+    public ProductGender Gender { get; set; } = ProductGender.Unisex;
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
     public bool IsActive { get; set; } = true;

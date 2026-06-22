@@ -1,8 +1,11 @@
+using FragranceCommerce.Api.Enums;
+
 namespace FragranceCommerce.Api.DTOs;
 
 public class ProductSearchRequestDto
 {
     public string? Search { get; set; }
+    public ProductGender? Gender { get; set; }
     public Guid? BrandId { get; set; }
     public Guid? CategoryId { get; set; }
     public decimal? MinPrice { get; set; }

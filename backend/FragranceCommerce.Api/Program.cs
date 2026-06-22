@@ -144,8 +144,21 @@ app.MapControllers();
 
 using (var scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    await DataSeeder.SeedRolesAsync(dbContext);
+    var context = scope.ServiceProvider
+        .GetRequiredService<ApplicationDbContext>();
+
+    var imageUploadService = scope.ServiceProvider
+        .GetRequiredService<IImageUploadService>();
+
+    var env = scope.ServiceProvider
+        .GetRequiredService<IWebHostEnvironment>();
+
+    await context.Database.MigrateAsync();
+
+    await DataSeeder.SeedAsync(
+        context,
+        imageUploadService,
+        env);
 }
 
 app.Run();

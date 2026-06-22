@@ -1,4 +1,13 @@
+export type ProductGender = "Men" | "Women" | "Unisex";
+
 export interface ProductImage {
+    id: string;
+    imageUrl: string;
+    displayOrder: number;
+    isPrimary: boolean;
+}
+
+export interface ProductVariantImage {
     id: string;
     imageUrl: string;
     displayOrder: number;
@@ -7,20 +16,21 @@ export interface ProductImage {
 
 export interface ProductVariant {
     id: string;
+    productId: string;
     variantName: string;
     sku: string;
     mrp: number;
     sellingPrice: number;
     costPrice: number;
     stockQuantity: number;
-    stockStatus: string;
-    images: ProductImage[];
+    isActive: boolean;
+    images: ProductVariantImage[];
 }
 
 export interface Product {
     id: string;
     vendorId: string;
-    vendorName: string;
+    vendorName?: string;
 
     brandId: string;
     brandName: string;
@@ -28,10 +38,26 @@ export interface Product {
     categoryId: string;
     categoryName: string;
 
+    gender: ProductGender;
+
     name: string;
-    description: string;
+    description?: string;
     isActive: boolean;
 
     variants: ProductVariant[];
     images: ProductImage[];
+}
+
+export interface ProductSearchParams {
+    search?: string;
+    gender?: ProductGender;
+    brandId?: string;
+    categoryId?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    inStockOnly?: boolean;
+    sortBy?: string;
+    sortDirection?: string;
+    pageNumber?: number;
+    pageSize?: number;
 }

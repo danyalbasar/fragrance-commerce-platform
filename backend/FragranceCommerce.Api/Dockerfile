@@ -9,6 +9,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 
 COPY --from=build /app/publish .
+COPY --from=build /src/SeedImages ./SeedImages
 
 EXPOSE 8080
 
