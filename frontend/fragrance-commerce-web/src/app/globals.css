@@ -1,8 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fafafa;
-  --foreground: #171717;
+  --background: #f7f2ea;
+  --foreground: #16120d;
+  --luxury-ink: #16120d;
+  --luxury-ivory: #f7f2ea;
+  --luxury-paper: #fffaf2;
+  --luxury-gold: #b68a42;
+  --luxury-moss: #28352b;
+  --luxury-muted: #766d61;
+  --font-serif: Georgia, "Times New Roman", serif;
 }
 
 @theme inline {
@@ -15,4 +22,35 @@
 body {
   background: var(--background);
   color: var(--foreground);
+  font-feature-settings: "liga" 1, "kern" 1;
+}
+
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  min-width: 0;
+}
+
+::selection {
+  background: #b68a42;
+  color: #fffaf2;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }

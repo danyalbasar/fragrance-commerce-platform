@@ -16,7 +16,7 @@ export default function OrderTimeline({
 
     return (
         <div className="mt-8">
-            <h2 className="mb-4 text-lg font-semibold">
+            <h2 className="mb-4 text-sm font-semibold uppercase tracking-[0.18em]">
                 Order Progress
             </h2>
 
@@ -33,14 +33,14 @@ export default function OrderTimeline({
                             <div className="flex flex-col items-center">
                                 <div
                                     className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold ${completed
-                                            ? "bg-green-500 text-white"
-                                            : "bg-gray-200 text-gray-500"
+                                            ? "bg-[var(--luxury-gold)] text-[var(--luxury-ink)]"
+                                            : "bg-[#efe3d0] text-[var(--luxury-muted)]"
                                         }`}
                                 >
                                     {index + 1}
                                 </div>
 
-                                <span className="mt-2 text-sm">
+                                <span className="mt-2 text-sm text-[var(--luxury-muted)]">
                                     {status}
                                 </span>
                             </div>
@@ -48,8 +48,8 @@ export default function OrderTimeline({
                             {index < statuses.length - 1 && (
                                 <div
                                     className={`mx-2 h-1 flex-1 ${currentIndex > index
-                                            ? "bg-green-500"
-                                            : "bg-gray-200"
+                                            ? "bg-[var(--luxury-gold)]"
+                                            : "bg-[#d8c8ad]"
                                         }`}
                                 />
                             )}

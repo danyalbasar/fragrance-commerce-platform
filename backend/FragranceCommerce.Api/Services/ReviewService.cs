@@ -67,11 +67,13 @@ public class ReviewService : IReviewService
         await _reviewRepository.AddAsync(review);
         await _reviewRepository.SaveChangesAsync();
 
-        var createdReview = await _reviewRepository.GetByUserAndProductAsync(
-            currentUserId,
-            productId);
+        await _reviewRepository.AddAsync(review);
+        await _reviewRepository.SaveChangesAsync();
 
-        return MapToReviewDto(createdReview!);
+        review.User = await _context.Users
+            .FirstAsync(u => u.Id == currentUserId);
+
+        return MapToReviewDto(review);
     }
 
     public async Task<List<ReviewDto>> GetByProductIdAsync(Guid productId)

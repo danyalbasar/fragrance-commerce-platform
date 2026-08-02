@@ -1,0 +1,9 @@
+using FragranceCommerce.Api.DTOs;
+
+namespace FragranceCommerce.Api.Services;
+
+public interface IContactMessageService
+{
+    Task<ContactMessageDto?> GetByIdAsync(Guid id);
+    Task<ContactMessageDto> CreateAsync(CreateContactMessageDto dto);
+}

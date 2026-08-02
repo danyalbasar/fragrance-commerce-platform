@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/common/ProtectedRoute";
@@ -50,38 +51,43 @@ export default function OrderDetailsPage() {
     }
 
     if (loading) {
-        return <div className="p-8 text-xl">Loading order...</div>;
+        return <div className="bg-[var(--luxury-ivory)] p-8 text-xl text-[var(--luxury-ink)]">Loading order...</div>;
     }
 
     if (!order) {
-        return <div className="p-8 text-xl">Order not found.</div>;
+        return <div className="bg-[var(--luxury-ivory)] p-8 text-xl text-[var(--luxury-ink)]">Order not found.</div>;
     }
 
     return (
         <ProtectedRoute>
-            <main className="mx-auto max-w-5xl p-8">
+            <main className="min-h-screen bg-[var(--luxury-ivory)] px-6 py-10 text-[var(--luxury-ink)]">
+                <div className="mx-auto max-w-5xl">
                 <button
                     onClick={() => router.push("/orders")}
-                    className="mb-6 text-sm text-gray-600 hover:text-black"
+                    className="mb-6 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--luxury-muted)] hover:text-[var(--luxury-gold)]"
                 >
                     ← Back to Orders
                 </button>
 
-                <div className="rounded-xl border bg-white p-6">
+                <div className="border border-[#d8c8ad] bg-[var(--luxury-paper)] p-6 shadow-[0_18px_50px_rgba(22,18,13,0.08)]">
                     <div>
                         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                             <div>
-                                <h1 className="text-3xl font-bold">
+                                <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold)]">
+                                    Order Details
+                                </p>
+
+                                <h1 className="mt-3 text-4xl font-normal [font-family:var(--font-serif)]">
                                     Order #{order.orderNumber}
                                 </h1>
 
-                                <p className="mt-2 text-sm text-gray-500">
+                                <p className="mt-2 text-sm text-[var(--luxury-muted)]">
                                     {new Date(order.orderedAt).toLocaleString()}
                                 </p>
                             </div>
 
                             <span
-                                className={`w-fit rounded-full px-3 py-1 text-sm ${getStatusClasses(
+                                className={`w-fit rounded-full ${getStatusClasses(
                                     order.status
                                 )}`}
                             >
@@ -90,7 +96,7 @@ export default function OrderDetailsPage() {
                         </div>
 
                         {order.status === "Cancelled" ? (
-                            <div className="mt-6 rounded-lg bg-red-50 p-4 text-sm font-medium text-red-700">
+                            <div className="mt-6 border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700">
                                 This order has been cancelled.
                             </div>
                         ) : (
@@ -99,50 +105,50 @@ export default function OrderDetailsPage() {
                     </div>
 
                     <div className="mt-8 grid gap-6 md:grid-cols-2">
-                        <section className="rounded-lg border p-4">
-                            <h2 className="mb-3 text-lg font-semibold">
+                        <section className="border border-[#d8c8ad] bg-[#fffaf2] p-4">
+                            <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.18em]">
                                 Shipping Address
                             </h2>
 
                             <p className="font-medium">{order.shippingAddress.fullName}</p>
 
-                            <p className="mt-2 text-sm text-gray-600">
+                            <p className="mt-2 text-sm text-[var(--luxury-muted)]">
                                 {order.shippingAddress.addressLine1}
                                 {order.shippingAddress.addressLine2 &&
                                     `, ${order.shippingAddress.addressLine2}`}
                             </p>
 
-                            <p className="text-sm text-gray-600">
+                            <p className="text-sm text-[var(--luxury-muted)]">
                                 {order.shippingAddress.city}, {order.shippingAddress.state} -{" "}
                                 {order.shippingAddress.postalCode}
                             </p>
 
-                            <p className="text-sm text-gray-600">
+                            <p className="text-sm text-[var(--luxury-muted)]">
                                 {order.shippingAddress.country}
                             </p>
 
-                            <p className="mt-2 text-sm text-gray-600">
+                            <p className="mt-2 text-sm text-[var(--luxury-muted)]">
                                 Phone: {order.shippingAddress.phoneNumber}
                             </p>
                         </section>
 
-                        <section className="rounded-lg border p-4">
-                            <h2 className="mb-3 text-lg font-semibold">Payment</h2>
+                        <section className="border border-[#d8c8ad] bg-[#fffaf2] p-4">
+                            <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.18em]">Payment</h2>
 
-                            <p className="text-sm text-gray-600">
+                            <p className="text-sm text-[var(--luxury-muted)]">
                                 Method: {order.payment.paymentMethod}
                             </p>
 
-                            <p className="text-sm text-gray-600">
+                            <p className="text-sm text-[var(--luxury-muted)]">
                                 Status: {order.payment.paymentStatus}
                             </p>
 
-                            <p className="text-sm text-gray-600">
+                            <p className="text-sm text-[var(--luxury-muted)]">
                                 Amount: ₹{order.payment.amount}
                             </p>
 
                             {order.payment.transactionId && (
-                                <p className="text-sm text-gray-600">
+                                <p className="text-sm text-[var(--luxury-muted)]">
                                     Transaction ID: {order.payment.transactionId}
                                 </p>
                             )}
@@ -150,29 +156,40 @@ export default function OrderDetailsPage() {
                     </div>
 
                     <section className="mt-8">
-                        <h2 className="mb-4 text-lg font-semibold">Items</h2>
+                        <h2 className="mb-4 text-sm font-semibold uppercase tracking-[0.18em]">Items</h2>
 
                         <div className="space-y-3">
                             {order.items.map((item) => (
                                 <div
                                     key={item.id}
-                                    className="flex justify-between rounded-lg border p-4"
+                                    className="grid gap-4 border border-[#d8c8ad] bg-[#fffaf2] p-4 md:grid-cols-[96px_1fr_auto]"
                                 >
+                                    <div className="relative h-24 overflow-hidden bg-[#efe3d0]">
+                                        {item.imageUrl && (
+                                            <Image
+                                                src={item.imageUrl}
+                                                alt={item.productName}
+                                                fill
+                                                className="object-contain p-3 drop-shadow-[0_16px_18px_rgba(22,18,13,0.14)]"
+                                            />
+                                        )}
+                                    </div>
+
                                     <div>
                                         <p className="font-medium">{item.productName}</p>
 
-                                        <p className="text-sm text-gray-500">
+                                        <p className="text-sm text-[var(--luxury-muted)]">
                                             {item.variantName} × {item.quantity}
                                         </p>
                                     </div>
 
-                                    <p className="font-semibold">₹{item.totalPrice}</p>
+                                    <p className="font-semibold md:text-right">₹{item.totalPrice}</p>
                                 </div>
                             ))}
                         </div>
                     </section>
 
-                    <section className="mt-8 rounded-lg border p-4">
+                    <section className="mt-8 border border-[#d8c8ad] bg-[#efe3d0] p-4">
                         <div className="flex justify-between">
                             <span>Total</span>
                             <span>₹{order.totalAmount}</span>
@@ -183,7 +200,7 @@ export default function OrderDetailsPage() {
                             <span>₹{order.discountAmount}</span>
                         </div>
 
-                        <div className="mt-4 flex justify-between text-xl font-bold">
+                        <div className="mt-4 flex justify-between border-t border-[#d8c8ad] pt-4 text-xl font-semibold">
                             <span>Final Amount</span>
                             <span>₹{order.finalAmount}</span>
                         </div>
@@ -193,11 +210,12 @@ export default function OrderDetailsPage() {
                         <button
                             onClick={handleCancelOrder}
                             disabled={cancelling}
-                            className="mt-6 rounded-full bg-red-500 px-6 py-3 font-semibold text-white hover:bg-red-600 disabled:bg-gray-400"
+                            className="mt-6 rounded-full bg-red-600 px-6 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-white hover:bg-red-700 disabled:bg-gray-400"
                         >
                             {cancelling ? "Cancelling..." : "Cancel Order"}
                         </button>
                     )}
+                </div>
                 </div>
             </main>
         </ProtectedRoute>

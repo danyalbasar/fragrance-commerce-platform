@@ -45,6 +45,24 @@ public class OrdersController : ControllerBase
         return Ok(orders);
     }
 
+    [Authorize(Roles = "Vendor")]
+    [HttpGet("vendor")]
+    public async Task<ActionResult<List<OrderDto>>> GetVendorOrders()
+    {
+        try
+        {
+            var currentUserId = GetCurrentUserId();
+
+            var orders = await _orderService.GetVendorOrdersAsync(currentUserId);
+
+            return Ok(orders);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
     [HttpGet("{id}")]
     public async Task<ActionResult<OrderDto>> GetOrder(Guid id)
     {
@@ -68,7 +86,9 @@ public class OrdersController : ControllerBase
     {
         try
         {
-            var order = await _orderService.UpdateStatusAsync(id, dto);
+            var currentUserId = GetCurrentUserId();
+
+            var order = await _orderService.UpdateStatusAsync(id, dto, currentUserId);
             return Ok(order);
         }
         catch (InvalidOperationException ex)

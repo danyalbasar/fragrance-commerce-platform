@@ -31,6 +31,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Coupon> Coupons => Set<Coupon>();
     public DbSet<OrderAddress> OrderAddresses => Set<OrderAddress>();
     public DbSet<Payment> Payments => Set<Payment>();
+    public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -163,6 +164,31 @@ public class ApplicationDbContext : DbContext
             entity.HasOne(o => o.Payment)
                 .WithOne(p => p.Order)
                 .HasForeignKey<Payment>(p => p.OrderId);
+        });
+
+        modelBuilder.Entity<ContactMessage>(entity =>
+        {
+            entity.Property(m => m.FullName)
+                .HasMaxLength(150)
+                .IsRequired();
+
+            entity.Property(m => m.Email)
+                .HasMaxLength(255)
+                .IsRequired();
+
+            entity.Property(m => m.PhoneNumber)
+                .HasMaxLength(30);
+
+            entity.Property(m => m.Subject)
+                .HasMaxLength(180)
+                .IsRequired();
+
+            entity.Property(m => m.Message)
+                .HasMaxLength(2000)
+                .IsRequired();
+
+            entity.HasIndex(m => m.Email);
+            entity.HasIndex(m => m.CreatedAt);
         });
     }
 }

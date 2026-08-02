@@ -62,6 +62,64 @@ public class ProductService : IProductService
                 SellingPrice = v.SellingPrice,
                 CostPrice = v.CostPrice,
                 StockQuantity = v.StockQuantity,
+                IsActive = v.IsActive,
+
+                Images = v.Images.Select(i => new ProductVariantImageDto
+                {
+                    Id = i.Id,
+                    ImageUrl = i.ImageUrl,
+                    DisplayOrder = i.DisplayOrder,
+                    IsPrimary = i.IsPrimary
+                }).ToList()
+            }).ToList(),
+
+            Images = product.Images.Select(i => new ProductImageDto
+            {
+                Id = i.Id,
+                ImageUrl = i.ImageUrl,
+                DisplayOrder = i.DisplayOrder,
+                IsPrimary = i.IsPrimary
+            }).ToList()
+        }).ToList();
+    }
+
+    public async Task<List<ProductDto>> GetVendorProductsAsync(Guid currentUserId)
+    {
+        var vendor = await _vendorRepository.GetByUserIdAsync(currentUserId);
+
+        if (vendor == null)
+            throw new InvalidOperationException("Vendor profile not found for current user.");
+
+        var products = await _productRepository.GetByVendorIdAsync(vendor.Id);
+
+        return products.Select(product => new ProductDto
+        {
+            Id = product.Id,
+            VendorId = product.VendorId,
+            VendorName = vendor.BusinessName,
+
+            BrandId = product.BrandId,
+            BrandName = product.Brand.Name,
+
+            CategoryId = product.CategoryId,
+            CategoryName = product.Category.Name,
+
+            Gender = product.Gender.ToString(),
+
+            Name = product.Name,
+            Description = product.Description,
+            IsActive = product.IsActive,
+
+            Variants = product.Variants.Select(v => new ProductVariantDto
+            {
+                Id = v.Id,
+                VariantName = v.VariantName,
+                SKU = v.SKU,
+                MRP = v.MRP,
+                SellingPrice = v.SellingPrice,
+                CostPrice = v.CostPrice,
+                StockQuantity = v.StockQuantity,
+                IsActive = v.IsActive,
 
                 Images = v.Images.Select(i => new ProductVariantImageDto
                 {
@@ -116,6 +174,7 @@ public class ProductService : IProductService
                 SellingPrice = v.SellingPrice,
                 CostPrice = v.CostPrice,
                 StockQuantity = v.StockQuantity,
+                IsActive = v.IsActive,
 
                 Images = v.Images.Select(i => new ProductVariantImageDto
                 {
@@ -160,6 +219,7 @@ public class ProductService : IProductService
             VendorId = vendor.Id,
             BrandId = dto.BrandId,
             CategoryId = dto.CategoryId,
+            Gender = dto.Gender,
             Name = dto.Name,
             Description = dto.Description,
             Variants = dto.Variants.Select(v => new ProductVariant
@@ -216,6 +276,7 @@ public class ProductService : IProductService
                 SellingPrice = v.SellingPrice,
                 CostPrice = v.CostPrice,
                 StockQuantity = v.StockQuantity,
+                IsActive = v.IsActive,
 
                 Images = v.Images.Select(i => new ProductVariantImageDto
                 {
@@ -265,6 +326,7 @@ public class ProductService : IProductService
 
         product.BrandId = dto.BrandId;
         product.CategoryId = dto.CategoryId;
+        product.Gender = dto.Gender;
         product.Name = dto.Name;
         product.Description = dto.Description;
         product.IsActive = dto.IsActive;
@@ -342,6 +404,7 @@ public class ProductService : IProductService
                 SellingPrice = v.SellingPrice,
                 CostPrice = v.CostPrice,
                 StockQuantity = v.StockQuantity,
+                IsActive = v.IsActive,
 
                 Images = v.Images.Select(i => new ProductVariantImageDto
                 {
@@ -408,6 +471,7 @@ public class ProductService : IProductService
             SellingPrice = variant.SellingPrice,
             CostPrice = variant.CostPrice,
             StockQuantity = variant.StockQuantity,
+            IsActive = variant.IsActive,
             Images = variant.Images.Select(i => new ProductVariantImageDto
             {
                 Id = i.Id,
@@ -415,6 +479,163 @@ public class ProductService : IProductService
                 DisplayOrder = i.DisplayOrder,
                 IsPrimary = i.IsPrimary
             }).ToList()
+        };
+    }
+
+    public async Task<ProductVariantDto> UpdateVariantAsync(
+        Guid variantId,
+        UpdateProductVariantDto dto,
+        Guid currentUserId)
+    {
+        if (string.IsNullOrWhiteSpace(dto.VariantName))
+            throw new InvalidOperationException("Variant name is required.");
+
+        if (string.IsNullOrWhiteSpace(dto.SKU))
+            throw new InvalidOperationException("SKU is required.");
+
+        if (dto.MRP < 0 || dto.SellingPrice < 0 || dto.CostPrice < 0)
+            throw new InvalidOperationException("Prices cannot be negative.");
+
+        if (dto.StockQuantity < 0)
+            throw new InvalidOperationException("Stock quantity cannot be negative.");
+
+        var vendor = await _vendorRepository.GetByUserIdAsync(currentUserId);
+
+        if (vendor == null)
+            throw new InvalidOperationException("Vendor profile not found.");
+
+        var variant = await _productRepository.GetVariantByIdAsync(variantId);
+
+        if (variant == null)
+            throw new InvalidOperationException("Product variant not found.");
+
+        if (variant.Product.VendorId != vendor.Id)
+            throw new InvalidOperationException("You are not allowed to update this product variant.");
+
+        variant.VariantName = dto.VariantName;
+        variant.SKU = dto.SKU;
+        variant.MRP = dto.MRP;
+        variant.SellingPrice = dto.SellingPrice;
+        variant.CostPrice = dto.CostPrice;
+        variant.StockQuantity = dto.StockQuantity;
+        variant.IsActive = dto.IsActive;
+        variant.UpdatedAt = DateTime.UtcNow;
+
+        await _productRepository.SaveChangesAsync();
+
+        return new ProductVariantDto
+        {
+            Id = variant.Id,
+            VariantName = variant.VariantName,
+            SKU = variant.SKU,
+            MRP = variant.MRP,
+            SellingPrice = variant.SellingPrice,
+            CostPrice = variant.CostPrice,
+            StockQuantity = variant.StockQuantity,
+            IsActive = variant.IsActive,
+            Images = variant.Images
+                .OrderBy(i => i.DisplayOrder)
+                .Select(i => new ProductVariantImageDto
+                {
+                    Id = i.Id,
+                    ImageUrl = i.ImageUrl,
+                    DisplayOrder = i.DisplayOrder,
+                    IsPrimary = i.IsPrimary
+                }).ToList()
+        };
+    }
+
+    public async Task<ProductImageDto> UpdateProductImageAsync(
+        Guid imageId,
+        UpdateImageMetadataDto dto,
+        Guid currentUserId)
+    {
+        if (dto.DisplayOrder < 0)
+            throw new InvalidOperationException("Display order cannot be negative.");
+
+        var vendor = await _vendorRepository.GetByUserIdAsync(currentUserId);
+
+        if (vendor == null)
+            throw new InvalidOperationException("Vendor profile not found.");
+
+        var image = await _productRepository.GetProductImageByIdAsync(imageId);
+
+        if (image == null)
+            throw new InvalidOperationException("Product image not found.");
+
+        if (image.Product.VendorId != vendor.Id)
+            throw new InvalidOperationException("You are not allowed to update this product image.");
+
+        if (dto.IsPrimary)
+        {
+            foreach (var sibling in image.Product.Images)
+            {
+                sibling.IsPrimary = sibling.Id == image.Id;
+            }
+        }
+        else
+        {
+            image.IsPrimary = false;
+        }
+
+        image.DisplayOrder = dto.DisplayOrder;
+        image.UpdatedAt = DateTime.UtcNow;
+
+        await _productRepository.SaveChangesAsync();
+
+        return new ProductImageDto
+        {
+            Id = image.Id,
+            ImageUrl = image.ImageUrl,
+            DisplayOrder = image.DisplayOrder,
+            IsPrimary = image.IsPrimary
+        };
+    }
+
+    public async Task<ProductVariantImageDto> UpdateVariantImageAsync(
+        Guid imageId,
+        UpdateImageMetadataDto dto,
+        Guid currentUserId)
+    {
+        if (dto.DisplayOrder < 0)
+            throw new InvalidOperationException("Display order cannot be negative.");
+
+        var vendor = await _vendorRepository.GetByUserIdAsync(currentUserId);
+
+        if (vendor == null)
+            throw new InvalidOperationException("Vendor profile not found.");
+
+        var image = await _productRepository.GetVariantImageByIdAsync(imageId);
+
+        if (image == null)
+            throw new InvalidOperationException("Variant image not found.");
+
+        if (image.ProductVariant.Product.VendorId != vendor.Id)
+            throw new InvalidOperationException("You are not allowed to update this variant image.");
+
+        if (dto.IsPrimary)
+        {
+            foreach (var sibling in image.ProductVariant.Images)
+            {
+                sibling.IsPrimary = sibling.Id == image.Id;
+            }
+        }
+        else
+        {
+            image.IsPrimary = false;
+        }
+
+        image.DisplayOrder = dto.DisplayOrder;
+        image.UpdatedAt = DateTime.UtcNow;
+
+        await _productRepository.SaveChangesAsync();
+
+        return new ProductVariantImageDto
+        {
+            Id = image.Id,
+            ImageUrl = image.ImageUrl,
+            DisplayOrder = image.DisplayOrder,
+            IsPrimary = image.IsPrimary
         };
     }
 

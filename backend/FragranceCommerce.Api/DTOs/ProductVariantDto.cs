@@ -9,6 +9,7 @@ public class ProductVariantDto
     public decimal SellingPrice { get; set; }
     public decimal CostPrice { get; set; }
     public int StockQuantity { get; set; }
+    public bool IsActive { get; set; }
     public string StockStatus =>
         StockQuantity == 0 ? "Out of Stock" :
         StockQuantity <= 5 ? $"Only {StockQuantity} left" :

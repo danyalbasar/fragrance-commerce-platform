@@ -12,15 +12,18 @@ public class OrderService : IOrderService
     private readonly ApplicationDbContext _context;
     private readonly ICartRepository _cartRepository;
     private readonly IOrderRepository _orderRepository;
+    private readonly IVendorRepository _vendorRepository;
 
     public OrderService(
         ApplicationDbContext context,
         ICartRepository cartRepository,
-        IOrderRepository orderRepository)
+        IOrderRepository orderRepository,
+        IVendorRepository vendorRepository)
     {
         _context = context;
         _cartRepository = cartRepository;
         _orderRepository = orderRepository;
+        _vendorRepository = vendorRepository;
     }
 
     public async Task<OrderDto> CreateOrderAsync(CreateOrderDto dto, Guid currentUserId)
@@ -153,6 +156,18 @@ public class OrderService : IOrderService
         return orders.Select(MapToOrderDto).ToList();
     }
 
+    public async Task<List<OrderDto>> GetVendorOrdersAsync(Guid currentUserId)
+    {
+        var vendor = await _vendorRepository.GetByUserIdAsync(currentUserId);
+
+        if (vendor == null)
+            throw new InvalidOperationException("Vendor profile not found.");
+
+        var orders = await _orderRepository.GetByVendorIdAsync(vendor.Id);
+
+        return orders.Select(MapToOrderDto).ToList();
+    }
+
     private static OrderDto MapToOrderDto(Order order)
     {
         return new OrderDto
@@ -170,9 +185,16 @@ public class OrderService : IOrderService
             Items = order.Items.Select(i => new OrderItemDto
             {
                 Id = i.Id,
+                ProductId = i.ProductVariant.ProductId,
                 ProductVariantId = i.ProductVariantId,
                 ProductName = i.ProductVariant.Product.Name,
                 VariantName = i.ProductVariant.VariantName,
+                BrandName = i.ProductVariant.Product.Brand.Name,
+                Gender = i.ProductVariant.Product.Gender.ToString(),
+                CategoryName = i.ProductVariant.Product.Category.Name,
+                ImageUrl = i.ProductVariant.Images
+                    .OrderBy(i => i.DisplayOrder)
+                    .FirstOrDefault(i => i.IsPrimary)!.ImageUrl,
                 UnitPrice = i.UnitPrice,
                 Quantity = i.Quantity,
                 TotalPrice = i.UnitPrice * i.Quantity
@@ -208,12 +230,21 @@ public class OrderService : IOrderService
 
     public async Task<OrderDto> UpdateStatusAsync(
         Guid orderId,
-        UpdateOrderStatusDto dto)
+        UpdateOrderStatusDto dto,
+        Guid currentUserId)
     {
         var order = await _orderRepository.GetByIdAsync(orderId);
 
         if (order == null)
             throw new InvalidOperationException("Order not found.");
+
+        var vendor = await _vendorRepository.GetByUserIdAsync(currentUserId);
+
+        if (vendor != null &&
+            !order.Items.Any(item => item.ProductVariant.Product.VendorId == vendor.Id))
+        {
+            throw new InvalidOperationException("You are not allowed to update this order.");
+        }
 
         if (!IsValidStatusTransition(order.Status, dto.Status))
             throw new InvalidOperationException(

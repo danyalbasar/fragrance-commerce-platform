@@ -12,15 +12,15 @@ export default function ProtectedRoute({
     children,
 }: ProtectedRouteProps) {
     const router = useRouter();
-    const { isLoggedIn } = useAuth();
+    const { isLoggedIn, authReady } = useAuth();
 
     useEffect(() => {
-        if (!isLoggedIn) {
+        if (authReady && !isLoggedIn) {
             router.replace("/login");
         }
-    }, [isLoggedIn, router]);
+    }, [authReady, isLoggedIn, router]);
 
-    if (!isLoggedIn) {
+    if (!authReady || !isLoggedIn) {
         return null;
     }
 

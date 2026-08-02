@@ -27,6 +27,21 @@ public class ProductRepository : IProductRepository
             .ToListAsync();
     }
 
+    public async Task<List<Product>> GetByVendorIdAsync(Guid vendorId)
+    {
+        return await _context.Products
+            .Include(p => p.Brand)
+            .Include(p => p.Category)
+            .Include(p => p.Vendor)
+            .Include(p => p.Variants)
+                .ThenInclude(v => v.Images)
+            .Include(p => p.Images)
+            .Where(p => p.VendorId == vendorId)
+            .OrderByDescending(p => p.UpdatedAt ?? p.CreatedAt)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
     public async Task<Product?> GetByIdAsync(Guid id)
     {
         return await _context.Products
@@ -37,6 +52,32 @@ public class ProductRepository : IProductRepository
                 .ThenInclude(v => v.Images)
             .Include(p => p.Images)
             .FirstOrDefaultAsync(p => p.Id == id);
+    }
+
+    public async Task<ProductVariant?> GetVariantByIdAsync(Guid id)
+    {
+        return await _context.ProductVariants
+            .Include(v => v.Product)
+            .Include(v => v.Images)
+            .FirstOrDefaultAsync(v => v.Id == id);
+    }
+
+    public async Task<ProductImage?> GetProductImageByIdAsync(Guid id)
+    {
+        return await _context.ProductImages
+            .Include(i => i.Product)
+                .ThenInclude(p => p.Images)
+            .FirstOrDefaultAsync(i => i.Id == id);
+    }
+
+    public async Task<ProductVariantImage?> GetVariantImageByIdAsync(Guid id)
+    {
+        return await _context.ProductVariantImages
+            .Include(i => i.ProductVariant)
+                .ThenInclude(v => v.Product)
+            .Include(i => i.ProductVariant)
+                .ThenInclude(v => v.Images)
+            .FirstOrDefaultAsync(i => i.Id == id);
     }
 
     public async Task AddAsync(Product product)

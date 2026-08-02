@@ -57,7 +57,8 @@ public class CloudinaryImageUploadService : IImageUploadService
         {
             File = new FileDescription(filePath),
             PublicId = publicId,
-            Overwrite = false,
+            Overwrite = true,
+            Invalidate = true,
             Folder = "fragrance-commerce/demo-products"
         };
 

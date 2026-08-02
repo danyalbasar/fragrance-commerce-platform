@@ -23,6 +23,14 @@ public class CartRepository : ICartRepository
                 .ThenInclude(i => i.ProductVariant)
                     .ThenInclude(v => v.Product)
                         .ThenInclude(p => p.Images)
+            .Include(c => c.Items)
+                .ThenInclude(i => i.ProductVariant)
+                    .ThenInclude(v => v.Product)
+                        .ThenInclude(p => p.Brand)
+            .Include(c => c.Items)
+                .ThenInclude(i => i.ProductVariant)
+                    .ThenInclude(v => v.Product)
+                        .ThenInclude(p => p.Category)
             .AsSplitQuery()
             .FirstOrDefaultAsync(c => c.UserId == userId);
     }
@@ -37,6 +45,14 @@ public class CartRepository : ICartRepository
                 .ThenInclude(i => i.ProductVariant)
                     .ThenInclude(v => v.Product)
                         .ThenInclude(p => p.Images)
+            .Include(c => c.Items)
+                .ThenInclude(i => i.ProductVariant)
+                    .ThenInclude(v => v.Product)
+                        .ThenInclude(p => p.Brand)
+            .Include(c => c.Items)
+                .ThenInclude(i => i.ProductVariant)
+                    .ThenInclude(v => v.Product)
+                        .ThenInclude(p => p.Category)
             .AsSplitQuery()
             .FirstOrDefaultAsync(c => c.Id == id);
     }

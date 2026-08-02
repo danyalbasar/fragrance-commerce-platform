@@ -16,6 +16,8 @@ export default function VariantSelector({ variants }: VariantSelectorProps) {
 
   const [selectedVariant, setSelectedVariant] = useState(variants[0]);
   const [isAdding, setIsAdding] = useState(false);
+  const lowStock =
+    selectedVariant.stockQuantity > 0 && selectedVariant.stockQuantity <= 2;
 
   async function handleAddToCart() {
     if (!isLoggedIn) {
@@ -65,9 +67,11 @@ export default function VariantSelector({ variants }: VariantSelectorProps) {
           SKU: {selectedVariant.sku}
         </p>
 
-        <p className="mt-1 text-sm text-gray-500">
-          Stock: {selectedVariant.stockQuantity}
-        </p>
+        {lowStock && (
+          <p className="mt-3 inline-flex rounded-full border border-[#d7ad62] bg-[#fff6e4] px-3 py-1 text-xs font-medium text-[#8a5a12]">
+            Only {selectedVariant.stockQuantity} left
+          </p>
+        )}
       </div>
 
       <button

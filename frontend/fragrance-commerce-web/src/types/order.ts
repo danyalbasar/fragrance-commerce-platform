@@ -25,11 +25,16 @@ export interface OrderPayment {
 
 export interface OrderItem {
     id: string;
+    productId: string;
     productVariantId: string;
     productName: string;
     variantName: string;
-    unitPrice: number;
+    brandName: string;
+    gender: string;
+    categoryName: string;
+    imageUrl?: string | null;
     quantity: number;
+    unitPrice: number;
     totalPrice: number;
 }
 

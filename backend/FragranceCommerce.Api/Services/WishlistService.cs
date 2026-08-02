@@ -25,17 +25,31 @@ public class WishlistService : IWishlistService
 
         return new WishlistDto
         {
-            Items = items.Select(w => new WishlistItemDto
+            Items = items.Select(w =>
             {
-                Id = w.Id,
-                ProductId = w.ProductId,
-                ProductName = w.Product.Name,
-                BrandName = w.Product.Brand.Name,
-                CategoryName = w.Product.Category.Name,
+                var variant = w.Product.Variants
+                    .OrderBy(v => v.CreatedAt)
+                    .FirstOrDefault();
 
-                PrimaryImageUrl = w.Product.Images
-                    .OrderBy(i => i.DisplayOrder)
-                    .FirstOrDefault(i => i.IsPrimary)?.ImageUrl
+                return new WishlistItemDto
+                {
+                    Id = w.Id,
+                    ProductId = w.ProductId,
+                    ProductName = w.Product.Name,
+                    Description = w.Product.Description ?? string.Empty,
+                    Gender = w.Product.Gender.ToString(),
+                    BrandName = w.Product.Brand.Name,
+                    CategoryName = w.Product.Category.Name,
+
+                    PrimaryImageUrl = w.Product.Images
+                        .OrderBy(i => i.DisplayOrder)
+                        .FirstOrDefault(i => i.IsPrimary)?.ImageUrl,
+
+                    VariantId = variant?.Id ?? Guid.Empty,
+                    VariantName = variant?.VariantName ?? string.Empty,
+                    SellingPrice = variant?.SellingPrice ?? 0,
+                    StockQuantity = variant?.StockQuantity ?? 0
+                };
             }).ToList()
         };
     }

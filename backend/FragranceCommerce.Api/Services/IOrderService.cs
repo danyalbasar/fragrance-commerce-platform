@@ -11,9 +11,11 @@ public interface IOrderService
         Guid orderId,
         Guid currentUserId);
     Task<List<OrderDto>> GetMyOrdersAsync(Guid currentUserId);
+    Task<List<OrderDto>> GetVendorOrdersAsync(Guid currentUserId);
     Task<OrderDto> UpdateStatusAsync(
         Guid orderId,
-        UpdateOrderStatusDto dto);
+        UpdateOrderStatusDto dto,
+        Guid currentUserId);
     Task<OrderDto> CancelOrderAsync(
         Guid orderId,
         Guid currentUserId);

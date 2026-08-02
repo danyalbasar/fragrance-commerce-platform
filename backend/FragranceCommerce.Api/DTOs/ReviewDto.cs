@@ -9,5 +9,6 @@ public class ReviewDto
     public string? Title { get; set; }
     public string? Comment { get; set; }
     public DateTime CreatedAt { get; set; }
+    public bool IsVerifiedPurchase { get; set; } = true;
     public List<ReviewImageDto> Images { get; set; } = new();
 }

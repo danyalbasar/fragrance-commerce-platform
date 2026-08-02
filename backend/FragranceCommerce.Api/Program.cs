@@ -106,6 +106,9 @@ builder.Services.AddScoped<ICouponService, CouponService>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 
+builder.Services.AddScoped<IContactMessageRepository, ContactMessageRepository>();
+builder.Services.AddScoped<IContactMessageService, ContactMessageService>();
+
 builder.Services.AddScoped<IVendorDashboardService, VendorDashboardService>();
 
 builder.Services.AddScoped<IImageUploadService, CloudinaryImageUploadService>();

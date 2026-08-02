@@ -5,6 +5,7 @@ namespace FragranceCommerce.Api.Services;
 public interface IProductService
 {
     Task<List<ProductDto>> GetAllAsync();
+    Task<List<ProductDto>> GetVendorProductsAsync(Guid currentUserId);
     Task<ProductDto?> GetByIdAsync(Guid id);
     Task<ProductDto> CreateAsync(
         CreateProductDto dto,
@@ -21,6 +22,18 @@ public interface IProductService
     Task<ProductVariantDto> UpdateStockAsync(
         Guid variantId,
         UpdateStockDto dto,
+        Guid currentUserId);
+    Task<ProductVariantDto> UpdateVariantAsync(
+        Guid variantId,
+        UpdateProductVariantDto dto,
+        Guid currentUserId);
+    Task<ProductImageDto> UpdateProductImageAsync(
+        Guid imageId,
+        UpdateImageMetadataDto dto,
+        Guid currentUserId);
+    Task<ProductVariantImageDto> UpdateVariantImageAsync(
+        Guid imageId,
+        UpdateImageMetadataDto dto,
         Guid currentUserId);
     Task<ProductImageDto> AddProductImageAsync(
         Guid productId,

@@ -13,6 +13,11 @@ export async function getOrders(): Promise<Order[]> {
     return response.data;
 }
 
+export async function getVendorOrders(): Promise<Order[]> {
+    const response = await api.get<Order[]>("/Orders/vendor");
+    return response.data;
+}
+
 export async function getOrderById(id: string): Promise<Order> {
     const response = await api.get<Order>(`/Orders/${id}`);
     return response.data;
@@ -20,5 +25,16 @@ export async function getOrderById(id: string): Promise<Order> {
 
 export async function cancelOrder(id: string): Promise<Order> {
     const response = await api.post<Order>(`/Orders/${id}/cancel`);
+    return response.data;
+}
+
+export async function updateOrderStatus(
+    id: string,
+    status: string
+): Promise<Order> {
+    const response = await api.put<Order>(`/Orders/${id}/status`, {
+        status,
+    });
+
     return response.data;
 }

@@ -36,11 +36,10 @@ public static class DataSeeder
     {
         var brands = new[]
         {
-            new Brand { Name = "Dior", Description = "Luxury French fragrance brand." },
-            new Brand { Name = "Tom Ford", Description = "Premium designer fragrance brand." },
-            new Brand { Name = "Versace", Description = "Luxury Italian fragrance brand." },
-            new Brand { Name = "Yves Saint Laurent", Description = "French luxury fragrance brand." },
-            new Brand { Name = "Chanel", Description = "Luxury fragrance brand." }
+            new Brand { Name = "Aurelian Atelier", Description = "Fragrance house known for luminous woods and polished florals." },
+            new Brand { Name = "Nocturne Vale", Description = "Fragrance studio blending resin, spice, and evening botanicals." },
+            new Brand { Name = "Mira Solace", Description = "Skincare brand focused on calm, dewy daily rituals." },
+            new Brand { Name = "Vellum & Dew", Description = "Skincare brand creating refined cleansers and skin treatments." }
         };
 
         foreach (var brand in brands)
@@ -192,64 +191,86 @@ public static class DataSeeder
         IImageUploadService imageUploadService,
         IWebHostEnvironment env)
     {
-        if (await context.Products.AnyAsync())
-            return;
-
         var vendor = await context.Vendors.FirstAsync();
 
         await SeedProductAsync(context, imageUploadService, env, vendor.Id,
-            "Dior", "Perfume", ProductGender.Men, "Dior Sauvage",
-            "A fresh and spicy men's fragrance.",
-            "dior-sauvage.webp", "dior-sauvage",
+            "Aurelian Atelier", "Perfume", ProductGender.Unisex, "Velvet Saffron Eau de Parfum",
+            "An amber floral fragrance with saffron, suede petals, and polished cedar.",
+            "aurelian-velvet-saffron.png", "aurelian-velvet-saffron",
             new[]
             {
-                new DemoVariant("60ml", "DS60", 4999, 4499, 3000, 20),
-                new DemoVariant("100ml", "DS100", 6999, 6499, 4500, 15)
+                new DemoVariant("50ml", "AA-VS-50", 4299, 3699, 2200, 28, "aurelian-velvet-saffron-50.png", "aurelian-velvet-saffron-50"),
+                new DemoVariant("100ml", "AA-VS-100", 6499, 5799, 3500, 18, "aurelian-velvet-saffron-100.png", "aurelian-velvet-saffron-100")
             });
 
         await SeedProductAsync(context, imageUploadService, env, vendor.Id,
-            "Versace", "Perfume", ProductGender.Men, "Versace Eros",
-            "A bold fresh fragrance with mint, apple and vanilla notes.",
-            "versace-eros.webp", "versace-eros",
+            "Aurelian Atelier", "Attar", ProductGender.Women, "Moonlit Rose Attar",
+            "A concentrated oil with rose absolute, pear skin, and soft white musk.",
+            "aurelian-moonlit-rose.png", "aurelian-moonlit-rose",
             new[]
             {
-                new DemoVariant("100ml", "VE100", 7999, 6999, 4800, 18)
+                new DemoVariant("6ml", "AA-MR-6", 1799, 1499, 850, 36, "aurelian-moonlit-rose-6.png", "aurelian-moonlit-rose-6"),
+                new DemoVariant("12ml", "AA-MR-12", 2999, 2499, 1400, 24, "aurelian-moonlit-rose-12.png", "aurelian-moonlit-rose-12")
             });
 
         await SeedProductAsync(context, imageUploadService, env, vendor.Id,
-            "Tom Ford", "Perfume", ProductGender.Men, "Tom Ford Oud Wood",
-            "A warm woody fragrance with oud, sandalwood and amber.",
-            "tom-ford-oud-wood.webp", "tom-ford-oud-wood",
+            "Nocturne Vale", "Perfume", ProductGender.Men, "Cedar Smoke Parfum",
+            "A smoky fragrance with cedar resin, black tea, and mineral amber.",
+            "nocturne-cedar-smoke.png", "nocturne-cedar-smoke",
             new[]
             {
-                new DemoVariant("50ml", "TFOW50", 14999, 12999, 9500, 10)
+                new DemoVariant("50ml", "NV-CS-50", 4599, 3999, 2400, 22, "nocturne-cedar-smoke-50.png", "nocturne-cedar-smoke-50"),
+                new DemoVariant("100ml", "NV-CS-100", 6999, 6199, 3900, 16, "nocturne-cedar-smoke-100.png", "nocturne-cedar-smoke-100")
             });
 
         await SeedProductAsync(context, imageUploadService, env, vendor.Id,
-            "Yves Saint Laurent", "Perfume", ProductGender.Men, "YSL Y Eau de Parfum",
-            "A clean masculine fragrance with apple, sage and woods.",
-            "ysl-y-edp.webp", "ysl-y-edp",
+            "Nocturne Vale", "Customised Perfume", ProductGender.Unisex, "Bespoke Citrus Resin Blend",
+            "A custom-blend starter with mandarin peel, incense resin, and clean woods.",
+            "nocturne-citrus-resin.png", "nocturne-citrus-resin",
             new[]
             {
-                new DemoVariant("100ml", "YSLY100", 8999, 7499, 5200, 14)
+                new DemoVariant("30ml", "NV-CR-30", 3499, 2999, 1700, 20, "nocturne-citrus-resin-30.png", "nocturne-citrus-resin-30"),
+                new DemoVariant("75ml", "NV-CR-75", 5799, 5199, 3100, 14, "nocturne-citrus-resin-75.png", "nocturne-citrus-resin-75")
             });
 
         await SeedProductAsync(context, imageUploadService, env, vendor.Id,
-            "Chanel", "Perfume", ProductGender.Women, "Chanel Coco Mademoiselle",
-            "A fresh oriental fragrance with orange, jasmine and patchouli.",
-            "chanel-coco.webp", "chanel-coco",
+            "Mira Solace", "Face Wash", ProductGender.Unisex, "Cloud Milk Cleanser",
+            "A gentle cleanser with oat milk, lotus water, and amino acids.",
+            "mira-cloud-milk-cleanser.png", "mira-cloud-milk-cleanser",
             new[]
             {
-                new DemoVariant("100ml", "CCM100", 10999, 9499, 7000, 12)
+                new DemoVariant("100ml", "MS-CM-100", 899, 749, 360, 45, "mira-cloud-milk-cleanser-100.png", "mira-cloud-milk-cleanser-100"),
+                new DemoVariant("200ml", "MS-CM-200", 1399, 1199, 620, 30, "mira-cloud-milk-cleanser-200.png", "mira-cloud-milk-cleanser-200")
             });
 
         await SeedProductAsync(context, imageUploadService, env, vendor.Id,
-            "Dior", "Perfume", ProductGender.Women, "J'adore Eau de Parfum",
-            "An elegant floral fragrance with notes of ylang-ylang, Damascus rose and jasmine.",
-            "jadore-edp.webp", "jadore-edp",
+            "Mira Solace", "Fairness Cream", ProductGender.Women, "Pearl Veil Bright Cream",
+            "A brightening cream with niacinamide, pearl extract, and meadowfoam.",
+            "mira-pearl-veil-cream.png", "mira-pearl-veil-cream",
             new[]
             {
-                new DemoVariant("100ml", "DJ100", 10999, 9999, 7000, 15)
+                new DemoVariant("30g", "MS-PV-30", 1299, 1099, 540, 34, "mira-pearl-veil-cream-30.png", "mira-pearl-veil-cream-30"),
+                new DemoVariant("50g", "MS-PV-50", 1899, 1599, 780, 26, "mira-pearl-veil-cream-50.png", "mira-pearl-veil-cream-50")
+            });
+
+        await SeedProductAsync(context, imageUploadService, env, vendor.Id,
+            "Vellum & Dew", "Face Wash", ProductGender.Men, "Mineral Rain Gel Wash",
+            "A cooling gel wash with zinc PCA, green tea, and glacier minerals.",
+            "vellum-mineral-rain-wash.png", "vellum-mineral-rain-wash",
+            new[]
+            {
+                new DemoVariant("120ml", "VD-MR-120", 999, 849, 410, 40, "vellum-mineral-rain-wash-120.png", "vellum-mineral-rain-wash-120"),
+                new DemoVariant("240ml", "VD-MR-240", 1599, 1399, 720, 25, "vellum-mineral-rain-wash-240.png", "vellum-mineral-rain-wash-240")
+            });
+
+        await SeedProductAsync(context, imageUploadService, env, vendor.Id,
+            "Vellum & Dew", "Nails", ProductGender.Unisex, "Glass Petal Nail Serum",
+            "A nail serum with botanical oils, ceramide gloss, and a clean petal finish.",
+            "vellum-glass-petal-serum.png", "vellum-glass-petal-serum",
+            new[]
+            {
+                new DemoVariant("8ml", "VD-GP-8", 799, 649, 280, 42, "vellum-glass-petal-serum-8.png", "vellum-glass-petal-serum-8"),
+                new DemoVariant("15ml", "VD-GP-15", 1199, 999, 460, 30, "vellum-glass-petal-serum-15.png", "vellum-glass-petal-serum-15")
             });
     }
 
@@ -267,6 +288,9 @@ public static class DataSeeder
         string publicId,
         DemoVariant[] variants)
     {
+        if (await context.Products.AnyAsync(p => p.Name == productName))
+            return;
+
         var brand = await context.Brands.FirstAsync(b => b.Name == brandName);
         var category = await context.Categories.FirstAsync(c => c.Name == categoryName);
 
@@ -300,6 +324,18 @@ public static class DataSeeder
 
         foreach (var variant in variants)
         {
+            var variantImageUrl = imageUrl;
+
+            if (!string.IsNullOrWhiteSpace(variant.ImageFileName) &&
+                !string.IsNullOrWhiteSpace(variant.PublicId))
+            {
+                var variantImagePath = Path.Combine(env.ContentRootPath, "SeedImages", variant.ImageFileName);
+
+                variantImageUrl = await imageUploadService.UploadImageAsync(
+                    variantImagePath,
+                    variant.PublicId);
+            }
+
             var productVariant = new ProductVariant
             {
                 ProductId = product.Id,
@@ -318,7 +354,7 @@ public static class DataSeeder
             context.ProductVariantImages.Add(new ProductVariantImage
             {
                 ProductVariantId = productVariant.Id,
-                ImageUrl = imageUrl,
+                ImageUrl = variantImageUrl,
                 DisplayOrder = 1,
                 IsPrimary = true
             });
@@ -333,5 +369,7 @@ public static class DataSeeder
         decimal Mrp,
         decimal SellingPrice,
         decimal CostPrice,
-        int StockQuantity);
+        int StockQuantity,
+        string? ImageFileName = null,
+        string? PublicId = null);
 }

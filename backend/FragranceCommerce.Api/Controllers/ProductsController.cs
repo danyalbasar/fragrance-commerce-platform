@@ -36,6 +36,29 @@ public class ProductsController : ControllerBase
     }
 
     [Authorize(Roles = "Vendor")]
+    [HttpGet("vendor")]
+    public async Task<ActionResult<List<ProductDto>>> GetVendorProducts()
+    {
+        try
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+                return Unauthorized();
+
+            var currentUserId = Guid.Parse(userIdClaim.Value);
+
+            var products = await _productService.GetVendorProductsAsync(currentUserId);
+
+            return Ok(products);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [Authorize(Roles = "Vendor")]
     [HttpPost]
     public async Task<ActionResult<ProductDto>> CreateProduct(CreateProductDto dto)
     {
@@ -152,6 +175,90 @@ public class ProductsController : ControllerBase
                 currentUserId);
 
             return Ok(variant);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [Authorize(Roles = "Vendor")]
+    [HttpPut("variants/{variantId}")]
+    public async Task<ActionResult<ProductVariantDto>> UpdateVariant(
+        Guid variantId,
+        UpdateProductVariantDto dto)
+    {
+        try
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+                return Unauthorized();
+
+            var currentUserId = Guid.Parse(userIdClaim.Value);
+
+            var variant = await _productService.UpdateVariantAsync(
+                variantId,
+                dto,
+                currentUserId);
+
+            return Ok(variant);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [Authorize(Roles = "Vendor")]
+    [HttpPut("images/{imageId}")]
+    public async Task<ActionResult<ProductImageDto>> UpdateProductImage(
+        Guid imageId,
+        UpdateImageMetadataDto dto)
+    {
+        try
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+                return Unauthorized();
+
+            var currentUserId = Guid.Parse(userIdClaim.Value);
+
+            var image = await _productService.UpdateProductImageAsync(
+                imageId,
+                dto,
+                currentUserId);
+
+            return Ok(image);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [Authorize(Roles = "Vendor")]
+    [HttpPut("variants/images/{imageId}")]
+    public async Task<ActionResult<ProductVariantImageDto>> UpdateVariantImage(
+        Guid imageId,
+        UpdateImageMetadataDto dto)
+    {
+        try
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+                return Unauthorized();
+
+            var currentUserId = Guid.Parse(userIdClaim.Value);
+
+            var image = await _productService.UpdateVariantImageAsync(
+                imageId,
+                dto,
+                currentUserId);
+
+            return Ok(image);
         }
         catch (InvalidOperationException ex)
         {
