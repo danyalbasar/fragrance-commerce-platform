@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { clearUserCache } from "@/utils/swrCache";
 
 interface AuthContextType {
     email: string | null;
@@ -32,15 +33,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const savedEmail = localStorage.getItem("email");
         const savedRoles = localStorage.getItem("roles");
 
-        setToken(savedToken);
-        setEmail(savedEmail);
-        try {
-            setRoles(savedRoles ? JSON.parse(savedRoles) : []);
-        } catch {
-            setRoles([]);
-        }
+        queueMicrotask(() => {
+            setToken(savedToken);
+            setEmail(savedEmail);
+            try {
+                setRoles(savedRoles ? JSON.parse(savedRoles) : []);
+            } catch {
+                setRoles([]);
+            }
 
-        setAuthReady(true);
+            setAuthReady(true);
+        });
     }, []);
 
     function loginUser(newToken: string, userEmail: string, userRoles: string[] = []) {
@@ -59,6 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem("token");
         localStorage.removeItem("email");
         localStorage.removeItem("roles");
+        clearUserCache();
 
         setToken(null);
         setEmail(null);

@@ -1,13 +1,16 @@
 "use client";
 
 import Image from "next/image";
+import { PackageX } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/common/ProtectedRoute";
 import OrderTimeline from "@/components/orders/OrderTimeline";
+import { EmptyState } from "@/components/common/EmptyState";
 import type { Order } from "@/types/order";
 import { cancelOrder, getOrderById } from "@/services/orderService";
 import { getStatusClasses } from "@/utils/orderStatus";
+import { readCache, writeCache } from "@/utils/swrCache";
 
 export default function OrderDetailsPage() {
     const params = useParams();
@@ -15,14 +18,19 @@ export default function OrderDetailsPage() {
 
     const orderId = params.id as string;
 
-    const [order, setOrder] = useState<Order | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [order, setOrder] = useState<Order | null>(() =>
+        readCache<Order>(`order:${orderId}`)
+    );
+    const [loading, setLoading] = useState(order === null);
     const [cancelling, setCancelling] = useState(false);
+    const [confirmingCancel, setConfirmingCancel] = useState(false);
+    const [cancelError, setCancelError] = useState("");
 
     async function loadOrder() {
         try {
             const data = await getOrderById(orderId);
             setOrder(data);
+            writeCache(`order:${orderId}`, data);
         } finally {
             setLoading(false);
         }
@@ -35,27 +43,79 @@ export default function OrderDetailsPage() {
     async function handleCancelOrder() {
         if (!order) return;
 
-        const confirmed = confirm("Are you sure you want to cancel this order?");
-        if (!confirmed) return;
-
         try {
             setCancelling(true);
+            setCancelError("");
             const updatedOrder = await cancelOrder(order.id);
             setOrder(updatedOrder);
+            setConfirmingCancel(false);
         } catch (error) {
             console.error(error);
-            alert("Failed to cancel order.");
+            setCancelError("Failed to cancel order. Please try again.");
         } finally {
             setCancelling(false);
         }
     }
 
-    if (loading) {
-        return <div className="bg-[var(--luxury-ivory)] p-8 text-xl text-[var(--luxury-ink)]">Loading order...</div>;
+    if (loading && !order) {
+        return (
+            <main aria-hidden="true" className="min-h-screen bg-[var(--luxury-ivory)] px-4 py-8 text-[var(--luxury-ink)] sm:px-6 sm:py-10">
+                <div className="mx-auto max-w-5xl">
+                    <div className="mb-8 border-b border-[#d8c8ad] pb-6">
+                        <div className="h-4 w-24 animate-pulse rounded bg-[#e5d9c4]" />
+
+                        <div className="mt-3 h-10 w-48 animate-pulse rounded bg-[#e5d9c4]" />
+                    </div>
+
+                    <div className="overflow-hidden rounded-[var(--luxury-radius)] border border-[var(--luxury-line)] bg-[var(--luxury-paper)] shadow-[var(--luxury-shadow-sm)]">
+                        <div className="grid gap-4 border-b border-[#d8c8ad] bg-[#efe3d0] px-6 py-4 md:grid-cols-4">
+                            {Array.from({ length: 4 }).map((_, i) => (
+                                <div key={i}>
+                                    <div className="h-3 w-16 animate-pulse rounded bg-[#e5d9c4]" />
+
+                                    <div className="mt-2 h-4 w-24 animate-pulse rounded bg-[#e5d9c4]" />
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="p-6">
+                            <div className="h-7 w-40 animate-pulse rounded bg-[#e5d9c4]" />
+
+                            <div className="mt-5 space-y-5">
+                                {Array.from({ length: 2 }).map((_, i) => (
+                                    <div key={i} className="grid gap-5 border-b border-[#d8c8ad] pb-5 last:border-b-0 last:pb-0 md:grid-cols-[110px_1fr_220px]">
+                                        <div className="h-28 w-full animate-pulse rounded bg-[#e5d9c4] md:w-28" />
+
+                                        <div>
+                                            <div className="h-4 w-40 animate-pulse rounded bg-[#e5d9c4]" />
+                                            <div className="mt-2 h-4 w-32 animate-pulse rounded bg-[#e5d9c4]" />
+                                        </div>
+
+                                        <div className="h-4 w-16 animate-pulse rounded bg-[#e5d9c4] md:ml-auto" />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        );
     }
 
     if (!order) {
-        return <div className="bg-[var(--luxury-ivory)] p-8 text-xl text-[var(--luxury-ink)]">Order not found.</div>;
+        return (
+            <div className="min-h-screen bg-[var(--luxury-ivory)] px-6 py-10 text-[var(--luxury-ink)]">
+                <div className="mx-auto max-w-5xl">
+                    <EmptyState
+                        icon={PackageX}
+                        title="Order not found"
+                        description="This order may no longer be available."
+                        actionLabel="Back to Orders"
+                        actionHref="/orders"
+                    />
+                </div>
+            </div>
+        );
     }
 
     return (
@@ -64,7 +124,7 @@ export default function OrderDetailsPage() {
                 <div className="mx-auto max-w-5xl">
                 <button
                     onClick={() => router.push("/orders")}
-                    className="mb-6 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--luxury-muted)] hover:text-[var(--luxury-gold)]"
+                    className="mb-6 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--luxury-muted)] hover:text-[var(--luxury-gold-strong)]"
                 >
                     ← Back to Orders
                 </button>
@@ -73,7 +133,7 @@ export default function OrderDetailsPage() {
                     <div>
                         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                             <div>
-                                <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold)]">
+                                <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">
                                     Order Details
                                 </p>
 
@@ -168,7 +228,7 @@ export default function OrderDetailsPage() {
                                         {item.imageUrl && (
                                             <Image
                                                 src={item.imageUrl}
-                                                alt={item.productName}
+                                                alt=""
                                                 fill
                                                 className="object-contain p-3 drop-shadow-[0_16px_18px_rgba(22,18,13,0.14)]"
                                             />
@@ -207,13 +267,56 @@ export default function OrderDetailsPage() {
                     </section>
 
                     {order.status !== "Cancelled" && order.status !== "Delivered" && (
-                        <button
-                            onClick={handleCancelOrder}
-                            disabled={cancelling}
-                            className="mt-6 rounded-full bg-red-600 px-6 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-white hover:bg-red-700 disabled:bg-gray-400"
-                        >
-                            {cancelling ? "Cancelling..." : "Cancel Order"}
-                        </button>
+                        <div className="mt-6">
+                            {confirmingCancel ? (
+                                <div
+                                    role="alert"
+                                    className="rounded-xl border border-red-200 bg-red-50 p-4"
+                                >
+                                    <p className="text-sm font-semibold text-red-700">
+                                        Are you sure you want to cancel this order?
+                                    </p>
+
+                                    <div className="mt-3 flex flex-wrap gap-3">
+                                        <button
+                                            onClick={handleCancelOrder}
+                                            disabled={cancelling}
+                                            className="rounded-full bg-red-600 px-6 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-white hover:bg-red-700 disabled:bg-[var(--luxury-muted-strong)]"
+                                        >
+                                            {cancelling
+                                                ? "Cancelling..."
+                                                : "Yes, Cancel Order"}
+                                        </button>
+
+                                        <button
+                                            onClick={() =>
+                                                setConfirmingCancel(false)
+                                            }
+                                            disabled={cancelling}
+                                            className="rounded-full border border-[var(--luxury-line)] bg-[var(--luxury-paper)] px-6 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-[var(--luxury-ink)] transition hover:border-[var(--luxury-gold-strong)]"
+                                        >
+                                            Keep Order
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={() => setConfirmingCancel(true)}
+                                    className="rounded-full bg-red-600 px-6 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-white hover:bg-red-700"
+                                >
+                                    Cancel Order
+                                </button>
+                            )}
+
+                            {cancelError && (
+                                <p
+                                    role="alert"
+                                    className="mt-3 text-sm font-medium text-red-700"
+                                >
+                                    {cancelError}
+                                </p>
+                            )}
+                        </div>
                     )}
                 </div>
                 </div>

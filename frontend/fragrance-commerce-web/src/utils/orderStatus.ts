@@ -6,7 +6,7 @@ export function getStatusClasses(status: string) {
         case "Pending":
             return `${base} border-[#d5b36a] bg-[#fff4d8] text-[#86631d]`;
 
-        case "Processing":
+        case "Confirmed":
             return `${base} border-[#9cae9d] bg-[#edf3ea] text-[#435a43]`;
 
         case "Shipped":

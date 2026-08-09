@@ -1,11 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import { Check } from "lucide-react";
+import { Check, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/common/ProtectedRoute";
+import { CheckoutPageSkeleton } from "@/components/common/CheckoutPageSkeleton";
+import { EmptyState } from "@/components/common/EmptyState";
 import type { Cart } from "@/types/cart";
 import type { Address } from "@/types/address";
 import { getCart } from "@/services/cartService";
@@ -30,6 +31,7 @@ export default function CheckoutPage() {
     const [showAddressForm, setShowAddressForm] = useState(false);
     const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
     const [addressError, setAddressError] = useState("");
+    const [orderError, setOrderError] = useState("");
 
     const emptyAddressForm = {
         fullName: "",
@@ -129,12 +131,13 @@ export default function CheckoutPage() {
 
     async function handlePlaceOrder() {
         if (!selectedAddressId) {
-            alert("Please select a shipping address.");
+            setOrderError("Please select a shipping address.");
             return;
         }
 
         try {
             setPlacingOrder(true);
+            setOrderError("");
 
             await createOrder({
                 addressId: selectedAddressId,
@@ -145,7 +148,7 @@ export default function CheckoutPage() {
 
             router.push("/orders");
         } catch {
-            alert("Failed to place order.");
+            setOrderError("Failed to place order. Please try again.");
         } finally {
             setPlacingOrder(false);
         }
@@ -161,15 +164,15 @@ export default function CheckoutPage() {
     ];
 
     if (loading) {
-        return <div className="bg-[var(--luxury-ivory)] p-8 text-xl text-[var(--luxury-ink)]">Loading checkout...</div>;
+        return <CheckoutPageSkeleton />;
     }
 
     return (
         <ProtectedRoute>
             <main className="min-h-screen bg-[var(--luxury-ivory)] px-4 py-8 text-[var(--luxury-ink)] sm:px-6 sm:py-10">
                 <div className="mx-auto max-w-7xl">
-                    <div className="mb-10 border-b border-[#d8c8ad] pb-6">
-                        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--luxury-gold)] sm:tracking-[0.34em]">
+                    <div className="mb-8 border-b border-[#d8c8ad] pb-6">
+                        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--luxury-gold-strong)] sm:tracking-[0.34em]">
                             Secure Checkout
                         </p>
 
@@ -180,7 +183,7 @@ export default function CheckoutPage() {
 
                     <div className="grid gap-10 lg:grid-cols-[1fr_420px]">
                         <section className="space-y-6">
-                            <div className="overflow-hidden border border-[#d8c8ad] bg-[var(--luxury-paper)] shadow-[0_18px_50px_rgba(22,18,13,0.08)]">
+                            <div className="overflow-hidden rounded-[var(--luxury-radius)] border border-[var(--luxury-line)] bg-[var(--luxury-paper)] shadow-[var(--luxury-shadow-sm)]">
                                 <div className="flex items-center justify-between gap-4 border-b border-[#d8c8ad] bg-[#efe3d0] px-4 py-4 sm:px-6">
                                     <h2 className="text-sm font-semibold uppercase tracking-[0.12em] sm:tracking-[0.18em]">
                                         1. Shipping
@@ -189,7 +192,7 @@ export default function CheckoutPage() {
                                     {step === "payment" && (
                                         <button
                                             onClick={() => setStep("shipping")}
-                                            className="cursor-pointer text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-gold)] sm:tracking-[0.14em]"
+                                            className="cursor-pointer text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-gold-strong)] sm:tracking-[0.14em]"
                                         >
                                             Edit
                                         </button>
@@ -198,26 +201,22 @@ export default function CheckoutPage() {
 
                                 <div className="p-4 sm:p-6">
                                     {addresses.length === 0 && !showAddressForm ? (
-                                        <div>
-                                            <p className="text-[var(--luxury-muted)]">
-                                                No address found. Please add an address first.
-                                            </p>
-
-                                            <button
-                                                onClick={openNewAddressForm}
-                                                className="mt-4 cursor-pointer rounded-full bg-[var(--luxury-ink)] px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-[var(--luxury-paper)]"
-                                            >
-                                                Add Address
-                                            </button>
-                                        </div>
+                                        <EmptyState
+                                            icon={MapPin}
+                                            title="Add a shipping address"
+                                            description="No address found. Please add an address first."
+                                            actionLabel="Add Address"
+                                            onAction={openNewAddressForm}
+                                            compact
+                                        />
                                     ) : (
                                         <div className="space-y-4">
                                             {addresses.map((address) => (
                                                 <label
                                                     key={address.id}
-                                                    className={`block cursor-pointer border p-4 transition sm:p-5 ${selectedAddressId === address.id
+                                                    className={`block cursor-pointer rounded-[var(--luxury-radius)] border p-4 transition sm:p-5 ${selectedAddressId === address.id
                                                         ? "border-[var(--luxury-gold)] bg-[#fffaf2]"
-                                                        : "border-[#d8c8ad] hover:border-[var(--luxury-gold)]"
+                                                        : "border-[var(--luxury-line)] hover:border-[var(--luxury-gold)] hover:bg-[#fffaf2]"
                                                         }`}
                                                 >
                                                     <div className="flex gap-3 sm:gap-4">
@@ -238,7 +237,7 @@ export default function CheckoutPage() {
                                                                 </p>
 
                                                                 {address.isDefault && (
-                                                                    <span className="rounded-full border border-[#b7c7a8] bg-[#eef5e8] px-2 py-1 text-xs text-[#3f5f32]">
+                                                                    <span className="rounded-full border border-[#b7c7a8] bg-[#eef5e8] px-2 py-1 text-xs font-medium text-[#3f5f32]">
                                                                         Default
                                                                     </span>
                                                                 )}
@@ -250,7 +249,7 @@ export default function CheckoutPage() {
                                                                             e.preventDefault();
                                                                             openEditAddressForm(address);
                                                                         }}
-                                                                        className="ml-auto cursor-pointer text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-gold)] sm:tracking-[0.12em]"
+                                                                        className="ml-auto cursor-pointer text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-gold-strong)] sm:tracking-[0.12em]"
                                                                     >
                                                                         Edit
                                                                     </button>
@@ -284,7 +283,7 @@ export default function CheckoutPage() {
                                                 <div className="flex flex-col gap-4 border-t border-[#d8c8ad] pt-4 sm:flex-row sm:items-center sm:justify-between">
                                                     <button
                                                         onClick={openNewAddressForm}
-                                                        className="cursor-pointer text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-gold)] sm:tracking-[0.14em]"
+                                                        className="cursor-pointer text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-gold-strong)] sm:tracking-[0.14em]"
                                                     >
                                                         + Add New Address
                                                     </button>
@@ -292,7 +291,7 @@ export default function CheckoutPage() {
                                                     <button
                                                         onClick={() => setStep("payment")}
                                                         disabled={!selectedAddressId}
-                                                        className="cursor-pointer rounded-full bg-[var(--luxury-ink)] px-6 py-3 text-center text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-paper)] disabled:cursor-not-allowed disabled:bg-gray-400 sm:tracking-[0.14em]"
+                                                        className="cursor-pointer rounded-full bg-[var(--luxury-ink)] px-6 py-3 text-center text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-paper)] shadow-[0_14px_30px_rgba(22,18,13,0.12)] transition hover:bg-[var(--luxury-moss)] disabled:cursor-not-allowed disabled:bg-[var(--luxury-muted-strong)] sm:tracking-[0.14em]"
                                                     >
                                                         Continue to Payment
                                                     </button>
@@ -302,7 +301,7 @@ export default function CheckoutPage() {
                                     )}
 
                                     {showAddressForm && step === "shipping" && (
-                                        <div className="mt-5 border border-[#d8c8ad] bg-[#fffaf2] p-4 sm:p-5">
+                                        <div className="mt-5 rounded-[var(--luxury-radius)] border border-[var(--luxury-line)] bg-[var(--luxury-input)] p-4 sm:p-5">
                                             <h3 className="mb-4 text-2xl font-normal [font-family:var(--font-serif)]">
                                                 {editingAddressId
                                                     ? "Edit Address"
@@ -310,7 +309,7 @@ export default function CheckoutPage() {
                                             </h3>
 
                                             {addressError && (
-                                                <p className="mb-4 text-sm text-red-500">
+                                                <p role="alert" className="mb-4 text-sm text-red-700">
                                                     {addressError}
                                                 </p>
                                             )}
@@ -325,6 +324,8 @@ export default function CheckoutPage() {
                                                         })
                                                     }
                                                     placeholder="Full Name *"
+                                                    aria-label="Full name"
+                                                    autoComplete="name"
                                                     className="border border-[#d8c8ad] bg-[var(--luxury-paper)] px-4 py-3 outline-none focus:border-[var(--luxury-gold)]"
                                                 />
 
@@ -337,6 +338,9 @@ export default function CheckoutPage() {
                                                         })
                                                     }
                                                     placeholder="Phone Number *"
+                                                    aria-label="Phone number"
+                                                    type="tel"
+                                                    autoComplete="tel"
                                                     className="border border-[#d8c8ad] bg-[var(--luxury-paper)] px-4 py-3 outline-none focus:border-[var(--luxury-gold)]"
                                                 />
 
@@ -349,6 +353,8 @@ export default function CheckoutPage() {
                                                         })
                                                     }
                                                     placeholder="Address Line 1 *"
+                                                    aria-label="Address line 1"
+                                                    autoComplete="address-line1"
                                                     className="border border-[#d8c8ad] bg-[var(--luxury-paper)] px-4 py-3 outline-none focus:border-[var(--luxury-gold)] md:col-span-2"
                                                 />
 
@@ -361,6 +367,8 @@ export default function CheckoutPage() {
                                                         })
                                                     }
                                                     placeholder="Address Line 2"
+                                                    aria-label="Address line 2"
+                                                    autoComplete="address-line2"
                                                     className="border border-[#d8c8ad] bg-[var(--luxury-paper)] px-4 py-3 outline-none focus:border-[var(--luxury-gold)] md:col-span-2"
                                                 />
 
@@ -373,6 +381,8 @@ export default function CheckoutPage() {
                                                         })
                                                     }
                                                     placeholder="City *"
+                                                    aria-label="City"
+                                                    autoComplete="address-level2"
                                                     className="border border-[#d8c8ad] bg-[var(--luxury-paper)] px-4 py-3 outline-none focus:border-[var(--luxury-gold)]"
                                                 />
 
@@ -385,6 +395,8 @@ export default function CheckoutPage() {
                                                         })
                                                     }
                                                     placeholder="State *"
+                                                    aria-label="State"
+                                                    autoComplete="address-level1"
                                                     className="border border-[#d8c8ad] bg-[var(--luxury-paper)] px-4 py-3 outline-none focus:border-[var(--luxury-gold)]"
                                                 />
 
@@ -397,6 +409,8 @@ export default function CheckoutPage() {
                                                         })
                                                     }
                                                     placeholder="Postal Code *"
+                                                    aria-label="Postal code"
+                                                    autoComplete="postal-code"
                                                     className="border border-[#d8c8ad] bg-[var(--luxury-paper)] px-4 py-3 outline-none focus:border-[var(--luxury-gold)]"
                                                 />
 
@@ -409,6 +423,8 @@ export default function CheckoutPage() {
                                                         })
                                                     }
                                                     placeholder="Country *"
+                                                    aria-label="Country"
+                                                    autoComplete="country-name"
                                                     className="border border-[#d8c8ad] bg-[var(--luxury-paper)] px-4 py-3 outline-none focus:border-[var(--luxury-gold)]"
                                                 />
                                             </div>
@@ -431,7 +447,7 @@ export default function CheckoutPage() {
                                             <div className="mt-5 flex flex-col gap-3 sm:flex-row">
                                                 <button
                                                     onClick={handleSaveAddress}
-                                                    className="cursor-pointer rounded-full bg-[var(--luxury-ink)] px-6 py-3 text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-paper)] sm:tracking-[0.14em]"
+                                                    className="cursor-pointer rounded-full bg-[var(--luxury-ink)] px-6 py-3 text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-paper)] shadow-[0_14px_30px_rgba(22,18,13,0.12)] transition hover:bg-[var(--luxury-moss)] sm:tracking-[0.14em]"
                                                 >
                                                     Save Address
                                                 </button>
@@ -442,7 +458,7 @@ export default function CheckoutPage() {
                                                         setEditingAddressId(null);
                                                         setAddressError("");
                                                     }}
-                                                    className="cursor-pointer rounded-full border border-[#d8c8ad] px-6 py-3 text-sm font-semibold uppercase tracking-[0.1em] transition hover:border-[var(--luxury-gold)] sm:tracking-[0.14em]"
+                                                    className="cursor-pointer rounded-full border border-[var(--luxury-line)] px-6 py-3 text-sm font-semibold uppercase tracking-[0.1em] transition hover:border-[var(--luxury-gold)] hover:bg-[var(--luxury-paper)] sm:tracking-[0.14em]"
                                                 >
                                                     Cancel
                                                 </button>
@@ -452,11 +468,11 @@ export default function CheckoutPage() {
                                 </div>
                             </div>
 
-                            <div className="overflow-hidden border border-[#d8c8ad] bg-[var(--luxury-paper)] shadow-[0_18px_50px_rgba(22,18,13,0.08)]">
+                            <div className="overflow-hidden rounded-[var(--luxury-radius)] border border-[var(--luxury-line)] bg-[var(--luxury-paper)] shadow-[var(--luxury-shadow-sm)]">
                                 <div className="border-b border-[#d8c8ad] bg-[#efe3d0] px-4 py-4 sm:px-6">
                                     <h2
                                         className={`text-sm font-semibold uppercase tracking-[0.12em] sm:tracking-[0.18em] ${step === "shipping"
-                                            ? "text-[var(--luxury-muted)]"
+                                            ? "text-[var(--luxury-muted-strong)]"
                                             : "text-[var(--luxury-ink)]"
                                             }`}
                                     >
@@ -466,34 +482,50 @@ export default function CheckoutPage() {
 
                                 {step === "payment" && (
                                     <div className="p-4 sm:p-6">
-                                        <div className="grid gap-3 md:grid-cols-2">
-                                            {paymentMethods.map((method) => (
-                                                <button
-                                                    key={method.value}
-                                                    onClick={() =>
-                                                        setPaymentMethod(method.value)
-                                                    }
-                                                    className={`cursor-pointer border p-4 text-left transition ${paymentMethod === method.value
-                                                        ? "border-[var(--luxury-gold)] bg-[#fffaf2]"
-                                                        : "border-[#d8c8ad] hover:border-[var(--luxury-gold)]"
-                                                        }`}
-                                                >
-                                                    <div className="flex items-center justify-between">
-                                                        <span className="font-semibold">
-                                                            {method.label}
-                                                        </span>
+                                        <fieldset>
+                                            <legend className="sr-only">Payment method</legend>
+                                            <div className="grid gap-3 md:grid-cols-2">
+                                                {paymentMethods.map((method) => (
+                                                    <label
+                                                        key={method.value}
+                                                        className={`block cursor-pointer rounded-[var(--luxury-radius)] border p-4 text-left transition focus-within:border-[var(--luxury-ink)] ${paymentMethod === method.value
+                                                            ? "border-[var(--luxury-gold)] bg-[#fffaf2]"
+                                                            : "border-[var(--luxury-line)] hover:border-[var(--luxury-gold)] hover:bg-[#fffaf2]"
+                                                            }`}
+                                                    >
+                                                        <input
+                                                            type="radio"
+                                                            name="paymentMethod"
+                                                            value={method.value}
+                                                            checked={paymentMethod === method.value}
+                                                            onChange={() =>
+                                                                setPaymentMethod(method.value)
+                                                            }
+                                                            className="sr-only"
+                                                        />
+                                                        <div className="flex items-center justify-between">
+                                                            <span className="font-semibold">
+                                                                {method.label}
+                                                            </span>
 
-                                                        {paymentMethod === method.value && (
-                                                            <Check size={18} />
-                                                        )}
-                                                    </div>
-                                                </button>
-                                            ))}
-                                        </div>
+                                                            {paymentMethod === method.value && (
+                                                                <Check size={18} />
+                                                            )}
+                                                        </div>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </fieldset>
 
                                         <p className="mt-6 text-sm text-[var(--luxury-muted)]">
                                             Please review your details. Your order will not be placed until you click Place Order.
                                         </p>
+
+                                        {orderError && (
+                                            <p role="alert" className="mt-4 border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                                                {orderError}
+                                            </p>
+                                        )}
 
                                         <button
                                             onClick={handlePlaceOrder}
@@ -503,7 +535,7 @@ export default function CheckoutPage() {
                                                 !cart ||
                                                 cart.items.length === 0
                                             }
-                                            className="mt-5 w-full cursor-pointer rounded-full bg-[var(--luxury-ink)] px-6 py-3 text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-paper)] transition hover:bg-[var(--luxury-moss)] disabled:cursor-not-allowed disabled:bg-gray-400 sm:w-auto sm:tracking-[0.12em]"
+                                            className="mt-5 w-full cursor-pointer rounded-full bg-[var(--luxury-ink)] px-6 py-3 text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-paper)] shadow-[0_14px_30px_rgba(22,18,13,0.12)] transition-all duration-200 hover:bg-[var(--luxury-moss)] hover:shadow-[0_18px_38px_rgba(22,18,13,0.16)] hover:scale-[1.01] active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-[var(--luxury-muted-strong)] disabled:hover:scale-100 disabled:hover:shadow-none sm:w-auto sm:tracking-[0.12em]"
                                         >
                                             {placingOrder
                                                 ? "Placing Order..."
@@ -514,7 +546,7 @@ export default function CheckoutPage() {
                             </div>
                         </section>
 
-                        <aside className="h-fit border border-[#d8c8ad] bg-[var(--luxury-paper)] p-5 shadow-[0_18px_50px_rgba(22,18,13,0.08)] sm:p-6 lg:sticky lg:top-24">
+                        <aside className="h-fit rounded-[var(--luxury-radius)] border border-[var(--luxury-line)] bg-[var(--luxury-paper)] p-5 shadow-[var(--luxury-shadow-sm)] sm:p-6 lg:sticky lg:top-24">
                             <h2 className="text-2xl font-normal [font-family:var(--font-serif)] sm:text-3xl">Price Details</h2>
 
                             <div className="mt-6 border-t border-[#d8c8ad]">
@@ -573,10 +605,10 @@ export default function CheckoutPage() {
                                             className="grid grid-cols-[76px_1fr] gap-3 border-b border-[#d8c8ad] pb-5 sm:grid-cols-[90px_1fr] sm:gap-4"
                                         >
                                             {item.imageUrl && (
-                                                <div className="relative h-20 overflow-hidden bg-[#efe3d0] sm:h-24">
+                                                <div className="relative h-20 overflow-hidden rounded-[var(--luxury-radius)] bg-[var(--luxury-sand)] sm:h-24">
                                                     <Image
                                                         src={item.imageUrl}
-                                                        alt={item.productName}
+                                                        alt=""
                                                         fill
                                                         className="object-contain p-3 drop-shadow-[0_16px_18px_rgba(22,18,13,0.14)]"
                                                     />
@@ -584,7 +616,7 @@ export default function CheckoutPage() {
                                             )}
 
                                             <div className="min-w-0">
-                                                <p className="text-xs uppercase tracking-[0.16em] text-[var(--luxury-gold)] sm:tracking-[0.24em]">
+                                                <p className="text-xs uppercase tracking-[0.16em] text-[var(--luxury-gold-strong)] sm:tracking-[0.24em]">
                                                     {item.brandName}
                                                 </p>
 

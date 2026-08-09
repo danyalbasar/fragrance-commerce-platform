@@ -28,3 +28,18 @@ api.interceptors.request.use((config) => {
 
   return config;
 });
+
+export function getApiResponse(
+  err: unknown
+): { data?: unknown; status?: number } | undefined {
+  if (
+    typeof err === "object" &&
+    err !== null &&
+    typeof (err as { response?: unknown }).response === "object" &&
+    (err as { response?: unknown }).response !== null
+  ) {
+    return (err as { response: { data?: unknown; status?: number } }).response;
+  }
+
+  return undefined;
+}

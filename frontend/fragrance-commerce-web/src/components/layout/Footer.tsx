@@ -1,14 +1,22 @@
 "use client";
 
 import Link from "next/link";
+import { AtSign, Camera, CirclePlay, MessagesSquare } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+
+const socialLinks = [
+    { label: "Instagram", href: "https://instagram.com", icon: Camera },
+    { label: "Facebook", href: "https://facebook.com", icon: MessagesSquare },
+    { label: "X", href: "https://x.com", icon: AtSign },
+    { label: "YouTube", href: "https://youtube.com", icon: CirclePlay },
+];
 
 const shopLinks = [
     { label: "Men", href: "/products?gender=Men" },
     { label: "Women", href: "/products?gender=Women" },
     { label: "Unisex", href: "/products?gender=Unisex" },
     { label: "Perfumes", href: "/products?category=Perfume" },
-    { label: "Skincare", href: "/products?category=Face%20Wash" },
+    { label: "Face Wash", href: "/products?category=Face%20Wash" },
 ];
 
 const accountLinks = [
@@ -40,7 +48,7 @@ export default function Footer() {
                     <section>
                         <Link
                             href="/"
-                            className="text-2xl font-semibold uppercase tracking-[0.18em] [font-family:var(--font-serif)] sm:text-3xl sm:tracking-[0.34em]"
+                            className="-my-2.5 py-2.5 text-2xl font-semibold uppercase tracking-[0.18em] [font-family:var(--font-serif)] transition-colors duration-300 hover:text-[var(--luxury-gold)] sm:text-3xl sm:tracking-[0.34em]"
                         >
                             Fragrance
                         </Link>
@@ -50,6 +58,21 @@ export default function Footer() {
                         </p>
 
                         <div className="mt-8 h-px w-28 bg-[var(--luxury-gold)]" />
+
+                        <div className="mt-6 flex gap-4">
+                            {socialLinks.map(({ label, href, icon: Icon }) => (
+                                <a
+                                    key={label}
+                                    href={href}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    aria-label={label}
+                                    className="inline-flex -m-3 p-3 items-center justify-center text-white/58 transition-all duration-200 hover:-translate-y-0.5 hover:text-[var(--luxury-gold)]"
+                                >
+                                    <Icon size={20} />
+                                </a>
+                            ))}
+                        </div>
                     </section>
 
                     <div className="grid grid-cols-2 gap-x-8 gap-y-10 lg:contents">
@@ -79,9 +102,12 @@ export default function Footer() {
                     </div>
                 </div>
 
-                <div className="mt-12 flex flex-col gap-4 border-t border-white/10 pt-6 text-xs uppercase tracking-[0.12em] text-white/48 sm:tracking-[0.22em] md:flex-row md:items-center md:justify-between">
+                <div className="mt-16 flex flex-col gap-4 border-t border-white/10 pt-6 text-xs uppercase tracking-[0.12em] text-white/48 sm:tracking-[0.22em] md:flex-row md:items-center md:justify-between">
                     <p>Copyright {new Date().getFullYear()} Fragrance Commerce</p>
-                    <p>Luxury catalogue experience</p>
+                    <p className="text-white/58">
+                        The private house collection &mdash; fragrance, skincare
+                        &amp; ritual
+                    </p>
                 </div>
             </div>
         </footer>
@@ -101,7 +127,7 @@ function FooterColumn({
                 {title}
             </p>
 
-            <nav className="mt-5 flex flex-col gap-3 text-sm text-white/68">
+            <nav aria-label={title} className="mt-5 flex flex-col gap-3 text-sm text-white/68">
                 {children}
             </nav>
         </section>
@@ -118,7 +144,7 @@ function FooterLink({
     return (
         <Link
             href={href}
-            className="transition hover:translate-x-1 hover:text-[var(--luxury-gold)]"
+            className="-my-2.5 py-2.5 transition hover:translate-x-1 hover:text-[var(--luxury-gold)]"
         >
             {children}
         </Link>

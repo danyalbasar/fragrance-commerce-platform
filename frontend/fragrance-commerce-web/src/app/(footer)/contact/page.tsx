@@ -57,13 +57,13 @@ export default function ContactPage() {
 
     return (
         <main className="min-h-screen bg-[var(--luxury-ivory)] px-6 py-14 text-[var(--luxury-ink)] md:px-10 md:py-20">
-            <section className="mx-auto grid max-w-6xl items-start gap-12 lg:grid-cols-[0.85fr_1.15fr]">
+            <section className="mx-auto grid max-w-6xl items-start gap-16 lg:grid-cols-[0.85fr_1.15fr]">
                 <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold)]">
+                    <p className="font-normal uppercase tracking-[0.24em] text-[var(--luxury-gold-strong)]">
                         Contact
                     </p>
 
-                    <h1 className="mt-4 text-5xl font-normal leading-tight [font-family:var(--font-serif)] md:text-7xl">
+                    <h1 className="mt-5 text-5xl font-normal leading-[1.1] [font-family:var(--font-serif)] md:text-7xl">
                         Contact us
                     </h1>
 
@@ -71,29 +71,29 @@ export default function ContactPage() {
                         Reach out for help with orders, product selection, account questions, or delivery support.
                     </p>
 
-                    <div className="mt-10 grid gap-4">
+                    <div className="mt-12 grid gap-5">
                         <ContactDetail
-                            icon={<Mail size={19} />}
+                            icon={<Mail size={20} />}
                             label="Email"
                             value="care@fragrancehouse.test"
                         />
                         <ContactDetail
-                            icon={<Phone size={19} />}
+                            icon={<Phone size={20} />}
                             label="Phone"
                             value="+91 98765 43210"
                         />
                         <ContactDetail
-                            icon={<MapPin size={19} />}
+                            icon={<MapPin size={20} />}
                             label="Studio"
                             value="Bandra West, Mumbai, Maharashtra"
                         />
                     </div>
 
-                    <div className="mt-10 border-t border-[#d8c8ad] pt-8">
-                        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[var(--luxury-gold)]">
+                    <div className="mt-12 border-t border-[#d8c8ad] pt-8">
+                        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--luxury-gold-strong)]">
                             Response Time
                         </p>
-                        <p className="mt-3 text-sm leading-7 text-[var(--luxury-muted)]">
+                        <p className="mt-3 text-base leading-7 text-[var(--luxury-muted)]">
                             Most messages are reviewed within one business day. Include your order number if your message is about a purchase.
                         </p>
                     </div>
@@ -101,6 +101,7 @@ export default function ContactPage() {
 
                 <form
                     onSubmit={handleSubmit}
+                    aria-busy={submitting}
                     className="self-start border border-[#d8c8ad] bg-[var(--luxury-paper)] p-6 shadow-[0_22px_70px_rgba(22,18,13,0.08)] md:p-8"
                 >
                     <div className="grid gap-5 md:grid-cols-2">
@@ -109,6 +110,7 @@ export default function ContactPage() {
                                 id="fullName"
                                 required
                                 maxLength={150}
+                                autoComplete="name"
                                 value={form.fullName}
                                 onChange={(event) =>
                                     updateField("fullName", event.target.value)
@@ -123,6 +125,7 @@ export default function ContactPage() {
                                 type="email"
                                 required
                                 maxLength={255}
+                                autoComplete="email"
                                 value={form.email}
                                 onChange={(event) =>
                                     updateField("email", event.target.value)
@@ -134,7 +137,9 @@ export default function ContactPage() {
                         <Field label="Phone" htmlFor="phoneNumber">
                             <input
                                 id="phoneNumber"
+                                type="tel"
                                 maxLength={30}
+                                autoComplete="tel"
                                 value={form.phoneNumber}
                                 onChange={(event) =>
                                     updateField("phoneNumber", event.target.value)
@@ -172,13 +177,13 @@ export default function ContactPage() {
                     </Field>
 
                     {status === "success" && (
-                        <p className="mt-5 border border-[#d7ad62] bg-[#fff6e4] px-4 py-3 text-sm text-[#8a5a12]">
+                        <p role="status" className="mt-5 border border-[#d7ad62] bg-[#fff6e4] px-4 py-3 text-sm text-[#8a5a12]">
                             Your message has been sent. We will get back to you soon.
                         </p>
                     )}
 
                     {status === "error" && (
-                        <p className="mt-5 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                        <p role="alert" className="mt-5 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                             We could not send your message. Please try again.
                         </p>
                     )}
@@ -186,7 +191,7 @@ export default function ContactPage() {
                     <button
                         type="submit"
                         disabled={submitting}
-                        className="mt-6 h-12 w-full bg-[var(--luxury-ink)] text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-paper)] transition hover:bg-[var(--luxury-moss)] disabled:cursor-not-allowed disabled:bg-[#b9afa0]"
+                        className="mt-6 h-12 w-full bg-[var(--luxury-ink)] text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-paper)] transition hover:bg-[var(--luxury-moss)] disabled:cursor-not-allowed disabled:bg-[var(--luxury-muted-strong)]"
                     >
                         {submitting ? "Sending..." : "Submit"}
                     </button>

@@ -21,7 +21,12 @@ export default function ProtectedRoute({
     }, [authReady, isLoggedIn, router]);
 
     if (!authReady || !isLoggedIn) {
-        return null;
+        return (
+            <main
+                aria-hidden="true"
+                className="min-h-screen bg-[var(--luxury-ivory)]"
+            />
+        );
     }
 
     return <>{children}</>;

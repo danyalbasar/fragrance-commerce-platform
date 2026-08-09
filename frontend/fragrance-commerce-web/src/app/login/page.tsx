@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 export default function LoginPage() {
     const { loginUser } = useAuth();
 
-    const [email, setEmail] = useState("customer@test.com");
+    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -34,6 +34,8 @@ export default function LoginPage() {
 
     return (
         <main className="relative flex min-h-[calc(100svh-65px)] items-start justify-center overflow-hidden bg-[var(--luxury-ivory)] p-4 pt-8 text-[var(--luxury-ink)] sm:p-6 sm:pt-10 lg:min-h-screen lg:items-center lg:pt-6">
+            <h1 className="sr-only lg:hidden">Login</h1>
+
             <div className="absolute inset-x-0 top-0 h-24 bg-[linear-gradient(180deg,#efe3d0,rgba(239,227,208,0))] sm:h-48" />
 
             <section className="relative grid w-full max-w-5xl overflow-hidden border border-[#d8c8ad] bg-[var(--luxury-paper)] shadow-[0_24px_70px_rgba(22,18,13,0.12)] lg:grid-cols-[0.9fr_1fr]">
@@ -57,7 +59,7 @@ export default function LoginPage() {
                     onSubmit={handleSubmit}
                     className="w-full p-5 sm:p-8 md:p-10"
                 >
-                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--luxury-gold)] sm:tracking-[0.34em]">
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--luxury-gold-strong)] sm:tracking-[0.34em]">
                         Account Sign In
                     </p>
 
@@ -70,29 +72,36 @@ export default function LoginPage() {
                     </p>
 
                     {error && (
-                        <p className="mt-5 border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                        <p role="alert" className="mt-5 border border-red-200 bg-red-50 p-3 text-sm text-red-700">
                             {error}
                         </p>
                     )}
 
                     <div className="mt-7">
-                        <label className="text-sm font-semibold uppercase tracking-[0.1em] sm:tracking-[0.14em]">
+                        <label htmlFor="login-email" className="text-sm font-semibold uppercase tracking-[0.1em] sm:tracking-[0.14em]">
                             Email
                         </label>
                         <input
+                            id="login-email"
+                            type="email"
+                            name="email"
+                            autoComplete="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             className="mt-2 w-full border border-[#d8c8ad] bg-[#fffaf2] px-4 py-3 outline-none transition focus:border-[var(--luxury-gold)]"
-                            placeholder="customer@test.com"
+                            placeholder="you@example.com"
                         />
                     </div>
 
                     <div className="mt-5">
-                        <label className="text-sm font-semibold uppercase tracking-[0.1em] sm:tracking-[0.14em]">
+                        <label htmlFor="login-password" className="text-sm font-semibold uppercase tracking-[0.1em] sm:tracking-[0.14em]">
                             Password
                         </label>
                         <input
+                            id="login-password"
                             type="password"
+                            name="password"
+                            autoComplete="current-password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             className="mt-2 w-full border border-[#d8c8ad] bg-[#fffaf2] px-4 py-3 outline-none transition focus:border-[var(--luxury-gold)]"
@@ -102,7 +111,7 @@ export default function LoginPage() {
 
                     <button
                         disabled={isLoggingIn}
-                        className="mt-7 w-full rounded-full bg-[var(--luxury-ink)] px-4 py-3 text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-paper)] transition hover:bg-[var(--luxury-moss)] disabled:bg-gray-400 sm:tracking-[0.14em]"
+                        className="mt-7 w-full rounded-full bg-[var(--luxury-ink)] px-4 py-3 text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-paper)] transition hover:bg-[var(--luxury-moss)] disabled:bg-[var(--luxury-muted-strong)] sm:tracking-[0.14em]"
                     >
                         {isLoggingIn ? "Logging in..." : "Login"}
                     </button>

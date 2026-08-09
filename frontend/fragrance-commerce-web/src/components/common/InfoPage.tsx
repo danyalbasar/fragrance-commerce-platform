@@ -23,11 +23,11 @@ export default function InfoPage({
     return (
         <main className="min-h-screen bg-[var(--luxury-ivory)] px-6 py-14 text-[var(--luxury-ink)] md:px-10 md:py-20">
             <section className="mx-auto max-w-5xl">
-                <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold)]">
+                <p className="font-normal uppercase tracking-[0.24em] text-[var(--luxury-gold-strong)]">
                     {eyebrow}
                 </p>
 
-                <h1 className="mt-4 max-w-4xl text-5xl font-normal leading-tight [font-family:var(--font-serif)] md:text-7xl">
+                <h1 className="mt-5 max-w-4xl text-5xl font-normal leading-[1.1] [font-family:var(--font-serif)] md:text-7xl">
                     {title}
                 </h1>
 
@@ -35,17 +35,17 @@ export default function InfoPage({
                     {intro}
                 </p>
 
-                <div className="mt-12 border-t border-[#d8c8ad]">
+                <div className="mt-14 border-t border-[#d8c8ad]">
                     {sections.map((section) => (
                         <section
                             key={section.title}
-                            className="grid gap-4 border-b border-[#d8c8ad] py-8 md:grid-cols-[0.38fr_1fr]"
+                            className="grid gap-6 py-12 md:grid-cols-[0.38fr_1fr] md:gap-10"
                         >
                             <h2 className="text-2xl font-normal [font-family:var(--font-serif)]">
                                 {section.title}
                             </h2>
 
-                            <p className="text-sm leading-7 text-[var(--luxury-muted)]">
+                            <p className="text-base leading-7 text-[var(--luxury-muted)]">
                                 {section.body}
                             </p>
                         </section>
@@ -53,16 +53,16 @@ export default function InfoPage({
                 </div>
 
                 {contactCta && (
-                    <div className="mt-10 bg-[var(--luxury-ink)] p-8 text-[var(--luxury-paper)]">
-                        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[var(--luxury-gold)]">
+                    <div className="mt-14 bg-[var(--luxury-ink)] p-10 text-[var(--luxury-paper)]">
+                        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--luxury-gold)]">
                             Need Help?
                         </p>
-                        <p className="mt-3 max-w-2xl text-sm leading-7 text-white/70">
+                        <p className="mt-4 max-w-2xl text-base leading-7 text-white/80">
                             For order support, product questions, or return help, send us a note and we will guide you through the next step.
                         </p>
                         <Link
                             href="/contact"
-                            className="mt-6 inline-flex bg-[var(--luxury-gold)] px-6 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--luxury-ink)] transition hover:bg-[#d1ab67]"
+                            className="mt-8 inline-flex bg-[var(--luxury-gold)] px-8 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--luxury-ink)] transition-all duration-300 hover:bg-[#d1ab67] hover:scale-[1.02] shadow-[0_12px_30px_rgba(22,18,13,0.12)]"
                         >
                             Contact Us
                         </Link>

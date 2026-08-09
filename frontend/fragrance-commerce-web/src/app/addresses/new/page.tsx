@@ -18,12 +18,14 @@ export default function NewAddressPage() {
     const [country, setCountry] = useState("India");
     const [isDefault, setIsDefault] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [error, setError] = useState("");
 
     async function handleSubmit(e: SyntheticEvent<HTMLFormElement>) {
         e.preventDefault();
 
         try {
             setSaving(true);
+            setError("");
 
             await createAddress({
                 fullName,
@@ -40,7 +42,7 @@ export default function NewAddressPage() {
             router.push("/checkout");
         } catch (error) {
             console.error(error);
-            alert("Failed to save address.");
+            setError("Failed to save address. Please try again.");
         } finally {
             setSaving(false);
         }
@@ -48,19 +50,32 @@ export default function NewAddressPage() {
 
     return (
         <ProtectedRoute>
-            <main className="mx-auto max-w-3xl p-8">
-                <h1 className="mb-8 text-4xl font-bold">Add Address</h1>
+            <main className="min-h-screen bg-[var(--luxury-ivory)] px-4 py-8 text-[var(--luxury-ink)] sm:px-6 sm:py-10">
+                <div className="mx-auto max-w-3xl">
+                <div className="mb-8 border-b border-[#d8c8ad] pb-6">
+                    <h1 className="text-4xl font-normal leading-[1.05] [font-family:var(--font-serif)] sm:text-5xl">
+                        Add Address
+                    </h1>
+                </div>
 
                 <form
                     onSubmit={handleSubmit}
-                    className="rounded-xl border bg-white p-6"
+                    className="rounded-[var(--luxury-radius)] border border-[var(--luxury-line)] bg-[var(--luxury-paper)] p-5 shadow-[var(--luxury-shadow-sm)] sm:p-6"
                 >
+                    {error && (
+                        <p role="alert" className="mb-4 border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                            {error}
+                        </p>
+                    )}
+
                     <div className="grid gap-4 md:grid-cols-2">
                         <input
                             value={fullName}
                             onChange={(e) => setFullName(e.target.value)}
                             placeholder="Full Name"
-                            className="rounded-lg border px-4 py-3"
+                            aria-label="Full name"
+                            autoComplete="name"
+                            className="border border-[#d8c8ad] bg-[var(--luxury-input)] px-4 py-3 outline-none focus:border-[var(--luxury-gold)]"
                             required
                         />
 
@@ -68,7 +83,10 @@ export default function NewAddressPage() {
                             value={phoneNumber}
                             onChange={(e) => setPhoneNumber(e.target.value)}
                             placeholder="Phone Number"
-                            className="rounded-lg border px-4 py-3"
+                            aria-label="Phone number"
+                            type="tel"
+                            autoComplete="tel"
+                            className="border border-[#d8c8ad] bg-[var(--luxury-input)] px-4 py-3 outline-none focus:border-[var(--luxury-gold)]"
                             required
                         />
 
@@ -76,7 +94,9 @@ export default function NewAddressPage() {
                             value={addressLine1}
                             onChange={(e) => setAddressLine1(e.target.value)}
                             placeholder="Address Line 1"
-                            className="rounded-lg border px-4 py-3 md:col-span-2"
+                            aria-label="Address line 1"
+                            autoComplete="address-line1"
+                            className="border border-[#d8c8ad] bg-[var(--luxury-input)] px-4 py-3 outline-none focus:border-[var(--luxury-gold)] md:col-span-2"
                             required
                         />
 
@@ -84,14 +104,18 @@ export default function NewAddressPage() {
                             value={addressLine2}
                             onChange={(e) => setAddressLine2(e.target.value)}
                             placeholder="Address Line 2"
-                            className="rounded-lg border px-4 py-3 md:col-span-2"
+                            aria-label="Address line 2"
+                            autoComplete="address-line2"
+                            className="border border-[#d8c8ad] bg-[var(--luxury-input)] px-4 py-3 outline-none focus:border-[var(--luxury-gold)] md:col-span-2"
                         />
 
                         <input
                             value={city}
                             onChange={(e) => setCity(e.target.value)}
                             placeholder="City"
-                            className="rounded-lg border px-4 py-3"
+                            aria-label="City"
+                            autoComplete="address-level2"
+                            className="border border-[#d8c8ad] bg-[var(--luxury-input)] px-4 py-3 outline-none focus:border-[var(--luxury-gold)]"
                             required
                         />
 
@@ -99,7 +123,9 @@ export default function NewAddressPage() {
                             value={state}
                             onChange={(e) => setState(e.target.value)}
                             placeholder="State"
-                            className="rounded-lg border px-4 py-3"
+                            aria-label="State"
+                            autoComplete="address-level1"
+                            className="border border-[#d8c8ad] bg-[var(--luxury-input)] px-4 py-3 outline-none focus:border-[var(--luxury-gold)]"
                             required
                         />
 
@@ -107,7 +133,9 @@ export default function NewAddressPage() {
                             value={postalCode}
                             onChange={(e) => setPostalCode(e.target.value)}
                             placeholder="Postal Code"
-                            className="rounded-lg border px-4 py-3"
+                            aria-label="Postal code"
+                            autoComplete="postal-code"
+                            className="border border-[#d8c8ad] bg-[var(--luxury-input)] px-4 py-3 outline-none focus:border-[var(--luxury-gold)]"
                             required
                         />
 
@@ -115,27 +143,31 @@ export default function NewAddressPage() {
                             value={country}
                             onChange={(e) => setCountry(e.target.value)}
                             placeholder="Country"
-                            className="rounded-lg border px-4 py-3"
+                            aria-label="Country"
+                            autoComplete="country-name"
+                            className="border border-[#d8c8ad] bg-[var(--luxury-input)] px-4 py-3 outline-none focus:border-[var(--luxury-gold)]"
                             required
                         />
                     </div>
 
-                    <label className="mt-4 flex items-center gap-2 text-sm">
+                    <label className="mt-4 flex cursor-pointer items-center gap-2 text-sm">
                         <input
                             type="checkbox"
                             checked={isDefault}
                             onChange={(e) => setIsDefault(e.target.checked)}
+                            className="cursor-pointer accent-[var(--luxury-gold)]"
                         />
                         Make this my default address
                     </label>
 
                     <button
                         disabled={saving}
-                        className="mt-6 w-full rounded-full bg-black py-3 font-semibold text-white hover:bg-neutral-800 disabled:bg-gray-400"
+                        className="mt-6 w-full cursor-pointer rounded-full bg-[var(--luxury-ink)] px-6 py-3 text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-paper)] shadow-[0_14px_30px_rgba(22,18,13,0.12)] transition hover:bg-[var(--luxury-moss)] disabled:cursor-not-allowed disabled:bg-[var(--luxury-muted-strong)] sm:tracking-[0.14em]"
                     >
                         {saving ? "Saving..." : "Save Address"}
                     </button>
                 </form>
+                </div>
             </main>
         </ProtectedRoute>
     );

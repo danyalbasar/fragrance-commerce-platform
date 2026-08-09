@@ -2,9 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
+import { AnimatePresence, motion } from "framer-motion";
+import { Suspense, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import {
+  Check,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -15,7 +18,9 @@ import {
   RotateCcw,
   ShieldCheck,
   Truck,
-  Star
+  Star,
+  Sparkles,
+  PackageX
 } from "lucide-react";
 import { productService } from "@/services/productService";
 import { addToCart } from "@/services/cartService";
@@ -25,10 +30,21 @@ import {
   getWishlist,
 } from "@/services/wishlistService";
 import type { Product } from "@/types/product";
-import ProductReviews from "@/components/products/ProductReviews";
 import ProductCard from "@/components/products/ProductCard";
+import { PageSkeleton } from "@/components/common/PageSkeleton";
+import { ProductReviewsSkeleton } from "@/components/common/ProductReviewsSkeleton";
+import { EmptyState } from "@/components/common/EmptyState";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { getProductReviews } from "@/services/reviewService";
+import { siteConfig } from "@/config/site";
 import type { Review } from "@/types/review";
+
+const ProductReviews = dynamic(
+  () => import("@/components/products/ProductReviews"),
+  {
+    loading: () => <ProductReviewsSkeleton />,
+  }
+);
 
 export default function ProductDetailsPage() {
   return (
@@ -46,11 +62,14 @@ function ProductDetailsContent() {
   const [selectedVariantId, setSelectedVariantId] = useState("");
   const [selectedImageUrl, setSelectedImageUrl] = useState("");
   const [quantity, setQuantity] = useState(1);
+  const [justAdded, setJustAdded] = useState(false);
+  const justAddedTimerRef = useRef<number | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [addingToCart, setAddingToCart] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [actionError, setActionError] = useState("");
 
   const [openSection, setOpenSection] = useState<string | null>("description");
 
@@ -170,6 +189,12 @@ function ProductDetailsContent() {
     selectedVariant.stockQuantity > 0 &&
     selectedVariant.stockQuantity <= 2;
 
+  const averageRating =
+    reviews.length === 0
+      ? 0
+      : reviews.reduce((sum, review) => sum + review.rating, 0) /
+        reviews.length;
+
   const galleryImages = useMemo(() => {
     if (!product) return [];
 
@@ -194,16 +219,26 @@ function ProductDetailsContent() {
   }
 
   async function handleAddToCart() {
-    if (!selectedVariant) return;
+    if (!selectedVariant || justAdded) return;
 
     try {
       setAddingToCart(true);
+      setActionError("");
 
       await addToCart(selectedVariant.id, quantity);
 
+      setJustAdded(true);
+      if (justAddedTimerRef.current) {
+        window.clearTimeout(justAddedTimerRef.current);
+      }
+      justAddedTimerRef.current = window.setTimeout(
+        () => setJustAdded(false),
+        1800
+      );
+
       window.dispatchEvent(new Event("cartUpdated"));
     } catch {
-      alert("Failed to add item to cart.");
+      setActionError("Failed to add item to cart.");
     } finally {
       setAddingToCart(false);
     }
@@ -214,6 +249,7 @@ function ProductDetailsContent() {
 
     try {
       setWishlistLoading(true);
+      setActionError("");
 
       if (isWishlisted) {
         await removeFromWishlist(product.id);
@@ -225,7 +261,7 @@ function ProductDetailsContent() {
 
       window.dispatchEvent(new Event("wishlistUpdated"));
     } catch {
-      alert("Please login to use wishlist.");
+      setActionError("Please login to use wishlist.");
     } finally {
       setWishlistLoading(false);
     }
@@ -281,24 +317,101 @@ function ProductDetailsContent() {
   }, [similarProducts.length, similarLoading, updateSimilarScrollControls]);
 
   if (loading) {
-    return <div className="p-8 text-xl">Loading product...</div>;
+    return <PageSkeleton />;
   }
 
   if (!product) {
-    return <div className="p-8 text-xl">Product not found.</div>;
+    return (
+      <main className="min-h-screen bg-[var(--luxury-ivory)] px-4 py-6 text-[var(--luxury-ink)] sm:py-8 md:px-8">
+        <div className="mx-auto max-w-[1600px]">
+          <EmptyState
+            icon={PackageX}
+            title="Product not found"
+            description="The fragrance you're looking for may have been removed from the collection."
+            actionLabel="Browse Collection"
+            actionHref="/products"
+          />
+        </div>
+      </main>
+    );
   }
 
   return (
     <main className="min-h-screen bg-[var(--luxury-ivory)] px-4 py-6 text-[var(--luxury-ink)] sm:py-8 md:px-8">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            {
+              "@type": "ListItem",
+              position: 1,
+              name: "Home",
+              item: `${siteConfig.url}/`,
+            },
+            {
+              "@type": "ListItem",
+              position: 2,
+              name: product.categoryName,
+              item: `${siteConfig.url}/products?category=${encodeURIComponent(product.categoryName)}`,
+            },
+            {
+              "@type": "ListItem",
+              position: 3,
+              name: product.name,
+              item: `${siteConfig.url}/products/${product.id}`,
+            },
+          ],
+        }}
+      />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: product.name,
+          image: galleryImages,
+          description: product.description,
+          brand: { "@type": "Brand", name: product.brandName },
+          category: product.categoryName,
+          sku: product.variants[0]?.sku,
+          offers: {
+            "@type": "Offer",
+            url: `${siteConfig.url}/products/${product.id}`,
+            priceCurrency: "INR",
+            price:
+              product.variants.length > 0
+                ? Math.min(
+                    ...product.variants.map((variant) => variant.sellingPrice)
+                  )
+                : 0,
+            availability: product.variants.some(
+              (variant) => variant.stockQuantity > 0
+            )
+              ? "https://schema.org/InStock"
+              : "https://schema.org/OutOfStock",
+            itemCondition: "https://schema.org/NewCondition",
+          },
+          ...(reviews.length > 0
+            ? {
+                aggregateRating: {
+                  "@type": "AggregateRating",
+                  ratingValue: averageRating.toFixed(1),
+                  reviewCount: reviews.length,
+                },
+              }
+            : {}),
+        }}
+      />
+
       <div className="mx-auto max-w-[1600px]">
         <div className="mb-6 text-xs uppercase tracking-[0.12em] text-[var(--luxury-muted)] sm:mb-8 sm:text-sm sm:tracking-[0.18em]">
-          <Link href="/" className="hover:text-[var(--luxury-ink)]">
+          <Link href="/" className="-my-3 py-3 hover:text-[var(--luxury-ink)]">
             Home
           </Link>{" "}
           /{" "}
           <Link
             href={`/products?category=${product.categoryName}`}
-            className="hover:text-[var(--luxury-ink)]"
+            className="-my-3 py-3 hover:text-[var(--luxury-ink)]"
           >
             {product.categoryName}
           </Link>{" "}
@@ -308,20 +421,23 @@ function ProductDetailsContent() {
         <div className="grid items-start gap-8 lg:grid-cols-[50%_1fr] lg:gap-12 xl:gap-16">
           <section className="grid items-start gap-4 md:sticky md:top-28 md:grid-cols-[90px_1fr] md:gap-5">
             <div className="order-2 flex gap-3 overflow-x-auto md:order-1 md:flex-col md:overflow-visible">
-              {galleryImages.map((imageUrl) => (
+              {galleryImages.map((imageUrl, index) => (
                 <button
                   key={imageUrl}
                   onClick={() => setSelectedImageUrl(imageUrl)}
-                  className={`relative h-20 w-20 shrink-0 overflow-hidden border bg-[#efe3d0] transition sm:h-24 sm:w-24 ${selectedImageUrl === imageUrl
-                    ? "border-[var(--luxury-gold)]"
-                    : "border-[#d8c8ad] hover:border-[var(--luxury-gold)]"
+                  aria-pressed={selectedImageUrl === imageUrl}
+                  aria-label={`View image ${index + 1} of ${galleryImages.length}`}
+                  className={`relative h-20 w-20 shrink-0 overflow-hidden border bg-[#efe3d0] transition-all duration-200 active:scale-95 sm:h-24 sm:w-24 ${selectedImageUrl === imageUrl
+                    ? "border-[var(--luxury-gold)] shadow-[0_10px_24px_rgba(215,173,98,0.28)]"
+                    : "border-[#d8c8ad] opacity-70 hover:border-[var(--luxury-gold)] hover:opacity-100"
                     }`}
                 >
                   <Image
                     src={imageUrl}
-                    alt={product.name}
+                    alt=""
                     fill
-                    className="object-cover"
+                    sizes="96px"
+                    className="object-cover transition-transform duration-200 hover:scale-105"
                   />
                 </button>
               ))}
@@ -329,36 +445,56 @@ function ProductDetailsContent() {
 
             <div className="order-1 self-start overflow-hidden border border-[#d8c8ad] bg-[#efe3d0] shadow-[0_24px_70px_rgba(22,18,13,0.12)] md:order-2">
               <div className="relative h-[360px] sm:h-[480px] md:h-[580px]">
-                {selectedImageUrl && (
-                  <Image
-                    src={selectedImageUrl}
-                    alt={product.name}
-                    fill
-                    priority
-                    className="object-cover"
-                  />
-                )}
+                <AnimatePresence initial={false}>
+                  {selectedImageUrl && (
+                    <motion.div
+                      key={selectedImageUrl}
+                      initial={{ opacity: 0, scale: 1.015 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                      className="absolute inset-0"
+                    >
+                      <Image
+                        src={selectedImageUrl}
+                        alt={product.name}
+                        fill
+                        priority
+                        className="object-cover"
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
           </section>
 
           <section className="lg:pt-4">
             <div className="flex items-center justify-between gap-4">
-              <p className="text-xs uppercase tracking-[0.2em] text-[var(--luxury-gold)] sm:text-sm sm:tracking-[0.34em]">
+              <p className="text-xs uppercase tracking-[0.2em] text-[var(--luxury-gold-strong)] sm:text-sm sm:tracking-[0.34em]">
                 {product.brandName}
               </p>
 
               <button
                 onClick={handleWishlistClick}
                 disabled={wishlistLoading}
-                className="cursor-pointer p-1 transition hover:scale-110 hover:text-[var(--luxury-gold)] disabled:opacity-50"
-                aria-label="Wishlist"
+                className="cursor-pointer p-2.5 transition-all duration-200 hover:scale-110 hover:text-[var(--luxury-gold)] active:scale-90 disabled:opacity-50"
+                aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+                aria-pressed={isWishlisted}
               >
-                <Heart
-                  size={22}
-                  fill={isWishlisted ? "var(--luxury-gold)" : "none"}
-                  className={isWishlisted ? "text-[var(--luxury-gold)]" : "text-current"}
-                />
+                <motion.span
+                  key={String(isWishlisted)}
+                  initial={{ scale: 0.75 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+                  className="block"
+                >
+                  <Heart
+                    size={22}
+                    fill={isWishlisted ? "var(--luxury-gold)" : "none"}
+                    className={isWishlisted ? "text-[var(--luxury-gold)]" : "text-current"}
+                  />
+                </motion.span>
               </button>
             </div>
 
@@ -372,39 +508,36 @@ function ProductDetailsContent() {
                   .getElementById("reviews")
                   ?.scrollIntoView({ behavior: "smooth" })
               }
-              className="mt-3 flex cursor-pointer flex-wrap items-center gap-3 text-sm"
+              className="mt-3 flex cursor-pointer flex-wrap items-center gap-3 py-2.5 text-sm transition-all duration-200 hover:opacity-80 active:scale-[0.98]"
             >
               <span className="flex gap-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star
-                    key={star}
-                    size={20}
-                    className={
-                      star <=
-                        Math.round(
-                          reviews.length === 0
-                            ? 0
-                            : reviews.reduce(
-                              (sum, review) => sum + review.rating,
-                              0
-                            ) / reviews.length
-                        )
-                        ? "fill-[var(--luxury-gold)] text-[var(--luxury-gold)]"
-                        : "text-[#d8c8ad]"
-                    }
-                  />
-                ))}
+                {[1, 2, 3, 4, 5].map((star) => {
+                  const fillPercent = Math.max(
+                    0,
+                    Math.min(1, averageRating - (star - 1))
+                  );
+
+                  return (
+                    <span key={star} className="relative block h-5 w-5">
+                      <Star size={20} className="text-[#d8c8ad]" />
+                      {fillPercent > 0 && (
+                        <span
+                          className="absolute inset-y-0 left-0 overflow-hidden"
+                          style={{ width: `${fillPercent * 100}%` }}
+                        >
+                          <Star
+                            size={20}
+                            className="fill-[var(--luxury-gold)] text-[var(--luxury-gold)]"
+                          />
+                        </span>
+                      )}
+                    </span>
+                  );
+                })}
               </span>
 
               <span className="font-semibold">
-                {reviews.length === 0
-                  ? "0.0"
-                  : (
-                    reviews.reduce(
-                      (sum, review) => sum + review.rating,
-                      0
-                    ) / reviews.length
-                  ).toFixed(1)}
+                {averageRating.toFixed(1)}
               </span>
 
               <span className="text-[var(--luxury-muted)] underline">
@@ -417,9 +550,31 @@ function ProductDetailsContent() {
             </p>
 
             <div className="mt-6">
-              <p className="text-2xl font-semibold sm:text-3xl">
-                {formatPrice(selectedVariant?.sellingPrice)}
-              </p>
+              <div className="flex flex-wrap items-center gap-3">
+                <p className="text-2xl font-semibold [font-family:var(--font-serif)] sm:text-3xl">
+                  {formatPrice(selectedVariant?.sellingPrice)}
+                </p>
+
+                {selectedVariant &&
+                  selectedVariant.mrp > selectedVariant.sellingPrice && (
+                    <>
+                      <p className="text-base text-[var(--luxury-muted)] line-through">
+                        {formatPrice(selectedVariant.mrp)}
+                      </p>
+
+                      <span className="rounded-full bg-[var(--luxury-gold-strong)] px-2.5 py-1 text-xs font-semibold text-[var(--luxury-paper)]">
+                        Save{" "}
+                        {Math.round(
+                          ((selectedVariant.mrp -
+                            selectedVariant.sellingPrice) /
+                            selectedVariant.mrp) *
+                            100
+                        )}
+                        %
+                      </span>
+                    </>
+                  )}
+              </div>
 
               <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
                 {selectedVariant && (
@@ -460,19 +615,37 @@ function ProductDetailsContent() {
 
                       setQuantity(1);
                     }}
-                    className={`rounded-full border px-4 py-2 text-sm font-semibold transition sm:px-5 ${selectedVariantId === variant.id
-                      ? "border-[var(--luxury-ink)] bg-[var(--luxury-ink)] text-[var(--luxury-paper)]"
+                    disabled={variant.stockQuantity <= 0}
+                    aria-pressed={selectedVariantId === variant.id}
+                    className={`rounded-full border px-4 py-2 text-sm font-semibold transition-all duration-200 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-[#d8c8ad] sm:px-5 ${selectedVariantId === variant.id
+                      ? "border-[var(--luxury-ink)] bg-[var(--luxury-ink)] text-[var(--luxury-paper)] shadow-[0_10px_22px_rgba(22,18,13,0.18)]"
                       : "border-[#d8c8ad] bg-[var(--luxury-paper)] hover:border-[var(--luxury-gold)]"
                       }`}
                   >
-                    {variant.variantName}
+                    <span className="flex flex-col items-center gap-0.5">
+                      <span>{variant.variantName}</span>
+                      {variant.stockQuantity <= 0 ? (
+                        <span className="text-[11px] font-medium uppercase tracking-[0.1em] text-[var(--luxury-muted)]">
+                          Out of stock
+                        </span>
+                      ) : (
+                        <span
+                          className={`text-[11px] font-medium ${selectedVariantId === variant.id
+                            ? "text-[var(--luxury-paper)]/80"
+                            : "text-[var(--luxury-muted)]"
+                            }`}
+                        >
+                          {formatPrice(variant.sellingPrice)}
+                        </span>
+                      )}
+                    </span>
                   </button>
                 ))}
               </div>
             </div>
 
             <div className="mt-6 flex gap-3">
-              <div className="flex h-11 w-28 items-center justify-between rounded-full border border-[#d8c8ad] bg-[var(--luxury-paper)] px-3">
+              <div className="flex h-11 w-32 items-center justify-between rounded-full border border-[#d8c8ad] bg-[var(--luxury-paper)] px-3 transition-colors duration-200 hover:border-[var(--luxury-gold)]">
                 <button
                   onClick={() =>
                     setQuantity((value) =>
@@ -480,12 +653,21 @@ function ProductDetailsContent() {
                     )
                   }
                   disabled={quantity <= 1}
-                  className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
+                  className="flex h-full w-10 cursor-pointer items-center justify-center transition-all duration-200 hover:scale-110 hover:text-[var(--luxury-gold)] active:scale-90 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100 disabled:hover:text-current"
+                  aria-label="Decrease quantity"
                 >
                   <Minus size={18} />
                 </button>
 
-                <span className="font-semibold">{quantity}</span>
+                <motion.span
+                  key={quantity}
+                  initial={{ opacity: 0.5, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.15, ease: [0.22, 1, 0.36, 1] }}
+                  className="w-4 text-center font-semibold tabular-nums"
+                >
+                  {quantity}
+                </motion.span>
 
                 <button
                   onClick={() =>
@@ -497,7 +679,8 @@ function ProductDetailsContent() {
                       selectedVariant.stockQuantity
                       : true
                   }
-                  className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
+                  className="flex h-full w-10 cursor-pointer items-center justify-center transition-all duration-200 hover:scale-110 hover:text-[var(--luxury-gold)] active:scale-90 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100 disabled:hover:text-current"
+                  aria-label="Increase quantity"
                 >
                   <Plus size={18} />
                 </button>
@@ -511,10 +694,39 @@ function ProductDetailsContent() {
                 !selectedVariant ||
                 selectedVariant.stockQuantity <= 0
               }
-              className="mt-6 h-12 w-full cursor-pointer rounded-full bg-[var(--luxury-ink)] px-4 text-sm font-semibold uppercase tracking-[0.12em] text-[var(--luxury-paper)] transition hover:bg-[var(--luxury-moss)] disabled:cursor-not-allowed disabled:bg-gray-300 sm:tracking-[0.18em]"
+              className={`mt-6 h-12 w-full cursor-pointer rounded-full px-4 text-sm font-semibold uppercase tracking-[0.12em] text-[var(--luxury-paper)] transition-all duration-200 hover:shadow-[0_16px_34px_rgba(22,18,13,0.18)] hover:scale-[1.01] active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-[var(--luxury-muted-strong)] disabled:hover:scale-100 disabled:hover:shadow-none sm:tracking-[0.18em] ${justAdded
+                ? "bg-[var(--luxury-moss)]"
+                : "bg-[var(--luxury-ink)] hover:bg-[var(--luxury-moss)]"
+                }`}
             >
-              {addingToCart ? "Adding..." : "Add to Cart"}
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.span
+                  key={justAdded ? "added" : addingToCart ? "adding" : "idle"}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.15, ease: [0.22, 1, 0.36, 1] }}
+                  className="flex items-center justify-center gap-2"
+                >
+                  {justAdded ? (
+                    <>
+                      <Check size={16} strokeWidth={2.5} />
+                      Added to Cart
+                    </>
+                  ) : addingToCart ? (
+                    "Adding..."
+                  ) : (
+                    "Add to Cart"
+                  )}
+                </motion.span>
+              </AnimatePresence>
             </button>
+
+            {actionError && (
+              <p role="alert" className="mt-4 border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                {actionError}
+              </p>
+            )}
 
             <div className="mt-6 grid gap-3 border border-[#d8c8ad] bg-[var(--luxury-paper)] p-5 text-sm text-[var(--luxury-muted)]">
               <div className="flex items-center gap-3">
@@ -605,7 +817,7 @@ function ProductDetailsContent() {
       <section className="mx-auto mt-12 max-w-[1800px] border-t border-[#d8c8ad] pt-10 sm:mt-16 sm:pt-12">
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--luxury-gold)] sm:tracking-[0.34em]">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--luxury-gold-strong)] sm:tracking-[0.34em]">
               You May Also Like
             </p>
             <h2 className="mt-3 text-3xl font-normal [font-family:var(--font-serif)] sm:text-4xl">
@@ -615,7 +827,7 @@ function ProductDetailsContent() {
 
           <Link
             href={`/products?category=${encodeURIComponent(product.categoryName)}`}
-            className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold)] hover:text-[var(--luxury-ink)]"
+            className="-my-2.5 py-2.5 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold-strong)] hover:text-[var(--luxury-ink)]"
           >
             View similar
           </Link>
@@ -631,7 +843,7 @@ function ProductDetailsContent() {
               <button
                 type="button"
                 onClick={() => scrollSimilarProducts("left")}
-                className="absolute left-4 top-36 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--luxury-paper)] text-[var(--luxury-ink)] shadow-[0_14px_30px_rgba(22,18,13,0.18)] transition md:hidden"
+                className="absolute left-4 top-36 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--luxury-paper)] text-[var(--luxury-ink)] shadow-[0_14px_30px_rgba(22,18,13,0.18)] transition-all duration-200 hover:scale-105 hover:text-[var(--luxury-gold)] active:scale-90 md:hidden"
                 aria-label="Scroll similar products left"
               >
                 <ChevronLeft size={24} />
@@ -657,7 +869,7 @@ function ProductDetailsContent() {
               <button
                 type="button"
                 onClick={() => scrollSimilarProducts("right")}
-                className="absolute right-4 top-36 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--luxury-paper)] text-[var(--luxury-ink)] shadow-[0_14px_30px_rgba(22,18,13,0.18)] transition md:hidden"
+                className="absolute right-4 top-36 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--luxury-paper)] text-[var(--luxury-ink)] shadow-[0_14px_30px_rgba(22,18,13,0.18)] transition-all duration-200 hover:scale-105 hover:text-[var(--luxury-gold)] active:scale-90 md:hidden"
                 aria-label="Scroll similar products right"
               >
                 <ChevronRight size={24} />
@@ -665,9 +877,13 @@ function ProductDetailsContent() {
             )}
           </div>
         ) : (
-          <div className="border border-[#d8c8ad] bg-[var(--luxury-paper)] p-8 text-sm leading-7 text-[var(--luxury-muted)]">
-            Similar products will appear here as the catalogue grows.
-          </div>
+          <EmptyState
+            icon={Sparkles}
+            title="More picks on the way"
+            description="Similar products will appear here as the catalogue grows."
+            actionLabel="Browse Collection"
+            actionHref="/products"
+          />
         )}
       </section>
     </main>
@@ -685,24 +901,43 @@ function Accordion({
   onClick: () => void;
   children: React.ReactNode;
 }) {
+  const contentId = useId();
+
   return (
     <div className="border-b border-[#d8c8ad]">
       <button
         onClick={onClick}
-        className="flex w-full cursor-pointer items-center justify-between gap-4 py-5 text-left text-sm font-semibold uppercase tracking-[0.12em] sm:tracking-[0.18em]"
+        aria-expanded={open}
+        aria-controls={contentId}
+        className="group flex w-full cursor-pointer items-center justify-between gap-4 py-5 text-left text-sm font-semibold uppercase tracking-[0.12em] transition-colors duration-200 hover:bg-[#f6ead2]/70 hover:text-[var(--luxury-gold)] sm:tracking-[0.18em]"
       >
         {title}
         <ChevronDown
           size={18}
-          className={`transition ${open ? "rotate-180" : ""}`}
+          className={`shrink-0 transition-all duration-200 ${open
+            ? "rotate-180 text-[var(--luxury-gold)]"
+            : "group-hover:translate-y-[1px]"
+            }`}
         />
       </button>
 
-      {open && (
-        <div className="pb-5 text-sm leading-7 text-[var(--luxury-muted)]">
-          {children}
-        </div>
-      )}
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            key="content"
+            id={contentId}
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="pb-5 text-sm leading-7 text-[var(--luxury-muted)]">
+              {children}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

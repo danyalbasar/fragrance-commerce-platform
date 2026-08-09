@@ -1,13 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useEffect, useState, type ReactNode } from "react";
+import Image from "next/image";
+import { Suspense, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
-import { SlidersHorizontal, X } from "lucide-react";
+import { SlidersHorizontal, X, SearchX } from "lucide-react";
 import ProductCard from "@/components/products/ProductCard";
+import { EmptyState } from "@/components/common/EmptyState";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { productService } from "@/services/productService";
 import { getBrands } from "@/services/brandService";
 import { getCategories } from "@/services/categoryService";
+import { siteConfig } from "@/config/site";
 import type { Product, ProductGender } from "@/types/product";
 import type { Brand } from "@/types/brand";
 import type { Category } from "@/types/category";
@@ -52,15 +57,13 @@ function ProductsContent() {
     const [loading, setLoading] = useState(true);
     const [showMobileFilters, setShowMobileFilters] = useState(false);
 
+    const mobileFiltersRef = useRef<HTMLElement>(null);
+    useFocusTrap(mobileFiltersRef, showMobileFilters, () => setShowMobileFilters(false));
+
     const selectedCategory = categories.find((c) => c.id === categoryId);
     const selectedBrand = brands.find((b) => b.id === brandId);
 
-    const fragranceCategories = ["Perfume", "Attar", "Customised Perfume"];
     const skincareCategories = ["Face Wash", "Fairness Cream", "Lens", "Nails"];
-
-    const isFragrance =
-        selectedCategory &&
-        fragranceCategories.includes(selectedCategory.name);
 
     const isSkincare =
         selectedCategory &&
@@ -73,25 +76,20 @@ function ProductsContent() {
     if (isSkincare) {
         heroTitle = "SKINCARE";
         breadcrumbTitle = "Skincare";
+    }
 
-        if (gender === "Women") {
-            heroImage = "/banners/skincare-women.jpg";
-        } else if (gender === "Unisex") {
-            heroImage = "/banners/skincare-unisex.jpg";
-        } else {
-            heroImage = "/banners/skincare-men.jpg";
-        }
+    if (isSkincare && gender === "Women") {
+        heroImage = "/banners/skincare-women.jpg";
+    } else if (isSkincare && gender === "Unisex") {
+        heroImage = "/banners/skincare-unisex.jpg";
+    } else if (isSkincare) {
+        heroImage = "/banners/skincare-men.jpg";
+    } else if (gender === "Women") {
+        heroImage = "/banners/fragrance-women.jpg";
+    } else if (gender === "Unisex") {
+        heroImage = "/banners/fragrance-unisex.jpg";
     } else {
-        heroTitle = "FRAGRANCE";
-        breadcrumbTitle = "Fragrance";
-
-        if (gender === "Women") {
-            heroImage = "/banners/fragrance-women.jpg";
-        } else if (gender === "Unisex") {
-            heroImage = "/banners/fragrance-unisex.jpg";
-        } else {
-            heroImage = "/banners/fragrance-men.jpg";
-        }
+        heroImage = "/banners/fragrance-men.jpg";
     }
 
     async function loadMasterData() {
@@ -131,38 +129,48 @@ function ProductsContent() {
     }
 
     useEffect(() => {
-        loadMasterData();
+        const timer = window.setTimeout(loadMasterData, 0);
+        return () => window.clearTimeout(timer);
     }, []);
 
     useEffect(() => {
-        setSearch(searchFromUrl);
-        setPageNumber(1);
+        const timer = window.setTimeout(() => {
+            setSearch(searchFromUrl);
+            setPageNumber(1);
 
-        if (genderFromUrl) {
-            setGender(genderFromUrl);
-        } else {
-            setGender(undefined);
-        }
-
-        if (categoryFromUrl && categories.length > 0) {
-            const matchedCategory = categories.find(
-                (category) =>
-                    category.name.toLowerCase() ===
-                    categoryFromUrl.toLowerCase()
-            );
-
-            if (matchedCategory) {
-                setCategoryId(matchedCategory.id);
+            if (genderFromUrl) {
+                setGender(genderFromUrl);
+            } else {
+                setGender(undefined);
             }
-        }
 
-        if (!categoryFromUrl) {
-            setCategoryId("");
-        }
+            if (categoryFromUrl && categories.length > 0) {
+                const matchedCategory = categories.find(
+                    (category) =>
+                        category.name.toLowerCase() ===
+                        categoryFromUrl.toLowerCase()
+                );
+
+                if (matchedCategory) {
+                    setCategoryId(matchedCategory.id);
+                }
+            }
+
+            if (!categoryFromUrl) {
+                setCategoryId("");
+            }
+        }, 0);
+
+        return () => window.clearTimeout(timer);
     }, [searchFromUrl, genderFromUrl, categoryFromUrl, categories]);
 
     useEffect(() => {
-        loadProducts();
+        const timer = window.setTimeout(
+            loadProducts,
+            minPrice !== "" || maxPrice !== "" ? 350 : 0
+        );
+
+        return () => window.clearTimeout(timer);
     }, [
         search,
         gender,
@@ -203,6 +211,7 @@ function ProductsContent() {
     }, [showMobileFilters]);
 
     function resetFilters() {
+        setSearch("");
         setGender(undefined);
         setBrandId("");
         setCategoryId("");
@@ -251,6 +260,7 @@ function ProductsContent() {
             <select
                 onChange={(e) => handleSort(e.target.value)}
                 value={sortValue}
+                aria-label="Sort products"
                 className={`h-11 w-full border border-[#d8c8ad] bg-[var(--luxury-paper)] px-3 text-sm uppercase tracking-[0.08em] outline-none hover:border-[var(--luxury-gold)] ${className}`}
             >
                 <option value="newest">Newest</option>
@@ -271,7 +281,7 @@ function ProductsContent() {
 
                     <button
                         onClick={resetFilters}
-                        className="cursor-pointer text-sm font-semibold uppercase tracking-[0.16em] text-[var(--luxury-gold)] hover:text-[var(--luxury-ink)]"
+                        className="-my-2.5 py-2.5 cursor-pointer text-sm font-semibold uppercase tracking-[0.16em] text-[var(--luxury-gold-strong)] hover:text-[var(--luxury-ink)]"
                     >
                         Remove all
                     </button>
@@ -284,7 +294,7 @@ function ProductsContent() {
                                 setGender(undefined);
                                 setPageNumber(1);
                             }}
-                            className="cursor-pointer rounded-full border border-[#d8c8ad] bg-[#f1e6d4] px-3 py-2 text-xs font-bold uppercase tracking-[0.08em]"
+                            className="cursor-pointer rounded-full border border-[#d8c8ad] bg-[#f1e6d4] px-3 py-2 text-xs font-bold uppercase tracking-[0.08em] transition-colors duration-200 hover:border-[var(--luxury-gold)] hover:text-[var(--luxury-gold)]"
                         >
                             Gender: {gender} ×
                         </button>
@@ -296,7 +306,7 @@ function ProductsContent() {
                                 setCategoryId("");
                                 setPageNumber(1);
                             }}
-                            className="cursor-pointer rounded-full border border-[#d8c8ad] bg-[#f1e6d4] px-3 py-2 text-xs font-bold uppercase tracking-[0.08em]"
+                            className="cursor-pointer rounded-full border border-[#d8c8ad] bg-[#f1e6d4] px-3 py-2 text-xs font-bold uppercase tracking-[0.08em] transition-colors duration-200 hover:border-[var(--luxury-gold)] hover:text-[var(--luxury-gold)]"
                         >
                             Category: {selectedCategory.name} ×
                         </button>
@@ -308,7 +318,7 @@ function ProductsContent() {
                                 setBrandId("");
                                 setPageNumber(1);
                             }}
-                            className="cursor-pointer rounded-full border border-[#d8c8ad] bg-[#f1e6d4] px-3 py-2 text-xs font-bold uppercase tracking-[0.08em]"
+                            className="cursor-pointer rounded-full border border-[#d8c8ad] bg-[#f1e6d4] px-3 py-2 text-xs font-bold uppercase tracking-[0.08em] transition-colors duration-200 hover:border-[var(--luxury-gold)] hover:text-[var(--luxury-gold)]"
                         >
                             Brand: {selectedBrand.name} ×
                         </button>
@@ -320,7 +330,7 @@ function ProductsContent() {
                         (item) => (
                             <label
                                 key={item}
-                                className="flex cursor-pointer items-center gap-3 py-2 text-sm"
+                                className="flex cursor-pointer items-center gap-3 py-2.5 text-sm"
                             >
                                 <input
                                     type="checkbox"
@@ -344,7 +354,7 @@ function ProductsContent() {
                     {categories.map((category) => (
                         <label
                             key={category.id}
-                            className="flex cursor-pointer items-center gap-3 py-2 text-sm"
+                            className="flex cursor-pointer items-center gap-3 py-2.5 text-sm"
                         >
                             <input
                                 type="checkbox"
@@ -369,7 +379,7 @@ function ProductsContent() {
                     {brands.map((brand) => (
                         <label
                             key={brand.id}
-                            className="flex cursor-pointer items-center gap-3 py-2 text-sm"
+                            className="flex cursor-pointer items-center gap-3 py-2.5 text-sm"
                         >
                             <input
                                 type="checkbox"
@@ -407,7 +417,8 @@ function ProductsContent() {
                             setMaxPrice(value);
                             setPageNumber(1);
                         }}
-                        className="w-full accent-[var(--luxury-gold)]"
+                        aria-label={`Maximum price: ₹${priceLimit}`}
+                        className="h-10 w-full cursor-pointer accent-[var(--luxury-gold)]"
                     />
 
                     <div className="mt-4 grid grid-cols-2 gap-3">
@@ -418,7 +429,9 @@ function ProductsContent() {
                                 setPageNumber(1);
                             }}
                             placeholder="Min"
-                            className="border border-[#d8c8ad] bg-[#fffaf2] px-3 py-2 text-sm outline-none focus:border-[var(--luxury-gold)]"
+                            aria-label="Minimum price"
+                            inputMode="numeric"
+                            className="border border-[#d8c8ad] bg-[#fffaf2] px-3 py-2.5 text-sm outline-none focus:border-[var(--luxury-gold)]"
                         />
 
                         <input
@@ -429,13 +442,15 @@ function ProductsContent() {
                                 setPageNumber(1);
                             }}
                             placeholder="Max"
-                            className="border border-[#d8c8ad] bg-[#fffaf2] px-3 py-2 text-sm outline-none focus:border-[var(--luxury-gold)]"
+                            aria-label="Maximum price"
+                            inputMode="numeric"
+                            className="border border-[#d8c8ad] bg-[#fffaf2] px-3 py-2.5 text-sm outline-none focus:border-[var(--luxury-gold)]"
                         />
                     </div>
                 </FilterSection>
 
                 <FilterSection title="Availability" count={inStockOnly ? 1 : 0}>
-                    <label className="flex cursor-pointer items-center gap-3 py-2 text-sm">
+                    <label className="flex cursor-pointer items-center gap-3 py-2.5 text-sm">
                         <input
                             type="checkbox"
                             checked={inStockOnly}
@@ -455,11 +470,57 @@ function ProductsContent() {
 
     return (
         <main className="min-h-screen bg-[var(--luxury-ivory)] text-[var(--luxury-ink)]">
+            <JsonLd
+                data={{
+                    "@context": "https://schema.org",
+                    "@type": "BreadcrumbList",
+                    itemListElement: [
+                        {
+                            "@type": "ListItem",
+                            position: 1,
+                            name: "Home",
+                            item: `${siteConfig.url}/`,
+                        },
+                        {
+                            "@type": "ListItem",
+                            position: 2,
+                            name: breadcrumbTitle,
+                            item: `${siteConfig.url}/products`,
+                        },
+                    ],
+                }}
+            />
+            <JsonLd
+                data={{
+                    "@context": "https://schema.org",
+                    "@type": "CollectionPage",
+                    name: `${breadcrumbTitle} Collection`,
+                    url: `${siteConfig.url}/products`,
+                    description:
+                        "Curated luxury perfumes, attars, custom blends and skincare at Fragrance Commerce.",
+                    hasPart: {
+                        "@type": "ItemList",
+                        itemListElement:
+                            products.length > 0
+                                ? products.map((product, index) => ({
+                                      "@type": "ListItem",
+                                      position: index + 1,
+                                      url: `${siteConfig.url}/products/${product.id}`,
+                                      name: product.name,
+                                  }))
+                                : undefined,
+                    },
+                }}
+            />
+
             <section className="relative h-[300px] overflow-hidden sm:h-[380px] md:h-[500px]">
-                <img
+                <Image
                     src={heroImage}
                     alt={heroTitle}
-                    className="h-full w-full object-cover object-top"
+                    fill
+                    priority
+                    sizes="100vw"
+                    className="object-cover object-top"
                 />
 
                 <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(22,18,13,0.78),rgba(22,18,13,0.28),rgba(22,18,13,0.04))]" />
@@ -482,14 +543,14 @@ function ProductsContent() {
                     <div className="mb-8 flex flex-col gap-5 border-b border-[#d8c8ad] pb-6 md:flex-row md:items-end md:justify-between">
                         <div>
                             <p className="text-xs uppercase tracking-[0.14em] text-[var(--luxury-muted)] sm:text-sm sm:tracking-[0.18em]">
-                                <Link href="/" className="hover:text-[var(--luxury-ink)]">
+                                <Link href="/" className="-my-3 py-3 hover:text-[var(--luxury-ink)]">
                                     Home
                                 </Link> {" "}
                                 /{" "}
                                 <span className="text-[var(--luxury-ink)]">{breadcrumbTitle}</span>
                             </p>
 
-                            <p className="mt-8 hidden text-sm uppercase tracking-[0.24em] text-[var(--luxury-gold)] md:block">
+                            <p className="mt-8 hidden text-sm uppercase tracking-[0.24em] text-[var(--luxury-gold-strong)] md:block">
                                 {totalCount} Products
                             </p>
                         </div>
@@ -507,19 +568,21 @@ function ProductsContent() {
                         <button
                             type="button"
                             onClick={() => setShowMobileFilters(true)}
-                            className="flex items-center gap-3 text-sm font-semibold tracking-[0.12em] text-[var(--luxury-ink)]"
+                            aria-haspopup="dialog"
+                            aria-expanded={showMobileFilters}
+                            className="-my-2.5 py-2.5 flex items-center gap-3 text-sm font-semibold tracking-[0.12em] text-[var(--luxury-ink)] transition-colors duration-200 hover:text-[var(--luxury-gold)]"
                         >
                             <SlidersHorizontal size={18} />
                             Filter and sort
                         </button>
 
-                        <span className="text-sm uppercase tracking-[0.18em] text-[var(--luxury-gold)]">
+                        <span className="text-sm uppercase tracking-[0.18em] text-[var(--luxury-gold-strong)]">
                             {totalCount} products
                         </span>
                     </div>
 
                     <div className="grid gap-8 lg:grid-cols-[250px_1fr]">
-                        <aside className="hidden h-fit border border-[#d8c8ad] bg-[var(--luxury-paper)] p-4 shadow-[0_18px_45px_rgba(22,18,13,0.06)] sm:p-5 lg:sticky lg:top-24 lg:block">
+                        <aside className="hidden h-fit rounded-[var(--luxury-radius)] border border-[var(--luxury-line)] bg-[var(--luxury-paper)] p-4 shadow-[var(--luxury-shadow-sm)] sm:p-5 lg:sticky lg:top-24 lg:block">
                             <div className="mb-5 flex items-center justify-between">
                                 <span className="text-2xl font-normal [font-family:var(--font-serif)]">
                                     Filter:
@@ -527,7 +590,7 @@ function ProductsContent() {
 
                                 <button
                                     onClick={resetFilters}
-                                    className="cursor-pointer text-sm font-semibold uppercase tracking-[0.16em] text-[var(--luxury-gold)] hover:text-[var(--luxury-ink)]"
+                                    className="-my-2.5 py-2.5 cursor-pointer text-sm font-semibold uppercase tracking-[0.16em] text-[var(--luxury-gold-strong)] hover:text-[var(--luxury-ink)]"
                                 >
                                     Remove all
                                 </button>
@@ -540,7 +603,7 @@ function ProductsContent() {
                                             setGender(undefined);
                                             setPageNumber(1);
                                         }}
-                                        className="cursor-pointer rounded-full border border-[#d8c8ad] bg-[#f1e6d4] px-3 py-2 text-xs font-bold uppercase tracking-[0.08em]"
+                                        className="cursor-pointer rounded-full border border-[#d8c8ad] bg-[#f1e6d4] px-3 py-2 text-xs font-bold uppercase tracking-[0.08em] transition-colors duration-200 hover:border-[var(--luxury-gold)] hover:text-[var(--luxury-gold)]"
                                     >
                                         Gender: {gender} ×
                                     </button>
@@ -552,7 +615,7 @@ function ProductsContent() {
                                             setCategoryId("");
                                             setPageNumber(1);
                                         }}
-                                        className="cursor-pointer rounded-full border border-[#d8c8ad] bg-[#f1e6d4] px-3 py-2 text-xs font-bold uppercase tracking-[0.08em]"
+                                        className="cursor-pointer rounded-full border border-[#d8c8ad] bg-[#f1e6d4] px-3 py-2 text-xs font-bold uppercase tracking-[0.08em] transition-colors duration-200 hover:border-[var(--luxury-gold)] hover:text-[var(--luxury-gold)]"
                                     >
                                         Category: {selectedCategory.name} ×
                                     </button>
@@ -564,7 +627,7 @@ function ProductsContent() {
                                             setBrandId("");
                                             setPageNumber(1);
                                         }}
-                                        className="cursor-pointer rounded-full border border-[#d8c8ad] bg-[#f1e6d4] px-3 py-2 text-xs font-bold uppercase tracking-[0.08em]"
+                                        className="cursor-pointer rounded-full border border-[#d8c8ad] bg-[#f1e6d4] px-3 py-2 text-xs font-bold uppercase tracking-[0.08em] transition-colors duration-200 hover:border-[var(--luxury-gold)] hover:text-[var(--luxury-gold)]"
                                     >
                                         Brand: {selectedBrand.name} ×
                                     </button>
@@ -576,7 +639,7 @@ function ProductsContent() {
                                     (item) => (
                                         <label
                                             key={item}
-                                            className="flex cursor-pointer items-center gap-3 py-2 text-sm"
+                                            className="flex cursor-pointer items-center gap-3 py-2.5 text-sm"
                                         >
                                             <input
                                                 type="checkbox"
@@ -605,7 +668,7 @@ function ProductsContent() {
                                 {categories.map((category) => (
                                     <label
                                         key={category.id}
-                                        className="flex cursor-pointer items-center gap-3 py-2 text-sm"
+                                        className="flex cursor-pointer items-center gap-3 py-2.5 text-sm"
                                     >
                                         <input
                                             type="checkbox"
@@ -621,14 +684,7 @@ function ProductsContent() {
                                             className="h-4 w-4 accent-[var(--luxury-gold)]"
                                         />
 
-                                        <span>
-                                            {category.name === "Face Wash" ||
-                                                category.name === "Fairness Cream" ||
-                                                category.name === "Lens" ||
-                                                category.name === "Nails"
-                                                ? category.name
-                                                : category.name}
-                                        </span>
+                                        <span>{category.name}</span>
                                     </label>
                                 ))}
                             </FilterSection>
@@ -637,7 +693,7 @@ function ProductsContent() {
                                 {brands.map((brand) => (
                                     <label
                                         key={brand.id}
-                                        className="flex cursor-pointer items-center gap-3 py-2 text-sm"
+                                        className="flex cursor-pointer items-center gap-3 py-2.5 text-sm"
                                     >
                                         <input
                                             type="checkbox"
@@ -677,7 +733,8 @@ function ProductsContent() {
                                         setMaxPrice(value);
                                         setPageNumber(1);
                                     }}
-                                    className="w-full accent-[var(--luxury-gold)]"
+                                    aria-label={`Maximum price: ₹${priceLimit}`}
+                                    className="h-10 w-full cursor-pointer accent-[var(--luxury-gold)]"
                                 />
 
                                 <div className="mt-4 grid grid-cols-2 gap-3">
@@ -688,7 +745,9 @@ function ProductsContent() {
                                             setPageNumber(1);
                                         }}
                                         placeholder="Min"
-                                        className="border border-[#d8c8ad] bg-[#fffaf2] px-3 py-2 text-sm outline-none focus:border-[var(--luxury-gold)]"
+                                        aria-label="Minimum price"
+                                        inputMode="numeric"
+                                        className="border border-[#d8c8ad] bg-[#fffaf2] px-3 py-2.5 text-sm outline-none focus:border-[var(--luxury-gold)]"
                                     />
 
                                     <input
@@ -701,7 +760,9 @@ function ProductsContent() {
                                             setPageNumber(1);
                                         }}
                                         placeholder="Max"
-                                        className="border border-[#d8c8ad] bg-[#fffaf2] px-3 py-2 text-sm outline-none focus:border-[var(--luxury-gold)]"
+                                        aria-label="Maximum price"
+                                        inputMode="numeric"
+                                        className="border border-[#d8c8ad] bg-[#fffaf2] px-3 py-2.5 text-sm outline-none focus:border-[var(--luxury-gold)]"
                                     />
                                 </div>
                             </FilterSection>
@@ -710,7 +771,7 @@ function ProductsContent() {
                                 title="Availability"
                                 count={inStockOnly ? 1 : 0}
                             >
-                                <label className="flex cursor-pointer items-center gap-3 py-2 text-sm">
+                                <label className="flex cursor-pointer items-center gap-3 py-2.5 text-sm">
                                     <input
                                         type="checkbox"
                                         checked={inStockOnly}
@@ -727,18 +788,43 @@ function ProductsContent() {
                         </aside>
 
                         <section>
-                            {loading ? (
-                                <p className="text-sm uppercase tracking-[0.24em] text-[var(--luxury-muted)]">Loading products...</p>
-                            ) : products.length === 0 ? (
-                                <div className="border border-[#d8c8ad] bg-[var(--luxury-paper)] p-10 text-center">
-                                    <h2 className="text-2xl font-normal [font-family:var(--font-serif)]">
-                                        No products found
-                                    </h2>
+                            <h2 className="sr-only">Products</h2>
 
-                                    <p className="mt-2 text-[var(--luxury-muted)]">
-                                        Try changing your filters.
-                                    </p>
+                            {loading ? (
+                                <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                                    {Array.from({ length: 6 }).map((_, i) => (
+                                        <div
+                                            key={i}
+                                            className="flex h-full flex-col overflow-hidden rounded-[var(--luxury-radius)] border border-[var(--luxury-line)] bg-[var(--luxury-paper)] shadow-[var(--luxury-shadow-sm)]"
+                                        >
+                                            <div className="relative aspect-square overflow-hidden bg-[var(--luxury-sand)]">
+                                                <div className="h-full w-full animate-pulse bg-gray-200" />
+                                            </div>
+
+                                            <div className="flex flex-1 flex-col p-4 sm:p-5">
+                                                <div className="h-3 w-16 animate-pulse rounded bg-gray-200" />
+
+                                                <div className="mt-2 h-6 w-40 animate-pulse rounded bg-gray-200" />
+
+                                                <div className="mt-2 h-4 w-32 animate-pulse rounded bg-gray-200" />
+
+                                                <div className="mt-3 h-4 w-full animate-pulse rounded bg-gray-200" />
+
+                                                <div className="mt-auto pt-5">
+                                                    <div className="h-6 w-24 animate-pulse rounded bg-gray-200" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
+                            ) : products.length === 0 ? (
+                                    <EmptyState
+                                        icon={SearchX}
+                                        title="No products found"
+                                        description="Try adjusting your filters or search terms to discover more of the collection."
+                                        actionLabel="Clear Filters"
+                                        onAction={resetFilters}
+                                    />
                             ) : (
                                 <>
                                     <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
@@ -751,13 +837,17 @@ function ProductsContent() {
                                     </div>
 
                                     {totalPages > 1 && (
-                                        <div className="mt-10 flex flex-wrap justify-center gap-2">
+                                        <nav
+                                            aria-label="Pagination"
+                                            className="mt-10 flex flex-wrap justify-center gap-2"
+                                        >
                                             <button
                                                 disabled={pageNumber === 1}
                                                 onClick={() =>
                                                     setPageNumber((p) => p - 1)
                                                 }
-                                                className="h-10 w-10 border border-[#d8c8ad] bg-[var(--luxury-paper)] disabled:opacity-40"
+                                                aria-label="Previous page"
+                                                className="h-10 w-10 border border-[#d8c8ad] bg-[var(--luxury-paper)] transition-colors duration-200 hover:border-[var(--luxury-gold)] hover:text-[var(--luxury-gold)] disabled:opacity-40"
                                             >
                                                 ‹
                                             </button>
@@ -771,10 +861,16 @@ function ProductsContent() {
                                                     onClick={() =>
                                                         setPageNumber(page)
                                                     }
+                                                    aria-label={`Go to page ${page}`}
+                                                    aria-current={
+                                                        pageNumber === page
+                                                            ? "page"
+                                                            : undefined
+                                                    }
                                                     className={
                                                         pageNumber === page
                                                             ? "h-10 w-10 bg-[var(--luxury-ink)] text-[var(--luxury-paper)]"
-                                                            : "h-10 w-10 border border-[#d8c8ad] bg-[var(--luxury-paper)]"
+                                                            : "h-10 w-10 border border-[#d8c8ad] bg-[var(--luxury-paper)] transition-colors duration-200 hover:border-[var(--luxury-gold)] hover:text-[var(--luxury-gold)]"
                                                     }
                                                 >
                                                     {page}
@@ -788,11 +884,12 @@ function ProductsContent() {
                                                 onClick={() =>
                                                     setPageNumber((p) => p + 1)
                                                 }
-                                                className="h-10 w-10 border border-[#d8c8ad] bg-[var(--luxury-paper)] disabled:opacity-40"
+                                                aria-label="Next page"
+                                                className="h-10 w-10 border border-[#d8c8ad] bg-[var(--luxury-paper)] transition-colors duration-200 hover:border-[var(--luxury-gold)] hover:text-[var(--luxury-gold)] disabled:opacity-40"
                                             >
                                                 ›
                                             </button>
-                                        </div>
+                                        </nav>
                                     )}
                                 </>
                             )}
@@ -810,7 +907,13 @@ function ProductsContent() {
                         className="absolute inset-0 bg-black/45"
                     />
 
-                    <aside className="absolute right-0 top-0 flex h-full w-[82vw] max-w-[390px] flex-col bg-[var(--luxury-paper)] text-[var(--luxury-ink)] shadow-[0_24px_70px_rgba(22,18,13,0.24)]">
+                    <aside
+                        ref={mobileFiltersRef}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="Filter and sort"
+                        className="absolute right-0 top-0 flex h-full w-[82vw] max-w-[390px] flex-col border-l border-[var(--luxury-line)] bg-[var(--luxury-paper)] text-[var(--luxury-ink)] shadow-[var(--luxury-shadow-lg)]"
+                    >
                         <div className="flex items-start justify-between border-b border-[#d8c8ad] px-6 py-5">
                             <div>
                                 <h2 className="text-base font-semibold tracking-[0.08em]">
@@ -846,7 +949,7 @@ function ProductsContent() {
                             <button
                                 type="button"
                                 onClick={() => setShowMobileFilters(false)}
-                                className="h-12 w-full rounded-full bg-[var(--luxury-ink)] text-sm font-semibold uppercase tracking-[0.14em] text-[var(--luxury-paper)]"
+                                className="h-12 w-full rounded-full bg-[var(--luxury-ink)] text-sm font-semibold uppercase tracking-[0.14em] text-[var(--luxury-paper)] shadow-[0_14px_30px_rgba(22,18,13,0.12)] transition hover:bg-[var(--luxury-moss)]"
                             >
                                 View products
                             </button>
@@ -868,22 +971,31 @@ function FilterSection({
     children: ReactNode;
 }) {
     const [open, setOpen] = useState(true);
+    const contentId = useId();
 
     return (
         <div className="border-t border-[#d8c8ad] py-5">
             <button
                 onClick={() => setOpen((value) => !value)}
-                className="flex w-full cursor-pointer items-center justify-between text-left"
+                aria-expanded={open}
+                aria-controls={contentId}
+                className="-my-2.5 py-2.5 flex w-full cursor-pointer items-center justify-between text-left transition-colors duration-200 hover:text-[var(--luxury-gold)]"
             >
                 <span className="text-sm font-semibold uppercase tracking-[0.18em]">
                     {title}
                     {count ? ` (${count})` : ""}
                 </span>
 
-                <span className="text-lg">{open ? "−" : "+"}</span>
+                <span className="text-lg" aria-hidden="true">
+                    {open ? "−" : "+"}
+                </span>
             </button>
 
-            {open && <div className="mt-4">{children}</div>}
+            {open && (
+                <div id={contentId} role="group" aria-label={title} className="mt-4">
+                    {children}
+                </div>
+            )}
         </div>
     );
 }

@@ -5,7 +5,6 @@ import Link from "next/link";
 import {
     BarChart3,
     Boxes,
-    CheckCircle2,
     ChevronUp,
     ClipboardList,
     PanelLeftClose,
@@ -16,9 +15,14 @@ import {
     Store,
     Truck,
     UserCircle,
+    TrendingUp,
 } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { getApiResponse } from "@/services/api";
+import { motion } from "framer-motion";
 import ProtectedRoute from "@/components/common/ProtectedRoute";
+import { VendorDashboardSkeleton } from "@/components/common/VendorDashboardSkeleton";
+import { EmptyState } from "@/components/common/EmptyState";
 import { getVendorOrders, updateOrderStatus } from "@/services/orderService";
 import { productService } from "@/services/productService";
 import {
@@ -29,8 +33,16 @@ import type { Order } from "@/types/order";
 import type { Product } from "@/types/product";
 import type { VendorDashboard } from "@/types/vendor";
 import { getStatusClasses } from "@/utils/orderStatus";
+import { readCache, writeCache } from "@/utils/swrCache";
 
 type VendorTab = "overview" | "products" | "orders" | "profile";
+
+const tabTitles: Record<VendorTab, string> = {
+    overview: "Overview",
+    products: "Products",
+    orders: "Orders",
+    profile: "Profile",
+};
 
 const orderStatuses = [
     "Pending",
@@ -42,10 +54,20 @@ const orderStatuses = [
 
 export default function VendorPage() {
     const [activeTab, setActiveTab] = useState<VendorTab>("products");
-    const [dashboard, setDashboard] = useState<VendorDashboard | null>(null);
-    const [products, setProducts] = useState<Product[]>([]);
-    const [orders, setOrders] = useState<Order[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [dashboard, setDashboard] = useState<VendorDashboard | null>(() =>
+        readCache<VendorDashboard>("vendor-dashboard")
+    );
+    const [products, setProducts] = useState<Product[]>(() =>
+        readCache<Product[]>("vendor-products") ?? []
+    );
+    const [orders, setOrders] = useState<Order[]>(() =>
+        readCache<Order[]>("vendor-orders") ?? []
+    );
+    const [loading, setLoading] = useState(
+        () =>
+            readCache<Product[]>("vendor-products") === null ||
+            readCache<VendorDashboard>("vendor-dashboard") === null
+    );
     const [needsProfile, setNeedsProfile] = useState(false);
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
@@ -144,25 +166,27 @@ export default function VendorPage() {
             setDashboard(dashboardData);
             setProducts(productData);
             setOrders(orderData);
+            writeCache("vendor-dashboard", dashboardData);
+            writeCache("vendor-products", productData);
+            writeCache("vendor-orders", orderData);
             setOrderStatusForms(
                 orderData.reduce<Record<string, string>>((forms, order) => {
                     forms[order.id] = order.status;
                     return forms;
                 }, {})
             );
-        } catch (err: any) {
+        } catch (err: unknown) {
+            const response = getApiResponse(err);
             const responseText =
-                typeof err?.response?.data === "string"
-                    ? err.response.data
-                    : "";
+                typeof response?.data === "string" ? response.data : "";
 
             if (
-                err?.response?.status === 400 &&
+                response?.status === 400 &&
                 responseText.toLowerCase().includes("vendor profile")
             ) {
                 setNeedsProfile(true);
                 setActiveTab("profile");
-            } else if (err?.response?.status === 401 || err?.response?.status === 403) {
+            } else if (response?.status === 401 || response?.status === 403) {
                 setError("Sign in with a vendor account to open Vendor Studio.");
             } else {
                 setError("Vendor Studio could not be loaded.");
@@ -173,7 +197,8 @@ export default function VendorPage() {
     }
 
     useEffect(() => {
-        loadVendorArea();
+        const timer = window.setTimeout(loadVendorArea, 0);
+        return () => window.clearTimeout(timer);
     }, []);
 
     function currency(value: number) {
@@ -213,10 +238,11 @@ export default function VendorPage() {
             await createVendor(profileForm);
             setNeedsProfile(false);
             setMessage("Vendor profile created. Log in again to refresh your vendor access.");
-        } catch (err: any) {
+        } catch (err: unknown) {
+            const response = getApiResponse(err);
             setError(
-                typeof err?.response?.data === "string"
-                    ? err.response.data
+                typeof response?.data === "string"
+                    ? response.data
                     : "Vendor profile could not be created."
             );
         }
@@ -230,21 +256,20 @@ export default function VendorPage() {
             await updateOrderStatus(orderId, status);
             setMessage("Order status updated.");
             await loadVendorArea();
-        } catch (err: any) {
+        } catch (err: unknown) {
+            const response = getApiResponse(err);
             setError(
-                typeof err?.response?.data === "string"
-                    ? err.response.data
+                typeof response?.data === "string"
+                    ? response.data
                     : "Order status could not be updated."
             );
         }
     }
 
-    if (loading) {
+    if (loading && products.length === 0) {
         return (
             <ProtectedRoute>
-                <main className="min-h-screen bg-[var(--luxury-ivory)] p-8 text-[var(--luxury-ink)]">
-                    Loading Vendor Studio...
-                </main>
+                <VendorDashboardSkeleton />
             </ProtectedRoute>
         );
     }
@@ -259,7 +284,7 @@ export default function VendorPage() {
                             : "grid min-h-screen lg:grid-cols-[270px_1fr]"
                     }
                 >
-                    <aside className="overflow-hidden border-b border-[#d8c8ad] bg-[var(--luxury-paper)] px-4 py-4 transition-all sm:px-5 sm:py-6 lg:border-b-0 lg:border-r">
+                    <aside className="min-w-0 overflow-hidden border-b border-[#d8c8ad] bg-[var(--luxury-paper)] px-4 py-4 transition-all sm:px-5 sm:py-6 lg:border-b-0 lg:border-r">
                         <div
                             className={
                                 sidebarCollapsed
@@ -269,12 +294,12 @@ export default function VendorPage() {
                         >
                             {!sidebarCollapsed && (
                                 <div className="min-w-0">
-                                    <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--luxury-gold)]">
+                                    <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--luxury-gold-strong)]">
                                         Vendor
                                     </p>
                                     <Link
                                         href="/vendor"
-                                        className="mt-2 block truncate text-2xl font-semibold tracking-[0.04em] [font-family:var(--font-serif)]"
+                                        className="-my-1 py-1 mt-2 block truncate text-2xl font-semibold tracking-[0.04em] [font-family:var(--font-serif)]"
                                     >
                                         Dashboard
                                     </Link>
@@ -309,6 +334,7 @@ export default function VendorPage() {
                                             }))
                                         }
                                         placeholder="Search"
+                                        aria-label="Search products"
                                         className="w-full bg-transparent outline-none"
                                     />
                                 </label>
@@ -325,10 +351,11 @@ export default function VendorPage() {
                                 <button
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
+                                    aria-current={activeTab === tab ? "page" : undefined}
                                     className={
                                         activeTab === tab
-                                            ? `flex shrink-0 items-center gap-2 border border-[var(--luxury-ink)] bg-[var(--luxury-ink)] px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-[var(--luxury-paper)] sm:gap-3 sm:px-4 sm:py-3 sm:text-sm sm:tracking-[0.12em] lg:w-full ${sidebarCollapsed ? "lg:justify-center" : ""}`
-                                            : `flex shrink-0 items-center gap-2 border border-[#d8c8ad] px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-[var(--luxury-muted)] transition hover:border-[#d8c8ad] hover:text-[var(--luxury-ink)] sm:gap-3 sm:px-4 sm:py-3 sm:text-sm sm:tracking-[0.12em] lg:w-full lg:border-transparent ${sidebarCollapsed ? "lg:justify-center" : ""}`
+                                            ? `flex shrink-0 items-center gap-2 border border-[var(--luxury-ink)] bg-[var(--luxury-ink)] px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-[var(--luxury-paper)] transition-all duration-200 active:scale-[0.97] sm:gap-3 sm:px-4 sm:py-3 sm:text-sm sm:tracking-[0.12em] lg:w-full ${sidebarCollapsed ? "lg:justify-center" : ""}`
+                                            : `flex shrink-0 items-center gap-2 border border-[#d8c8ad] px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-[var(--luxury-muted)] transition-all duration-200 hover:border-[#d8c8ad] hover:bg-[#f6ead2] hover:text-[var(--luxury-ink)] active:scale-[0.97] sm:gap-3 sm:px-4 sm:py-3 sm:text-sm sm:tracking-[0.12em] lg:w-full lg:border-transparent ${sidebarCollapsed ? "lg:justify-center" : ""}`
                                     }
                                     title={label}
                                 >
@@ -339,14 +366,14 @@ export default function VendorPage() {
                         </nav>
                     </aside>
 
-                    <section className="px-4 py-6 md:px-8 md:py-8">
+                    <section className="min-w-0 px-4 py-6 md:px-8 md:py-8">
                     <header className="mb-6 grid gap-5 border-b border-[#d8c8ad] pb-6 lg:grid-cols-[1fr_auto] lg:items-end">
                         <div>
-                            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--luxury-gold)] sm:tracking-[0.34em]">
+                            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--luxury-gold-strong)] sm:tracking-[0.34em]">
                                 Vendor Studio
                             </p>
                             <h1 className="mt-3 text-4xl font-normal [font-family:var(--font-serif)] sm:text-5xl">
-                                {activeTab === "products" ? "Products" : "House Operations"}
+                                {tabTitles[activeTab]}
                             </h1>
                         </div>
 
@@ -354,7 +381,7 @@ export default function VendorPage() {
                             <div className="flex flex-wrap gap-2">
                                 <Link
                                     href="/vendor/products/new"
-                                    className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[var(--luxury-ink)] px-5 text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-paper)] transition hover:bg-[var(--luxury-moss)] sm:w-auto sm:tracking-[0.14em]"
+                                    className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[var(--luxury-ink)] px-5 text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-paper)] transition-all duration-200 hover:bg-[var(--luxury-moss)] active:scale-[0.98] sm:w-auto sm:tracking-[0.14em]"
                                 >
                                     <PackagePlus size={16} />
                                     Add Product
@@ -382,7 +409,12 @@ export default function VendorPage() {
                             onSubmit={handleCreateVendor}
                         />
                     ) : (
-                        <>
+                        <motion.div
+                            key={activeTab}
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                        >
                             {activeTab === "overview" && dashboard && (
                                 <section className="space-y-8">
                                     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -428,9 +460,14 @@ export default function VendorPage() {
                                             </h2>
                                             <div className="mt-5 space-y-4">
                                                 {dashboard.topSellingProducts.length === 0 ? (
-                                                    <p className="text-sm text-[var(--luxury-muted)]">
-                                                        No delivered sales yet.
-                                                    </p>
+                                                    <EmptyState
+                                                        icon={TrendingUp}
+                                                        title="No sales yet"
+                                                        description="Delivered sales will appear here."
+                                                        actionLabel="View Orders"
+                                                        onAction={() => setActiveTab("orders")}
+                                                        compact
+                                                    />
                                                 ) : (
                                                     dashboard.topSellingProducts.map((product) => (
                                                         <div
@@ -557,13 +594,6 @@ export default function VendorPage() {
                                                 <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap lg:col-span-2 lg:justify-center">
                                                     <button
                                                         type="button"
-                                                        className="inline-flex h-12 min-w-0 items-center justify-center gap-2 rounded-full bg-[var(--luxury-ink)] px-6 text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-paper)] transition hover:bg-[var(--luxury-moss)] sm:min-w-44 sm:tracking-[0.14em]"
-                                                    >
-                                                        <Search size={18} />
-                                                        Search
-                                                    </button>
-                                                    <button
-                                                        type="button"
                                                         onClick={() =>
                                                             setProductSearch({
                                                                 name: "",
@@ -593,6 +623,18 @@ export default function VendorPage() {
                                             </p>
                                         </div>
 
+                                        {filteredProducts.length === 0 ? (
+                                            <div className="p-4 sm:p-6">
+                                                <EmptyState
+                                                    icon={Boxes}
+                                                    title="No products found"
+                                                    description="Try adjusting your search, or add your first product to the house."
+                                                    actionLabel="Add Product"
+                                                    actionHref="/vendor/products/new"
+                                                />
+                                            </div>
+                                        ) : (
+                                            <>
                                         <div className="grid gap-4 p-4 md:hidden">
                                             {filteredProducts.map((product) => (
                                                 <article
@@ -611,10 +653,10 @@ export default function VendorPage() {
                                                             )}
                                                         </div>
                                                         <div className="min-w-0">
-                                                            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--luxury-gold)]">
+                                                            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--luxury-gold-strong)]">
                                                                 {product.brandName}
                                                             </p>
-                                                            <h3 className="mt-1 text-xl font-normal leading-tight [font-family:var(--font-serif)]">
+                                                            <h3 className="mt-1 break-words text-xl font-normal leading-tight [font-family:var(--font-serif)]">
                                                                 {product.name}
                                                             </h3>
                                                             <p className="mt-2 text-sm text-[var(--luxury-muted)]">
@@ -653,7 +695,7 @@ export default function VendorPage() {
 
                                         <div className="hidden overflow-x-auto md:block">
                                             <table className="w-full min-w-[1040px] border-collapse text-left">
-                                                <thead className="border-b border-[#d8c8ad] bg-[#efe3d0] text-xs uppercase tracking-[0.18em] text-[var(--luxury-muted)]">
+                                                <thead className="border-b border-[#d8c8ad] bg-[#efe3d0] text-xs uppercase tracking-[0.18em] text-[var(--luxury-muted-strong)]">
                                                     <tr>
                                                         <th className="px-5 py-4 font-semibold">Picture</th>
                                                         <th className="px-5 py-4 font-semibold">Product Name</th>
@@ -711,6 +753,8 @@ export default function VendorPage() {
                                                 </tbody>
                                             </table>
                                         </div>
+                                            </>
+                                        )}
                                     </section>
                                 </section>
                             )}
@@ -718,11 +762,13 @@ export default function VendorPage() {
                             {activeTab === "orders" && (
                                 <section className="space-y-5">
                                     {orders.length === 0 ? (
-                                        <div className="border border-[#d8c8ad] bg-[var(--luxury-paper)] p-10 text-center">
-                                            <h2 className="text-2xl font-normal [font-family:var(--font-serif)]">
-                                                No vendor orders yet
-                                            </h2>
-                                        </div>
+                                        <EmptyState
+                                            icon={ClipboardList}
+                                            title="No vendor orders yet"
+                                            description="Orders will appear here once customers place them."
+                                            actionLabel="Add Products"
+                                            actionHref="/vendor/products/new"
+                                        />
                                     ) : (
                                         orders.map((order) => (
                                             <article
@@ -789,7 +835,7 @@ export default function VendorPage() {
                                     onSubmit={handleCreateVendor}
                                 />
                             )}
-                        </>
+                        </motion.div>
                     )}
                     </section>
                 </div>
@@ -857,7 +903,7 @@ function ProfilePanel({
             <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-full border border-[#d8c8ad] text-[var(--luxury-gold)]">
                 <Store size={24} />
             </div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold)] sm:tracking-[0.28em]">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold-strong)] sm:tracking-[0.28em]">
                 Vendor Profile
             </p>
             <h2 className="mt-3 text-3xl font-normal [font-family:var(--font-serif)] sm:text-4xl">

@@ -2,20 +2,25 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Heart, Menu, Minus, Plus, Search, ShoppingBag, Trash2, User, X } from "lucide-react";
+import { ChevronDown, Heart, Menu, Minus, Plus, Search, ShoppingBag, Trash2, User, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { AnimatePresence, motion } from "framer-motion";
 import { getCart, removeCartItem, updateCartItem } from "@/services/cartService";
 import { getWishlist } from "@/services/wishlistService";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import type { Cart } from "@/types/cart";
+import { EmptyState } from "@/components/common/EmptyState";
+
+const subscribeToMounted = () => () => {};
 
 export default function Navbar() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
-    const { isLoggedIn, logoutUser, initials, roles } = useAuth();
+    const { isLoggedIn, logoutUser, initials, email, roles } = useAuth();
 
     const [showSearch, setShowSearch] = useState(false);
     const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -33,12 +38,35 @@ export default function Navbar() {
     const [cart, setCart] = useState<Cart | null>(null);
     const [showCartPreview, setShowCartPreview] = useState(false);
     const [cartPreviewLoading, setCartPreviewLoading] = useState(false);
-    const [isMounted, setIsMounted] = useState(false);
+    const isMounted = useSyncExternalStore(
+        subscribeToMounted,
+        () => true,
+        () => false
+    );
+    const [scrolled, setScrolled] = useState(false);
 
     const searchPanelRef = useRef<HTMLDivElement>(null);
     const searchButtonRef = useRef<HTMLButtonElement>(null);
     const cartPreviewRef = useRef<HTMLElement>(null);
     const cartButtonRef = useRef<HTMLButtonElement>(null);
+    const mobileMenuRef = useRef<HTMLElement>(null);
+    const genderMenuRef = useRef<HTMLDivElement>(null);
+    const genderCloseTimer = useRef<number | null>(null);
+
+    const scheduleGenderClose = () => {
+        if (genderCloseTimer.current) window.clearTimeout(genderCloseTimer.current);
+        genderCloseTimer.current = window.setTimeout(() => setActiveMenu(null), 150);
+    };
+
+    const cancelGenderClose = () => {
+        if (genderCloseTimer.current) {
+            window.clearTimeout(genderCloseTimer.current);
+            genderCloseTimer.current = null;
+        }
+    };
+
+    useFocusTrap(mobileMenuRef, showMobileMenu, () => setShowMobileMenu(false));
+    useFocusTrap(cartPreviewRef, showCartPreview, () => setShowCartPreview(false));
 
     const activeGender = searchParams.get("gender");
     const canUseVendorStudio =
@@ -49,7 +77,24 @@ export default function Navbar() {
     const homeHref = isVendorAccount ? "/vendor" : "/";
 
     useEffect(() => {
-        setIsMounted(true);
+        let ticking = false;
+
+        function handleScroll() {
+            if (ticking) return;
+
+            ticking = true;
+
+            requestAnimationFrame(() => {
+                setScrolled(window.scrollY > 8);
+                ticking = false;
+            });
+        }
+
+        window.addEventListener("scroll", handleScroll, { passive: true });
+
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+        };
     }, []);
 
     useEffect(() => {
@@ -311,12 +356,15 @@ export default function Navbar() {
     }
 
     return (
-        <nav className="sticky top-0 z-50 border-b border-[#d8c8ad] bg-[var(--luxury-paper)]/92 text-[var(--luxury-ink)] backdrop-blur-xl">
+        <nav
+            aria-label="Main"
+            className={`sticky top-0 z-50 border-b border-[#d8c8ad] bg-[var(--luxury-paper)]/92 text-[var(--luxury-ink)] backdrop-blur-xl transition-shadow duration-300 ${scrolled ? "shadow-[0_14px_34px_rgba(22,18,13,0.1)]" : ""}`}
+        >
             <div
                 className={
                     isVendorAccount
                         ? "flex w-full items-center justify-between gap-3 px-4 py-3 sm:px-6 md:px-8 md:py-4"
-                        : "flex w-full items-center justify-between gap-1 px-2 py-3 sm:gap-3 sm:px-6 md:px-8 md:py-4"
+                        : "flex w-full items-center justify-between gap-0.5 px-1.5 py-3 min-[375px]:gap-1 min-[375px]:px-2 sm:gap-3 sm:px-6 md:px-8 md:py-4"
                 }
             >
                 {!isVendorAccount && (
@@ -343,6 +391,7 @@ export default function Navbar() {
                         className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition hover:text-[var(--luxury-gold)] md:hidden"
                         aria-label="Toggle navigation menu"
                         aria-expanded={showMobileMenu}
+                        aria-controls="mobile-menu"
                     >
                         {showMobileMenu ? <X size={22} /> : <Menu size={22} />}
                     </button>
@@ -350,25 +399,41 @@ export default function Navbar() {
 
                 <Link
                     href={homeHref}
-                    className="mr-auto shrink-0 text-sm font-semibold tracking-[0.12em] [font-family:var(--font-serif)] min-[390px]:text-base sm:text-xl sm:tracking-[0.28em] md:mr-0"
+                    className="-my-2.5 py-2.5 mr-auto shrink-0 text-sm font-semibold tracking-[0.12em] [font-family:var(--font-serif)] min-[390px]:text-base sm:text-xl sm:tracking-[0.28em] md:mr-0"
                 >
                     FRAGRANCE
                 </Link>
 
                 {!isVendorAccount && (
-                <div className="hidden items-center gap-10 md:flex">
+                <div className="hidden items-center gap-11 md:flex">
                     {["Men", "Women", "Unisex"].map((item) => (
                         <div
                             key={item}
-                            onMouseEnter={() => setActiveMenu(item)}
+                            onMouseEnter={() => {
+                                cancelGenderClose();
+                                setActiveMenu(item);
+                            }}
+                            onMouseLeave={scheduleGenderClose}
+                            className="group"
                         >
                             <Link
                                 href={`/products?gender=${item}`}
+                                data-gender={item}
+                                onFocus={() => setActiveMenu(item)}
+                                onBlur={(e) => {
+                                    const next = e.relatedTarget as Node | null;
+                                    if (next && genderMenuRef.current?.contains(next)) return;
+                                    setActiveMenu(null);
+                                }}
+                                aria-haspopup="true"
+                                aria-expanded={activeMenu === item}
+                                aria-controls="gender-mega-menu"
                                 className={`
-                                    relative pb-1 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-ink)]
-                                    after:absolute after:bottom-0 after:left-0 after:h-[1.5px]
-                                    after:bg-[var(--luxury-gold)] after:transition-all
-                                    ${activeGender === item
+                                    relative -my-3 py-3 px-0.5 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-ink)]
+                                    transition-colors duration-200 group-hover:text-[var(--luxury-gold)]
+                                    after:absolute after:bottom-2 after:left-0 after:h-[1.5px]
+                                    after:bg-[var(--luxury-gold)] after:transition-all after:duration-300
+                                    ${activeGender === item || activeMenu === item
                                         ? "after:w-full"
                                         : "after:w-0 hover:after:w-full"
                                     }
@@ -387,7 +452,10 @@ export default function Navbar() {
                     <button
                         ref={searchButtonRef}
                         onClick={() => setShowSearch(true)}
-                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition hover:text-[var(--luxury-gold)]"
+                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-all duration-200 hover:scale-105 hover:text-[var(--luxury-gold)] active:scale-90"
+                        aria-label="Open search"
+                        aria-expanded={showSearch}
+                        aria-controls="search-panel"
                     >
                         <Search size={22} />
                     </button>
@@ -395,14 +463,21 @@ export default function Navbar() {
                     {isLoggedIn && (
                         <Link
                             href="/wishlist"
-                            className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition hover:text-[var(--luxury-gold)]"
+                            aria-label="View wishlist"
+                            className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-all duration-200 hover:scale-105 hover:text-[var(--luxury-gold)] active:scale-90"
                         >
                             <Heart size={22} />
 
                             {wishlistCount > 0 && (
-                                <span className="absolute right-0 top-0 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--luxury-gold)] text-xs text-[var(--luxury-ink)]">
+                                <motion.span
+                                    key={wishlistCount}
+                                    initial={{ scale: 0.4, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                                    className="absolute right-0 top-0 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--luxury-gold)] text-xs text-[var(--luxury-ink)]"
+                                >
                                     {wishlistCount}
-                                </span>
+                                </motion.span>
                             )}
                         </Link>
                     )}
@@ -411,295 +486,445 @@ export default function Navbar() {
                         ref={cartButtonRef}
                         type="button"
                         onClick={handleCartPreviewOpen}
-                        className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition hover:text-[var(--luxury-gold)]"
+                        className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-all duration-200 hover:scale-105 hover:text-[var(--luxury-gold)] active:scale-90"
+                        aria-label="View cart"
+                        aria-expanded={showCartPreview}
+                        aria-controls="cart-preview"
                     >
                         <ShoppingBag size={22} />
 
                         {cartCount > 0 && (
-                            <span className="absolute right-0 top-0 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--luxury-gold)] text-xs text-[var(--luxury-ink)]">
+                            <motion.span
+                                key={cartCount}
+                                initial={{ scale: 0.4, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                                className="absolute right-0 top-0 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--luxury-gold)] text-xs text-[var(--luxury-ink)]"
+                            >
                                 {cartCount}
-                            </span>
+                            </motion.span>
                         )}
                     </button>
                     </>
                     )}
 
                     <div className="relative">
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
+<button
+                        onClick={(e) => {
+                            e.stopPropagation();
 
-                                if (!isLoggedIn) {
-                                    router.push("/login");
-                                    return;
-                                }
-
-                                setShowAccountMenu((value) => !value);
-                            }}
-                            className={
-                                isLoggedIn
-                                    ? "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 border-[var(--luxury-ink)] text-sm font-semibold text-[var(--luxury-ink)] transition hover:border-[var(--luxury-gold)] hover:text-[var(--luxury-gold)]"
-                                    : "flex h-10 w-10 shrink-0 items-center justify-center transition hover:text-[var(--luxury-gold)]"
+                            if (!isLoggedIn) {
+                                router.push("/login");
+                                return;
                             }
-                        >
-                            {isLoggedIn && initials ? (
-                                initials
-                            ) : (
-                                <User size={22} />
-                            )}
-                        </button>
 
-                        {isLoggedIn && showAccountMenu && (
-                            <div
-                                onClick={(e) => e.stopPropagation()}
-                                className="absolute right-0 mt-3 w-48 rounded-xl border border-[#d8c8ad] bg-[var(--luxury-paper)] p-2 shadow-[0_18px_45px_rgba(22,18,13,0.16)]"
-                            >
-                                {!isVendorAccount && (
-                                    <>
-                                        <Link
-                                            href="/account"
-                                            onClick={() => setShowAccountMenu(false)}
-                                            className="block rounded-lg px-3 py-2 text-sm hover:bg-[#efe3d0]"
-                                        >
-                                            Account
-                                        </Link>
-
-                                        <Link
-                                            href="/orders"
-                                            onClick={() => setShowAccountMenu(false)}
-                                            className="block rounded-lg px-3 py-2 text-sm hover:bg-[#efe3d0]"
-                                        >
-                                            My Orders
-                                        </Link>
-                                    </>
-                                )}
-
-                                {canUseVendorStudio && (
-                                    <Link
-                                        href="/vendor"
-                                        onClick={() => setShowAccountMenu(false)}
-                                        className="block rounded-lg px-3 py-2 text-sm hover:bg-[#efe3d0]"
-                                    >
-                                        Dashboard
-                                    </Link>
-                                )}
-
-                                <button
-                                    onClick={() => {
-                                        logoutUser();
-                                        setShowAccountMenu(false);
-                                    }}
-                                    className="w-full rounded-lg px-3 py-2 text-left text-sm text-red-700 hover:bg-red-50"
-                                >
-                                    Logout
-                                </button>
-                            </div>
+                            setShowAccountMenu((value) => !value);
+                        }}
+                        aria-label={isLoggedIn ? "Account menu" : "Sign in"}
+                        aria-haspopup={isLoggedIn ? "menu" : undefined}
+                        aria-expanded={isLoggedIn ? showAccountMenu : undefined}
+                        aria-controls={isLoggedIn ? "account-menu" : undefined}
+                        className={
+                            isLoggedIn
+                                ? "flex h-10 w-10 shrink-0 items-center justify-center transition-all duration-200 ease-out hover:scale-105 active:scale-90"
+                                : "flex h-10 w-10 shrink-0 items-center justify-center transition-all duration-200 ease-out hover:text-[var(--luxury-gold)] hover:scale-105 active:scale-90"
+                        }
+                    >
+                        {isLoggedIn && initials ? (
+                            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--luxury-ink)] text-xs font-semibold text-[var(--luxury-paper)] transition-colors duration-200 hover:bg-[var(--luxury-gold)] hover:text-[var(--luxury-ink)]">
+                                {initials}
+                            </span>
+                        ) : (
+                            <User size={22} />
                         )}
+                    </button>
+
+                        <AnimatePresence>
+                            {isLoggedIn && showAccountMenu && (
+                                <motion.div
+                                    key="account-menu"
+                                    id="account-menu"
+                                    role="menu"
+                                    aria-label="Account menu"
+                                    onKeyDown={(e) => {
+                                        const items = Array.from(
+                                            e.currentTarget.querySelectorAll<HTMLElement>('[role="menuitem"]')
+                                        );
+                                        const index = items.indexOf(document.activeElement as HTMLElement);
+                                        if (e.key === "ArrowDown" && items[index + 1]) {
+                                            e.preventDefault();
+                                            items[index + 1].focus();
+                                        } else if (e.key === "ArrowUp" && items[index - 1]) {
+                                            e.preventDefault();
+                                            items[index - 1].focus();
+                                        } else if (e.key === "Home" && items[0]) {
+                                            e.preventDefault();
+                                            items[0].focus();
+                                        } else if (e.key === "End" && items.length) {
+                                            e.preventDefault();
+                                            items[items.length - 1].focus();
+                                        }
+                                    }}
+                                    initial={{ opacity: 0, scale: 0.96, y: -6 }}
+                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.96, y: -6 }}
+                                    transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="absolute right-0 top-full mt-3 w-60 origin-top-right rounded-xl border border-[#d8c8ad] bg-[var(--luxury-paper)] p-2 shadow-[0_18px_45px_rgba(22,18,13,0.16)]"
+                                >
+                                    <div className="border-b border-[#d8c8ad] px-3 py-3">
+                                        <div className="flex items-center gap-3">
+                                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-[var(--luxury-gold)] text-sm font-semibold text-[var(--luxury-gold)]">
+                                                {initials}
+                                            </span>
+                                            <div className="min-w-0">
+                                                <p className="text-sm font-semibold text-[var(--luxury-ink)]">
+                                                    My Account
+                                                </p>
+                                                <p className="truncate text-xs text-[var(--luxury-muted)]">
+                                                    {email}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {!isVendorAccount && (
+                                        <>
+                                            <Link
+                                                href="/account"
+                                                role="menuitem"
+                                                onClick={() => setShowAccountMenu(false)}
+                                                className="block rounded-lg px-3 py-2 text-sm font-normal transition-all duration-200 hover:bg-[#efe3d0] hover:translate-x-1"
+                                            >
+                                                Account
+                                            </Link>
+
+                                            <Link
+                                                href="/orders"
+                                                role="menuitem"
+                                                onClick={() => setShowAccountMenu(false)}
+                                                className="block rounded-lg px-3 py-2 text-sm font-normal transition-all duration-200 hover:bg-[#efe3d0] hover:translate-x-1"
+                                            >
+                                                My Orders
+                                            </Link>
+                                        </>
+                                    )}
+
+                                    {canUseVendorStudio && (
+                                        <Link
+                                            href="/vendor"
+                                            role="menuitem"
+                                            onClick={() => setShowAccountMenu(false)}
+                                            className="block rounded-lg px-3 py-2 text-sm font-normal transition-all duration-200 hover:bg-[#efe3d0] hover:translate-x-1"
+                                        >
+                                            Dashboard
+                                        </Link>
+                                    )}
+
+                                    <button
+                                        role="menuitem"
+                                        onClick={() => {
+                                            logoutUser();
+                                            setShowAccountMenu(false);
+                                        }}
+                                        className="w-full rounded-lg px-3 py-2 text-left text-sm font-normal text-red-700 transition-all duration-200 hover:bg-red-50"
+                                    >
+                                        Logout
+                                    </button>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
                 </div>
             </div>
 
-            {!isVendorAccount && isMounted && showMobileMenu && createPortal(
-                <div className="fixed inset-0 z-[90] overscroll-none md:hidden">
-                    <button
-                        type="button"
-                        aria-label="Close navigation overlay"
-                        onClick={() => setShowMobileMenu(false)}
-                        className="absolute inset-0 bg-black/45"
-                    />
-
-                    <aside className="absolute left-0 top-0 h-full w-[86vw] max-w-[430px] overflow-y-auto overscroll-contain bg-[var(--luxury-paper)] px-5 py-6 text-[var(--luxury-ink)] shadow-[0_24px_70px_rgba(22,18,13,0.24)]">
-                        <div className="mb-5 flex items-center justify-between">
-                            <Link
-                                href="/"
-                                onClick={() => setShowMobileMenu(false)}
-                                className="text-xl font-semibold tracking-[0.22em] [font-family:var(--font-serif)]"
-                            >
-                                FRAGRANCE
-                            </Link>
-
-                            <button
+            {!isVendorAccount && isMounted && createPortal(
+                <AnimatePresence>
+                    {showMobileMenu && (
+                        <motion.div
+                            key="mobile-menu"
+                            className="fixed inset-0 z-[90] overscroll-none md:hidden"
+                        >
+                            <motion.button
                                 type="button"
+                                aria-label="Close navigation overlay"
                                 onClick={() => setShowMobileMenu(false)}
-                                className="flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-[#efe3d0]"
-                                aria-label="Close navigation menu"
-                            >
-                                <X size={28} strokeWidth={1.5} />
-                            </button>
-                        </div>
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                                className="absolute inset-0 bg-black/45"
+                            />
 
-                        <nav className="text-base">
-                            {["Men", "Women", "Unisex"].map((item) => (
-                                <section key={item} className="border-b border-[#d8c8ad] py-4">
+                            <motion.aside
+                                ref={mobileMenuRef}
+                                id="mobile-menu"
+                                role="dialog"
+                                aria-modal="true"
+                                aria-label="Navigation menu"
+                                initial={{ x: "-100%" }}
+                                animate={{ x: 0 }}
+                                exit={{ x: "-100%" }}
+                                transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                                className="absolute left-0 top-0 h-full w-[86vw] max-w-[430px] overflow-y-auto overscroll-contain bg-[var(--luxury-paper)] px-5 py-6 text-[var(--luxury-ink)] shadow-[0_24px_70px_rgba(22,18,13,0.24)]"
+                            >
+                                <div className="mb-5 flex items-center justify-between">
+                                    <Link
+                                        href="/"
+                                        onClick={() => setShowMobileMenu(false)}
+                                        className="text-xl font-semibold tracking-[0.22em] [font-family:var(--font-serif)]"
+                                    >
+                                        FRAGRANCE
+                                    </Link>
+
                                     <button
                                         type="button"
-                                        onClick={() => toggleMobileGender(item)}
-                                        className="flex w-full items-center justify-between text-left font-semibold uppercase tracking-[0.16em]"
-                                        aria-expanded={openMobileGender[item]}
+                                        onClick={() => setShowMobileMenu(false)}
+                                        className="flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-[#efe3d0]"
+                                        aria-label="Close navigation menu"
                                     >
-                                        <span>{item}</span>
-                                        <span aria-hidden="true">{openMobileGender[item] ? "-" : "+"}</span>
+                                        <X size={28} strokeWidth={1.5} />
                                     </button>
+                                </div>
 
-                                    {openMobileGender[item] && (
-                                    <div className="mt-5 grid gap-5">
-                                        <div>
+                                <nav aria-label="Mobile navigation" className="text-base">
+                                    {["Men", "Women", "Unisex"].map((item) => (
+                                        <section key={item} className="border-b border-[#d8c8ad] py-4">
                                             <button
                                                 type="button"
-                                                onClick={() => toggleMobileGroup(item, "Fragrances")}
-                                                className="mb-3 flex w-full items-center justify-between text-left text-xs font-bold uppercase tracking-[0.22em] text-[var(--luxury-gold)]"
-                                                aria-expanded={isMobileGroupOpen(item, "Fragrances")}
+                                                onClick={() => toggleMobileGender(item)}
+                                                className="group flex w-full items-center justify-between text-left font-semibold uppercase tracking-[0.16em] transition-colors duration-200 hover:text-[var(--luxury-gold)]"
+                                                aria-expanded={openMobileGender[item]}
                                             >
-                                                <span>Fragrances</span>
-                                                <span aria-hidden="true">{isMobileGroupOpen(item, "Fragrances") ? "-" : "+"}</span>
+                                                <span>{item}</span>
+                                                <ChevronDown
+                                                    size={18}
+                                                    className={`shrink-0 transition-transform duration-200 ${openMobileGender[item] ? "rotate-180 text-[var(--luxury-gold)]" : "text-[var(--luxury-muted)] group-hover:text-[var(--luxury-gold)]"}`}
+                                                />
                                             </button>
-                                            {isMobileGroupOpen(item, "Fragrances") && (
-                                                <div className="grid gap-3 pl-3 text-sm text-[var(--luxury-muted)]">
-                                                    <Link href={`/products?gender=${item}`} onClick={() => setShowMobileMenu(false)}>
-                                                        Shop All
-                                                    </Link>
-                                                    <Link href={`/products?gender=${item}&category=Perfume`} onClick={() => setShowMobileMenu(false)}>
-                                                        Perfumes
-                                                    </Link>
-                                                    <Link href={`/products?gender=${item}&category=Attar`} onClick={() => setShowMobileMenu(false)}>
-                                                        Attars
-                                                    </Link>
-                                                    <Link href={`/products?gender=${item}&category=Customised%20Perfume`} onClick={() => setShowMobileMenu(false)}>
-                                                        Customised Perfumes
-                                                    </Link>
-                                                </div>
-                                            )}
-                                        </div>
 
-                                        <div>
-                                            <button
-                                                type="button"
-                                                onClick={() => toggleMobileGroup(item, "Cosmetics")}
-                                                className="mb-3 flex w-full items-center justify-between text-left text-xs font-bold uppercase tracking-[0.22em] text-[var(--luxury-gold)]"
-                                                aria-expanded={isMobileGroupOpen(item, "Cosmetics")}
-                                            >
-                                                <span>Cosmetics</span>
-                                                <span aria-hidden="true">{isMobileGroupOpen(item, "Cosmetics") ? "-" : "+"}</span>
-                                            </button>
-                                            {isMobileGroupOpen(item, "Cosmetics") && (
-                                                <div className="grid gap-3 pl-3 text-sm text-[var(--luxury-muted)]">
-                                                    <Link href={`/products?gender=${item}&category=Face%20Wash`} onClick={() => setShowMobileMenu(false)}>
-                                                        Face Wash
-                                                    </Link>
-                                                    <Link href={`/products?gender=${item}&category=Fairness%20Cream`} onClick={() => setShowMobileMenu(false)}>
-                                                        Fairness Cream
-                                                    </Link>
-                                                    <Link href={`/products?gender=${item}&category=Lens`} onClick={() => setShowMobileMenu(false)}>
-                                                        Lens
-                                                    </Link>
-                                                    <Link href={`/products?gender=${item}&category=Nails`} onClick={() => setShowMobileMenu(false)}>
-                                                        Nails
-                                                    </Link>
-                                                </div>
-                                            )}
-                                        </div>
+                                            <AnimatePresence initial={false}>
+                                                {openMobileGender[item] && (
+                                                    <motion.div
+                                                        initial={{ height: 0, opacity: 0 }}
+                                                        animate={{ height: "auto", opacity: 1 }}
+                                                        exit={{ height: 0, opacity: 0 }}
+                                                        transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                                                        className="overflow-hidden"
+                                                    >
+                                                        <div className="mt-5 grid gap-5">
+                                                            <div>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => toggleMobileGroup(item, "Fragrances")}
+                                                                    className="mb-3 flex w-full items-center justify-between text-left text-xs font-bold uppercase tracking-[0.22em] text-[var(--luxury-gold-strong)]"
+                                                                    aria-expanded={isMobileGroupOpen(item, "Fragrances")}
+                                                                >
+                                                                    <span>Fragrances</span>
+                                                                    <ChevronDown
+                                                                        size={16}
+                                                                        className={`shrink-0 transition-transform duration-200 ${isMobileGroupOpen(item, "Fragrances") ? "rotate-180" : ""}`}
+                                                                    />
+                                                                </button>
+                                                                <AnimatePresence initial={false}>
+                                                                    {isMobileGroupOpen(item, "Fragrances") && (
+                                                                        <motion.div
+                                                                            initial={{ height: 0, opacity: 0 }}
+                                                                            animate={{ height: "auto", opacity: 1 }}
+                                                                            exit={{ height: 0, opacity: 0 }}
+                                                                            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                                                                            className="overflow-hidden"
+                                                                        >
+                                                                            <div className="grid gap-3 pl-3 text-sm text-[var(--luxury-muted)]">
+                                                                                <Link href={`/products?gender=${item}`} onClick={() => setShowMobileMenu(false)} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
+                                                                                    Shop All
+                                                                                </Link>
+                                                                                <Link href={`/products?gender=${item}&category=Perfume`} onClick={() => setShowMobileMenu(false)} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
+                                                                                    Perfumes
+                                                                                </Link>
+                                                                                <Link href={`/products?gender=${item}&category=Attar`} onClick={() => setShowMobileMenu(false)} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
+                                                                                    Attars
+                                                                                </Link>
+                                                                                <Link href={`/products?gender=${item}&category=Customised%20Perfume`} onClick={() => setShowMobileMenu(false)} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
+                                                                                    Customised Perfumes
+                                                                                </Link>
+                                                                            </div>
+                                                                        </motion.div>
+                                                                    )}
+                                                                </AnimatePresence>
+                                                            </div>
 
-                                        <div>
-                                            <button
-                                                type="button"
-                                                onClick={() => toggleMobileGroup(item, "Brands")}
-                                                className="mb-3 flex w-full items-center justify-between text-left text-xs font-bold uppercase tracking-[0.22em] text-[var(--luxury-gold)]"
-                                                aria-expanded={isMobileGroupOpen(item, "Brands")}
-                                            >
-                                                <span>Brands</span>
-                                                <span aria-hidden="true">{isMobileGroupOpen(item, "Brands") ? "-" : "+"}</span>
-                                            </button>
-                                            {isMobileGroupOpen(item, "Brands") && (
-                                                <div className="grid gap-3 pl-3 text-sm text-[var(--luxury-muted)]">
-                                                    <Link href="/products?search=Aurelian%20Atelier" onClick={() => setShowMobileMenu(false)}>
-                                                        Aurelian Atelier
-                                                    </Link>
-                                                    <Link href="/products?search=Nocturne%20Vale" onClick={() => setShowMobileMenu(false)}>
-                                                        Nocturne Vale
-                                                    </Link>
-                                                    <Link href="/products?search=Mira%20Solace" onClick={() => setShowMobileMenu(false)}>
-                                                        Mira Solace
-                                                    </Link>
-                                                    <Link href="/products?search=Vellum%20%26%20Dew" onClick={() => setShowMobileMenu(false)}>
-                                                        Vellum & Dew
-                                                    </Link>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                    )}
-                                </section>
-                            ))}
-                        </nav>
-                    </aside>
-                </div>,
+                                                            <div>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => toggleMobileGroup(item, "Cosmetics")}
+                                                                    className="mb-3 flex w-full items-center justify-between text-left text-xs font-bold uppercase tracking-[0.22em] text-[var(--luxury-gold-strong)]"
+                                                                    aria-expanded={isMobileGroupOpen(item, "Cosmetics")}
+                                                                >
+                                                                    <span>Cosmetics</span>
+                                                                    <ChevronDown
+                                                                        size={16}
+                                                                        className={`shrink-0 transition-transform duration-200 ${isMobileGroupOpen(item, "Cosmetics") ? "rotate-180" : ""}`}
+                                                                    />
+                                                                </button>
+                                                                <AnimatePresence initial={false}>
+                                                                    {isMobileGroupOpen(item, "Cosmetics") && (
+                                                                        <motion.div
+                                                                            initial={{ height: 0, opacity: 0 }}
+                                                                            animate={{ height: "auto", opacity: 1 }}
+                                                                            exit={{ height: 0, opacity: 0 }}
+                                                                            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                                                                            className="overflow-hidden"
+                                                                        >
+                                                                            <div className="grid gap-3 pl-3 text-sm text-[var(--luxury-muted)]">
+                                                                                <Link href={`/products?gender=${item}&category=Face%20Wash`} onClick={() => setShowMobileMenu(false)} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
+                                                                                    Face Wash
+                                                                                </Link>
+                                                                                <Link href={`/products?gender=${item}&category=Fairness%20Cream`} onClick={() => setShowMobileMenu(false)} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
+                                                                                    Fairness Cream
+                                                                                </Link>
+                                                                                <Link href={`/products?gender=${item}&category=Lens`} onClick={() => setShowMobileMenu(false)} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
+                                                                                    Lens
+                                                                                </Link>
+                                                                                <Link href={`/products?gender=${item}&category=Nails`} onClick={() => setShowMobileMenu(false)} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
+                                                                                    Nails
+                                                                                </Link>
+                                                                            </div>
+                                                                        </motion.div>
+                                                                    )}
+                                                                </AnimatePresence>
+                                                            </div>
+
+                                                            <div>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => toggleMobileGroup(item, "Brands")}
+                                                                    className="mb-3 flex w-full items-center justify-between text-left text-xs font-bold uppercase tracking-[0.22em] text-[var(--luxury-gold-strong)]"
+                                                                    aria-expanded={isMobileGroupOpen(item, "Brands")}
+                                                                >
+                                                                    <span>Brands</span>
+                                                                    <ChevronDown
+                                                                        size={16}
+                                                                        className={`shrink-0 transition-transform duration-200 ${isMobileGroupOpen(item, "Brands") ? "rotate-180" : ""}`}
+                                                                    />
+                                                                </button>
+                                                                <AnimatePresence initial={false}>
+                                                                    {isMobileGroupOpen(item, "Brands") && (
+                                                                        <motion.div
+                                                                            initial={{ height: 0, opacity: 0 }}
+                                                                            animate={{ height: "auto", opacity: 1 }}
+                                                                            exit={{ height: 0, opacity: 0 }}
+                                                                            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                                                                            className="overflow-hidden"
+                                                                        >
+                                                                            <div className="grid gap-3 pl-3 text-sm text-[var(--luxury-muted)]">
+                                                                                <Link href="/products?search=Aurelian%20Atelier" onClick={() => setShowMobileMenu(false)} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
+                                                                                    Aurelian Atelier
+                                                                                </Link>
+                                                                                <Link href="/products?search=Nocturne%20Vale" onClick={() => setShowMobileMenu(false)} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
+                                                                                    Nocturne Vale
+                                                                                </Link>
+                                                                                <Link href="/products?search=Mira%20Solace" onClick={() => setShowMobileMenu(false)} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
+                                                                                    Mira Solace
+                                                                                </Link>
+                                                                                <Link href="/products?search=Vellum%20%26%20Dew" onClick={() => setShowMobileMenu(false)} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
+                                                                                    Vellum & Dew
+                                                                                </Link>
+                                                                            </div>
+                                                                        </motion.div>
+                                                                    )}
+                                                                </AnimatePresence>
+                                                            </div>
+                                                        </div>
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
+                                        </section>
+                                    ))}
+                                </nav>
+                            </motion.aside>
+                        </motion.div>
+                    )}
+                </AnimatePresence>,
                 document.body
             )}
 
-            {!isVendorAccount && activeMenu && (
-                <div
-                    onMouseLeave={() => setActiveMenu(null)}
-                    className="absolute left-0 top-full z-40 w-full border-t border-[#d8c8ad] bg-[var(--luxury-paper)] shadow-[0_22px_50px_rgba(22,18,13,0.12)]"
-                >
+            {!isVendorAccount && (
+                <AnimatePresence>
+                    {activeMenu && (
+                    <motion.div
+                        key={activeMenu}
+                        ref={genderMenuRef}
+                        id="gender-mega-menu"
+                        role="group"
+                        aria-label={`${activeMenu} menu`}
+                        onMouseEnter={cancelGenderClose}
+                        onMouseLeave={scheduleGenderClose}
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                        className="absolute left-0 top-full z-40 w-full origin-top border-t border-[#d8c8ad] bg-[var(--luxury-paper)] shadow-[0_22px_50px_rgba(22,18,13,0.12)]"
+                    >
                     <div className="mx-auto grid max-w-7xl grid-cols-4 gap-12 px-10 py-10">
                         <div>
-                            <h3 className="mb-4 text-xs font-bold uppercase tracking-[0.22em] text-[var(--luxury-gold)]">
+                            <h3 className="mb-4 text-xs font-bold uppercase tracking-[0.22em] text-[var(--luxury-gold-strong)]">
                                 Fragrances
                             </h3>
 
                             <div className="space-y-3 text-sm text-[var(--luxury-muted)]">
-                                <Link href={`/products?gender=${activeMenu}`} className="block transition hover:text-[var(--luxury-ink)]">
+                                <Link href={`/products?gender=${activeMenu}`} className="block transition-all duration-200 hover:translate-x-1 hover:text-[var(--luxury-gold)]">
                                     Shop All
                                 </Link>
-                                <Link href={`/products?gender=${activeMenu}&category=Perfume`} className="block transition hover:text-[var(--luxury-ink)]">
+                                <Link href={`/products?gender=${activeMenu}&category=Perfume`} className="block transition-all duration-200 hover:translate-x-1 hover:text-[var(--luxury-gold)]">
                                     Perfumes
                                 </Link>
-                                <Link href={`/products?gender=${activeMenu}&category=Attar`} className="block transition hover:text-[var(--luxury-ink)]">
+                                <Link href={`/products?gender=${activeMenu}&category=Attar`} className="block transition-all duration-200 hover:translate-x-1 hover:text-[var(--luxury-gold)]">
                                     Attars
                                 </Link>
-                                <Link href={`/products?gender=${activeMenu}&category=Customised Perfume`} className="block transition hover:text-[var(--luxury-ink)]">
+                                <Link href={`/products?gender=${activeMenu}&category=Customised Perfume`} className="block transition-all duration-200 hover:translate-x-1 hover:text-[var(--luxury-gold)]">
                                     Customised Perfumes
                                 </Link>
                             </div>
                         </div>
 
                         <div>
-                            <h3 className="mb-4 text-xs font-bold uppercase tracking-[0.22em] text-[var(--luxury-gold)]">
+                            <h3 className="mb-4 text-xs font-bold uppercase tracking-[0.22em] text-[var(--luxury-gold-strong)]">
                                 Cosmetics
                             </h3>
 
                             <div className="space-y-3 text-sm text-[var(--luxury-muted)]">
-                                <Link href={`/products?gender=${activeMenu}&category=Face Wash`} className="block transition hover:text-[var(--luxury-ink)]">
+                                <Link href={`/products?gender=${activeMenu}&category=Face Wash`} className="block transition-all duration-200 hover:translate-x-1 hover:text-[var(--luxury-gold)]">
                                     Face Wash
                                 </Link>
-                                <Link href={`/products?gender=${activeMenu}&category=Fairness Cream`} className="block transition hover:text-[var(--luxury-ink)]">
+                                <Link href={`/products?gender=${activeMenu}&category=Fairness Cream`} className="block transition-all duration-200 hover:translate-x-1 hover:text-[var(--luxury-gold)]">
                                     Fairness Cream
                                 </Link>
-                                <Link href={`/products?gender=${activeMenu}&category=Lens`} className="block transition hover:text-[var(--luxury-ink)]">
+                                <Link href={`/products?gender=${activeMenu}&category=Lens`} className="block transition-all duration-200 hover:translate-x-1 hover:text-[var(--luxury-gold)]">
                                     Lens
                                 </Link>
-                                <Link href={`/products?gender=${activeMenu}&category=Nails`} className="block transition hover:text-[var(--luxury-ink)]">
+                                <Link href={`/products?gender=${activeMenu}&category=Nails`} className="block transition-all duration-200 hover:translate-x-1 hover:text-[var(--luxury-gold)]">
                                     Nails
                                 </Link>
                             </div>
                         </div>
 
                         <div>
-                            <h3 className="mb-4 text-xs font-bold uppercase tracking-[0.22em] text-[var(--luxury-gold)]">
+                            <h3 className="mb-4 text-xs font-bold uppercase tracking-[0.22em] text-[var(--luxury-gold-strong)]">
                                 Brands
                             </h3>
 
                             <div className="space-y-3 text-sm text-[var(--luxury-muted)]">
-                                <Link href="/products?search=Aurelian%20Atelier" className="block transition hover:text-[var(--luxury-ink)]">
+                                <Link href="/products?search=Aurelian%20Atelier" className="block transition-all duration-200 hover:translate-x-1 hover:text-[var(--luxury-gold)]">
                                     Aurelian Atelier
                                 </Link>
-                                <Link href="/products?search=Nocturne%20Vale" className="block transition hover:text-[var(--luxury-ink)]">
+                                <Link href="/products?search=Nocturne%20Vale" className="block transition-all duration-200 hover:translate-x-1 hover:text-[var(--luxury-gold)]">
                                     Nocturne Vale
                                 </Link>
-                                <Link href="/products?search=Mira%20Solace" className="block transition hover:text-[var(--luxury-ink)]">
+                                <Link href="/products?search=Mira%20Solace" className="block transition-all duration-200 hover:translate-x-1 hover:text-[var(--luxury-gold)]">
                                     Mira Solace
                                 </Link>
-                                <Link href="/products?search=Vellum%20%26%20Dew" className="block transition hover:text-[var(--luxury-ink)]">
+                                <Link href="/products?search=Vellum%20%26%20Dew" className="block transition-all duration-200 hover:translate-x-1 hover:text-[var(--luxury-gold)]">
                                     Vellum & Dew
                                 </Link>
                             </div>
@@ -721,45 +946,61 @@ export default function Navbar() {
 
                                 <Link
                                     href={`/products?gender=${activeMenu}`}
-                                    className="mt-5 inline-block text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold)]"
+                                    className="mt-5 inline-block text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold)] transition-colors duration-200 hover:text-[var(--luxury-paper)]"
                                 >
                                     Shop Now
                                 </Link>
                             </div>
                         </div>
                     </div>
-                </div>
+                    </motion.div>
+                    )}
+                </AnimatePresence>
             )}
 
-            {!isVendorAccount && showSearch && (
-                <div
-                    ref={searchPanelRef}
-                    className="border-t border-[#d8c8ad] bg-[var(--luxury-paper)] px-6 py-6"
-                >
-                    <form
-                        onSubmit={handleSearchSubmit}
-                        className="mx-auto flex max-w-3xl flex-col gap-4 sm:flex-row sm:items-center"
-                    >
-                        <input
-                            autoFocus
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Enter search keyword"
-                            className="w-full border-b border-[var(--luxury-ink)] bg-transparent px-1 py-3 text-lg tracking-[0.12em] outline-none placeholder:text-[var(--luxury-muted)]"
-                        />
-
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setSearch("");
-                                setShowSearch(false);
-                            }}
-                            className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold)]"
+            {!isVendorAccount && (
+                <AnimatePresence>
+                    {showSearch && (
+                        <motion.div
+                            key="search-panel"
+                            id="search-panel"
+                            ref={searchPanelRef}
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                            className="overflow-hidden border-t border-[#d8c8ad] bg-[var(--luxury-paper)]"
                         >
-                            Close
-                        </button>
-                    </form>
-                </div>
+                            <div className="px-6 py-6">
+                                <form
+                                    role="search"
+                                    onSubmit={handleSearchSubmit}
+                                    className="mx-auto flex max-w-3xl flex-col gap-4 sm:flex-row sm:items-center"
+                                >
+                                    <input
+                                        autoFocus
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                        placeholder="Enter search keyword"
+                                        aria-label="Search products"
+                                        className="w-full border-b border-[var(--luxury-ink)] bg-transparent px-1 py-3 text-lg tracking-[0.12em] outline-none transition-colors duration-200 focus:border-[var(--luxury-gold)] placeholder:text-[var(--luxury-muted-strong)]"
+                                    />
+
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setSearch("");
+                                            setShowSearch(false);
+                                        }}
+                                        className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold-strong)] transition-colors duration-200 hover:text-[var(--luxury-ink)]"
+                                    >
+                                        Close
+                                    </button>
+                                </form>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             )}
 
             {!isVendorAccount && isMounted && showCartPreview && createPortal(
@@ -773,10 +1014,14 @@ export default function Navbar() {
 
                     <aside
                         ref={cartPreviewRef}
+                        id="cart-preview"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="cart-preview-title"
                         className="fixed right-0 top-0 z-[100] flex h-screen w-full max-w-[520px] flex-col border-l border-[#d8c8ad] bg-[var(--luxury-paper)] shadow-[0_30px_80px_rgba(22,18,13,0.24)]"
                     >
                         <div className="flex items-center justify-between border-b border-[#d8c8ad] px-4 py-4 sm:px-8 sm:py-6">
-                            <h2 className="text-2xl font-normal [font-family:var(--font-serif)] sm:text-3xl">
+                            <h2 id="cart-preview-title" className="text-2xl font-normal [font-family:var(--font-serif)] sm:text-3xl">
                                 Your Cart
                             </h2>
 
@@ -796,19 +1041,15 @@ export default function Navbar() {
                                     Loading cart...
                                 </p>
                             ) : !cart || cart.items.length === 0 ? (
-                                <div className="py-10 text-center">
-                                    <p className="text-2xl font-normal [font-family:var(--font-serif)]">
-                                        Your cart is empty
-                                    </p>
-
-                                    <Link
-                                        href="/products"
-                                        onClick={() => setShowCartPreview(false)}
-                                        className="mt-6 inline-block rounded-full bg-[var(--luxury-ink)] px-6 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-[var(--luxury-paper)] transition hover:bg-[var(--luxury-moss)]"
-                                    >
-                                        Continue Shopping
-                                    </Link>
-                                </div>
+                                <EmptyState
+                                    icon={ShoppingBag}
+                                    title="Your cart is empty"
+                                    description="Discover fragrances to add to your collection."
+                                    actionLabel="Continue Shopping"
+                                    actionHref="/products"
+                                    onAction={() => setShowCartPreview(false)}
+                                    compact
+                                />
                             ) : (
                                 <div className="space-y-5">
                                     {cart.items.map((item) => (
@@ -820,7 +1061,7 @@ export default function Navbar() {
                                                 {item.imageUrl && (
                                                     <Image
                                                         src={item.imageUrl}
-                                                        alt={item.productName}
+                                                        alt=""
                                                         fill
                                                         className="object-contain p-3 drop-shadow-[0_16px_18px_rgba(22,18,13,0.14)]"
                                                     />
@@ -828,7 +1069,7 @@ export default function Navbar() {
                                             </div>
 
                                             <div className="min-w-0">
-                                                <p className="text-xs uppercase tracking-[0.24em] text-[var(--luxury-gold)]">
+                                                <p className="text-xs uppercase tracking-[0.24em] text-[var(--luxury-gold-strong)]">
                                                     {item.brandName}
                                                 </p>
 
@@ -851,7 +1092,8 @@ export default function Navbar() {
                                                             )
                                                         }
                                                         disabled={item.quantity <= 1}
-                                                        className="flex h-8 w-8 items-center justify-center rounded-full border border-[#d8c8ad] transition hover:border-[var(--luxury-gold)] disabled:opacity-40"
+                                                        aria-label={`Decrease quantity of ${item.productName}`}
+                                                        className="flex h-8 w-8 items-center justify-center rounded-full border border-[#d8c8ad] transition-all duration-200 hover:scale-105 hover:border-[var(--luxury-gold)] hover:text-[var(--luxury-gold)] active:scale-90 disabled:opacity-40 disabled:hover:scale-100 disabled:hover:border-[#d8c8ad] disabled:hover:text-current"
                                                     >
                                                         <Minus size={14} />
                                                     </button>
@@ -868,7 +1110,8 @@ export default function Navbar() {
                                                                 item.quantity + 1
                                                             )
                                                         }
-                                                        className="flex h-8 w-8 items-center justify-center rounded-full border border-[#d8c8ad] transition hover:border-[var(--luxury-gold)]"
+                                                        aria-label={`Increase quantity of ${item.productName}`}
+                                                        className="flex h-8 w-8 items-center justify-center rounded-full border border-[#d8c8ad] transition-all duration-200 hover:scale-105 hover:border-[var(--luxury-gold)] hover:text-[var(--luxury-gold)] active:scale-90"
                                                     >
                                                         <Plus size={14} />
                                                     </button>

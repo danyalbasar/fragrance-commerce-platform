@@ -20,10 +20,13 @@ export default function OrderTimeline({
                 Order Progress
             </h2>
 
+            <p className="sr-only">Current status: {currentStatus}</p>
+
             <div className="flex items-center justify-between">
                 {statuses.map((status, index) => {
                     const completed =
                         currentIndex >= index;
+                    const isCurrent = status === currentStatus;
 
                     return (
                         <div
@@ -32,21 +35,29 @@ export default function OrderTimeline({
                         >
                             <div className="flex flex-col items-center">
                                 <div
+                                    aria-hidden="true"
                                     className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold ${completed
                                             ? "bg-[var(--luxury-gold)] text-[var(--luxury-ink)]"
-                                            : "bg-[#efe3d0] text-[var(--luxury-muted)]"
+                                            : "bg-[#efe3d0] text-[var(--luxury-muted-strong)]"
                                         }`}
                                 >
                                     {index + 1}
                                 </div>
 
-                                <span className="mt-2 text-sm text-[var(--luxury-muted)]">
+                                <span
+                                    aria-current={isCurrent ? "step" : undefined}
+                                    className={`mt-2 text-sm font-semibold ${isCurrent
+                                            ? "text-[var(--luxury-ink)]"
+                                            : "text-[var(--luxury-muted-strong)]"
+                                        }`}
+                                >
                                     {status}
                                 </span>
                             </div>
 
                             {index < statuses.length - 1 && (
                                 <div
+                                    aria-hidden="true"
                                     className={`mx-2 h-1 flex-1 ${currentIndex > index
                                             ? "bg-[var(--luxury-gold)]"
                                             : "bg-[#d8c8ad]"

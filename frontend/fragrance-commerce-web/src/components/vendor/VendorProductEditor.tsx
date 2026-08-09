@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Plus, Save, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { getApiResponse } from "@/services/api";
 import ProtectedRoute from "@/components/common/ProtectedRoute";
 import { getBrands } from "@/services/brandService";
 import { getCategories } from "@/services/categoryService";
@@ -92,6 +93,7 @@ export default function VendorProductEditor({
     const [variantFiles, setVariantFiles] = useState<Record<string, File | null>>({});
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [confirmingDeactivate, setConfirmingDeactivate] = useState(false);
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
 
@@ -183,7 +185,8 @@ export default function VendorProductEditor({
     }
 
     useEffect(() => {
-        loadEditor();
+        const timer = window.setTimeout(loadEditor, 0);
+        return () => window.clearTimeout(timer);
     }, [productId]);
 
     function currency(value: number) {
@@ -308,10 +311,11 @@ export default function VendorProductEditor({
 
                 router.replace(`/vendor/products/${created.id}`);
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
+            const response = getApiResponse(err);
             setError(
-                typeof err?.response?.data === "string"
-                    ? err.response.data
+                typeof response?.data === "string"
+                    ? response.data
                     : "Product could not be saved."
             );
         } finally {
@@ -324,12 +328,14 @@ export default function VendorProductEditor({
 
         try {
             setSaving(true);
+            setError("");
             await productService.delete(productId);
             router.replace("/vendor");
-        } catch (err: any) {
+        } catch (err: unknown) {
+            const response = getApiResponse(err);
             setError(
-                typeof err?.response?.data === "string"
-                    ? err.response.data
+                typeof response?.data === "string"
+                    ? response.data
                     : "Product could not be deactivated."
             );
         } finally {
@@ -406,8 +412,75 @@ export default function VendorProductEditor({
     if (loading) {
         return (
             <ProtectedRoute>
-                <main className="min-h-screen bg-[var(--luxury-ivory)] p-8 text-[var(--luxury-ink)]">
-                    Loading product...
+                <main aria-hidden="true" className="min-h-screen bg-[var(--luxury-ivory)] px-4 py-6 text-[var(--luxury-ink)] sm:py-8 md:px-8">
+                    <div className="mx-auto max-w-[1500px]">
+                        <div className="mb-2.5 h-4 w-28 animate-pulse rounded bg-[#e5d9c4]" />
+
+                        <div className="mb-6 flex flex-col gap-5 border-b border-[#d8c8ad] pb-6 md:mb-8 md:flex-row md:items-end md:justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="h-10 w-40 animate-pulse rounded bg-[#e5d9c4]" />
+
+                                <div className="h-8 w-24 animate-pulse rounded-full bg-[#e5d9c4]" />
+                            </div>
+
+                            <div className="h-11 w-44 animate-pulse rounded-full bg-[#e5d9c4]" />
+                        </div>
+
+                        <div className="grid gap-8 xl:grid-cols-[1fr_380px]">
+                            <div className="space-y-8">
+                                <div className="rounded-[var(--luxury-radius)] border border-[var(--luxury-line)] bg-[var(--luxury-paper)] p-5 shadow-[var(--luxury-shadow-sm)] sm:p-6">
+                                    <div className="h-7 w-44 animate-pulse rounded bg-[#e5d9c4]" />
+
+                                    <div className="mt-5 grid gap-4 md:grid-cols-2 md:gap-5">
+                                        {Array.from({ length: 4 }).map((_, i) => (
+                                            <div
+                                                key={i}
+                                                className={`h-12 animate-pulse rounded bg-[#e5d9c4] ${i === 2 || i === 3 ? "md:col-span-2" : ""}`}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="rounded-[var(--luxury-radius)] border border-[var(--luxury-line)] bg-[var(--luxury-paper)] p-5 shadow-[var(--luxury-shadow-sm)] sm:p-6">
+                                    <div className="h-7 w-36 animate-pulse rounded bg-[#e5d9c4]" />
+
+                                    <div className="mt-5 space-y-4">
+                                        {Array.from({ length: 2 }).map((_, i) => (
+                                            <div key={i} className="rounded-[var(--luxury-radius)] border border-[var(--luxury-line)] p-4">
+                                                <div className="flex items-center justify-between gap-4">
+                                                    <div className="h-4 w-32 animate-pulse rounded bg-[#e5d9c4]" />
+                                                    <div className="h-4 w-4 animate-pulse rounded bg-[#e5d9c4]" />
+                                                </div>
+                                                <div className="mt-4 h-12 animate-pulse rounded bg-[#e5d9c4]" />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-8">
+                                <div className="rounded-[var(--luxury-radius)] border border-[var(--luxury-line)] bg-[var(--luxury-paper)] p-5 shadow-[var(--luxury-shadow-sm)] sm:p-6">
+                                    <div className="h-7 w-32 animate-pulse rounded bg-[#e5d9c4]" />
+
+                                    <div className="mt-5 grid grid-cols-3 gap-3">
+                                        {Array.from({ length: 6 }).map((_, i) => (
+                                            <div key={i} className="aspect-square animate-pulse rounded bg-[#e5d9c4]" />
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="rounded-[var(--luxury-radius)] border border-[var(--luxury-line)] bg-[var(--luxury-paper)] p-5 shadow-[var(--luxury-shadow-sm)] sm:p-6">
+                                    <div className="h-7 w-24 animate-pulse rounded bg-[#e5d9c4]" />
+
+                                    <div className="mt-5 space-y-3">
+                                        {Array.from({ length: 3 }).map((_, i) => (
+                                            <div key={i} className="h-10 animate-pulse rounded bg-[#e5d9c4]" />
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </main>
             </ProtectedRoute>
         );
@@ -420,7 +493,7 @@ export default function VendorProductEditor({
                     <button
                         type="button"
                         onClick={() => router.push("/vendor")}
-                        className="mb-5 text-sm font-semibold uppercase tracking-[0.12em] text-[var(--luxury-muted)] transition hover:text-[var(--luxury-gold)] sm:tracking-[0.16em]"
+                        className="-my-2.5 mb-2.5 py-2.5 text-sm font-semibold uppercase tracking-[0.12em] text-[var(--luxury-muted)] transition hover:text-[var(--luxury-gold-strong)] sm:tracking-[0.16em]"
                     >
                         &larr; Back to Products
                     </button>
@@ -429,7 +502,7 @@ export default function VendorProductEditor({
                         <div>
                             <Link
                                 href="/vendor"
-                                className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--luxury-gold)] hover:text-[var(--luxury-ink)] sm:tracking-[0.22em]"
+                                className="-my-3 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--luxury-gold-strong)] hover:text-[var(--luxury-ink)] sm:tracking-[0.22em]"
                             >
                                 Vendor Studio
                             </Link>
@@ -440,21 +513,55 @@ export default function VendorProductEditor({
 
                         <div className="flex flex-col gap-3 sm:flex-row">
                             {isEditing && (
-                                <button
-                                    type="button"
-                                    onClick={handleDeactivate}
-                                    disabled={saving}
-                                    className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-red-200 px-5 text-sm font-semibold uppercase tracking-[0.1em] text-red-700 transition hover:bg-red-50 sm:tracking-[0.12em]"
-                                >
-                                    <Trash2 size={16} />
-                                    Deactivate
-                                </button>
+                                confirmingDeactivate ? (
+                                    <div
+                                        role="alert"
+                                        className="rounded-xl border border-red-200 bg-red-50 p-3"
+                                    >
+                                        <p className="text-sm font-semibold text-red-700">
+                                            Deactivate this product permanently?
+                                        </p>
+
+                                        <div className="mt-2 flex gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={handleDeactivate}
+                                                disabled={saving}
+                                                className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-red-200 px-5 text-sm font-semibold uppercase tracking-[0.1em] text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:text-[var(--luxury-muted-strong)] sm:tracking-[0.12em]"
+                                            >
+                                                <Trash2 size={16} />
+                                                {saving ? "Deactivating..." : "Yes, Deactivate"}
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    setConfirmingDeactivate(false)
+                                                }
+                                                disabled={saving}
+                                                className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-[var(--luxury-line)] px-5 text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-ink)] transition hover:border-[var(--luxury-gold-strong)] disabled:cursor-not-allowed disabled:text-[var(--luxury-muted-strong)] sm:tracking-[0.12em]"
+                                            >
+                                                Keep
+                                            </button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={() => setConfirmingDeactivate(true)}
+                                        disabled={saving}
+                                        className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-red-200 px-5 text-sm font-semibold uppercase tracking-[0.1em] text-red-700 transition hover:bg-red-50 sm:tracking-[0.12em]"
+                                    >
+                                        <Trash2 size={16} />
+                                        Deactivate
+                                    </button>
+                                )
                             )}
                             <button
                                 type="submit"
                                 form="vendor-product-form"
                                 disabled={saving}
-                                className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[var(--luxury-ink)] px-6 text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-paper)] transition hover:bg-[var(--luxury-moss)] disabled:bg-gray-400 sm:tracking-[0.14em]"
+                                className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[var(--luxury-ink)] px-6 text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-paper)] transition hover:bg-[var(--luxury-moss)] disabled:cursor-not-allowed disabled:bg-[var(--luxury-muted-strong)] sm:tracking-[0.14em]"
                             >
                                 <Save size={16} />
                                 {saving ? "Saving..." : "Save"}
@@ -463,13 +570,19 @@ export default function VendorProductEditor({
                     </div>
 
                     {message && (
-                        <div className="mb-6 border border-[#b9c8a8] bg-[#f6fbef] p-4 text-sm text-[#455c2b]">
+                        <div
+                            role="status"
+                            className="mb-6 border border-[#b9c8a8] bg-[#f6fbef] p-4 text-sm text-[#455c2b]"
+                        >
                             {message}
                         </div>
                     )}
 
                     {error && (
-                        <div className="mb-6 border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                        <div
+                            role="alert"
+                            className="mb-6 border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+                        >
                             {error}
                         </div>
                     )}
@@ -801,7 +914,7 @@ export default function VendorProductEditor({
                                             className="object-cover"
                                         />
                                     ) : (
-                                        <div className="flex h-full items-center justify-center text-sm uppercase tracking-[0.18em] text-[var(--luxury-muted)]">
+                                        <div className="flex h-full items-center justify-center text-sm uppercase tracking-[0.18em] text-[var(--luxury-muted-strong)]">
                                             No image
                                         </div>
                                     )}
