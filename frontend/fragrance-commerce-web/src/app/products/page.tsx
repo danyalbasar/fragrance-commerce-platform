@@ -791,7 +791,7 @@ function ProductsContent() {
                             <h2 className="sr-only">Products</h2>
 
                             {loading ? (
-                                <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                                <div className="grid grid-cols-2 gap-3 gap-y-6 sm:gap-6 xl:grid-cols-3">
                                     {Array.from({ length: 6 }).map((_, i) => (
                                         <div
                                             key={i}
@@ -827,11 +827,12 @@ function ProductsContent() {
                                     />
                             ) : (
                                 <>
-                                    <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                                    <div className="grid grid-cols-2 gap-3 gap-y-6 sm:gap-6 xl:grid-cols-3">
                                         {products.map((product) => (
                                             <ProductCard
                                                 key={product.id}
                                                 product={product}
+                                                compactMobile
                                             />
                                         ))}
                                     </div>

@@ -146,16 +146,17 @@ const ProductCard = memo(function ProductCard({
                     onClick={handleWishlistClick}
                     disabled={wishlistLoading}
                     aria-label={isWishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
-                    className={`absolute right-3 top-3 z-10 rounded-full border border-[var(--luxury-line)] bg-[rgba(255,250,242,0.95)] p-2.5 text-[var(--luxury-ink)] shadow-[0_12px_30px_rgba(22,18,13,0.16)] backdrop-blur-md transition-all duration-200 ease-out hover:border-[var(--luxury-gold)] hover:text-[var(--luxury-gold)] hover:scale-110 active:scale-90 disabled:opacity-50 sm:right-4 sm:top-4 ${
+                    className={`absolute right-3 top-3 z-10 rounded-full p-1.5 text-[var(--luxury-ink)] transition-all duration-200 ease-out hover:text-[var(--luxury-gold)] hover:scale-110 active:scale-90 disabled:opacity-50 sm:right-4 sm:top-4 ${
                         isWishlisted
                             ? "translate-y-0 opacity-100"
                             : "translate-y-0 opacity-100 md:translate-y-[-6px] md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 md:group-focus-within:translate-y-0 md:group-focus-within:opacity-100"
                     }`}
                 >
                     <Heart
-                        size={18}
-                        fill={isWishlisted ? "var(--luxury-gold)" : "none"}
-                        className={`transition-all duration-200 ${isWishlisted ? "text-[var(--luxury-gold)]" : "text-[var(--luxury-ink)]"}`}
+                        size={20}
+                        fill={isWishlisted ? "var(--luxury-gold)" : "var(--luxury-paper)"}
+                        strokeWidth={isWishlisted ? 0 : 2}
+                        className={`transition-all duration-200 drop-shadow-[0_1px_2px_rgba(22,18,13,0.4)] ${isWishlisted ? "text-transparent" : "text-[var(--luxury-muted-strong)]"}`}
                     />
                 </button>
 

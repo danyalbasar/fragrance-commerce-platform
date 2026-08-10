@@ -712,7 +712,7 @@ export default function Navbar() {
                                                         transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
                                                         className="overflow-hidden"
                                                     >
-                                                        <div className="mt-5 grid gap-5">
+                                                        <div className="mt-5 grid gap-5 pl-4">
                                                             <div>
                                                                 <button
                                                                     type="button"
@@ -975,7 +975,7 @@ export default function Navbar() {
                                 <form
                                     role="search"
                                     onSubmit={handleSearchSubmit}
-                                    className="mx-auto flex max-w-3xl flex-col gap-4 sm:flex-row sm:items-center"
+                                    className="mx-auto flex max-w-2xl flex-col gap-4 sm:flex-row sm:items-center"
                                 >
                                     <input
                                         autoFocus
@@ -983,7 +983,7 @@ export default function Navbar() {
                                         onChange={(e) => setSearch(e.target.value)}
                                         placeholder="Enter search keyword"
                                         aria-label="Search products"
-                                        className="w-full border-b border-[var(--luxury-ink)] bg-transparent px-1 py-3 text-lg tracking-[0.12em] outline-none transition-colors duration-200 focus:border-[var(--luxury-gold)] placeholder:text-[var(--luxury-muted-strong)]"
+                                        className="w-full border-b border-[var(--luxury-ink)] bg-transparent px-1 py-2 text-sm tracking-[0.12em] outline-none transition-colors duration-200 focus:border-[var(--luxury-gold)] placeholder:text-[var(--luxury-muted-strong)] sm:py-2.5 sm:text-base"
                                     />
 
                                     <button

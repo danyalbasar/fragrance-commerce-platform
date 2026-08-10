@@ -858,7 +858,7 @@ function ProductDetailsContent() {
               {similarProducts.slice(0, 3).map((item) => (
                 <div
                   key={item.id}
-                  className="min-w-[calc((100%_-_1rem)/2)] snap-start md:min-w-0"
+                  className="min-w-[70%] snap-start md:min-w-0"
                 >
                   <ProductCard product={item} compactMobile />
                 </div>

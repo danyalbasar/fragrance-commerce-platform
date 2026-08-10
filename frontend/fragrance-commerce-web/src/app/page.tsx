@@ -512,11 +512,11 @@ function ProductGrid({
 }) {
   if (loading) {
     return (
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-5 pb-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:px-6 md:grid md:grid-cols-4 md:gap-6 md:overflow-visible md:px-0 md:pb-0">
         {Array.from({ length: 4 }).map((_, index) => (
           <div
             key={index}
-            className="aspect-[1/1.08] animate-pulse rounded-[var(--luxury-radius)] bg-[#efe3d0]"
+            className="aspect-[1/1.08] min-w-[70%] max-w-[70%] basis-[70%] shrink-0 snap-start animate-pulse rounded-[var(--luxury-radius)] bg-[#efe3d0] md:min-w-0 md:max-w-none md:basis-auto md:shrink"
           />
         ))}
       </div>
@@ -532,9 +532,14 @@ function ProductGrid({
   }
 
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="flex snap-x snap-mandatory items-stretch gap-4 overflow-x-auto scroll-smooth px-5 pb-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:px-6 md:grid md:grid-cols-4 md:gap-6 md:overflow-visible md:px-0 md:pb-0">
       {products.map((product) => (
-        <ProductCard key={product.id} product={product} compactMobile />
+        <div
+          key={product.id}
+          className="min-w-[70%] max-w-[70%] basis-[70%] shrink-0 snap-start md:min-w-0 md:max-w-none md:basis-auto md:shrink"
+        >
+          <ProductCard product={product} compactMobile />
+        </div>
       ))}
     </div>
   );
