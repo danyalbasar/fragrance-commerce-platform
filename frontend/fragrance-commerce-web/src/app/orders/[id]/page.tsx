@@ -67,8 +67,8 @@ export default function OrderDetailsPage() {
                         <div className="mt-3 h-10 w-48 animate-pulse rounded bg-[#e5d9c4]" />
                     </div>
 
-                    <div className="overflow-hidden rounded-[var(--luxury-radius)] border border-[var(--luxury-line)] bg-[var(--luxury-paper)] shadow-[var(--luxury-shadow-sm)]">
-                        <div className="grid gap-4 border-b border-[#d8c8ad] bg-[#efe3d0] px-6 py-4 md:grid-cols-4">
+                        <div className="overflow-hidden rounded-[var(--luxury-radius)] border border-[var(--luxury-line)] bg-[var(--luxury-paper)] shadow-[var(--luxury-shadow-sm)]">
+                        <div className="grid gap-4 border-b border-[#d8c8ad] bg-[#efe3d0] px-4 py-4 sm:px-6 md:grid-cols-4">
                             {Array.from({ length: 4 }).map((_, i) => (
                                 <div key={i}>
                                     <div className="h-3 w-16 animate-pulse rounded bg-[#e5d9c4]" />
@@ -78,7 +78,7 @@ export default function OrderDetailsPage() {
                             ))}
                         </div>
 
-                        <div className="p-6">
+                        <div className="p-4 sm:p-6">
                             <div className="h-7 w-40 animate-pulse rounded bg-[#e5d9c4]" />
 
                             <div className="mt-5 space-y-5">
@@ -120,7 +120,7 @@ export default function OrderDetailsPage() {
 
     return (
         <ProtectedRoute>
-            <main className="min-h-screen bg-[var(--luxury-ivory)] px-6 py-10 text-[var(--luxury-ink)]">
+            <main className="min-h-screen bg-[var(--luxury-ivory)] px-4 py-8 text-[var(--luxury-ink)] sm:px-6 sm:py-10">
                 <div className="mx-auto max-w-5xl">
                 <button
                     onClick={() => router.push("/orders")}
@@ -129,7 +129,7 @@ export default function OrderDetailsPage() {
                     ← Back to Orders
                 </button>
 
-                <div className="border border-[#d8c8ad] bg-[var(--luxury-paper)] p-6 shadow-[0_18px_50px_rgba(22,18,13,0.08)]">
+                <div className="border border-[#d8c8ad] bg-[var(--luxury-paper)] p-4 shadow-[0_18px_50px_rgba(22,18,13,0.08)] sm:p-6">
                     <div>
                         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                             <div>
@@ -137,7 +137,7 @@ export default function OrderDetailsPage() {
                                     Order Details
                                 </p>
 
-                                <h1 className="mt-3 text-4xl font-normal [font-family:var(--font-serif)]">
+                                <h1 className="mt-3 text-3xl font-normal leading-tight [font-family:var(--font-serif)] sm:text-4xl">
                                     Order #{order.orderNumber}
                                 </h1>
 
@@ -164,7 +164,7 @@ export default function OrderDetailsPage() {
                         )}
                     </div>
 
-                    <div className="mt-8 grid gap-6 md:grid-cols-2">
+                    <div className="mt-6 grid gap-4 sm:mt-8 sm:gap-6 md:grid-cols-2">
                         <section className="border border-[#d8c8ad] bg-[#fffaf2] p-4">
                             <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.18em]">
                                 Shipping Address
@@ -222,9 +222,9 @@ export default function OrderDetailsPage() {
                             {order.items.map((item) => (
                                 <div
                                     key={item.id}
-                                    className="grid gap-4 border border-[#d8c8ad] bg-[#fffaf2] p-4 md:grid-cols-[96px_1fr_auto]"
+                                    className="grid gap-3 border border-[#d8c8ad] bg-[#fffaf2] p-3 sm:p-4 md:grid-cols-[96px_1fr_auto]"
                                 >
-                                    <div className="relative h-24 overflow-hidden bg-[#efe3d0]">
+                                    <div className="relative h-20 overflow-hidden bg-[#efe3d0] sm:h-24">
                                         {item.imageUrl && (
                                             <Image
                                                 src={item.imageUrl}
@@ -238,7 +238,7 @@ export default function OrderDetailsPage() {
                                     <div>
                                         <p className="font-medium">{item.productName}</p>
 
-                                        <p className="text-sm text-[var(--luxury-muted)]">
+                                        <p className="mt-1 text-sm text-[var(--luxury-muted)]">
                                             {item.variantName} × {item.quantity}
                                         </p>
                                     </div>
@@ -277,11 +277,11 @@ export default function OrderDetailsPage() {
                                         Are you sure you want to cancel this order?
                                     </p>
 
-                                    <div className="mt-3 flex flex-wrap gap-3">
+                                    <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                                         <button
                                             onClick={handleCancelOrder}
                                             disabled={cancelling}
-                                            className="rounded-full bg-red-600 px-6 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-white hover:bg-red-700 disabled:bg-[var(--luxury-muted-strong)]"
+                                            className="rounded-full bg-red-600 px-6 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-white hover:bg-red-700 disabled:bg-[var(--luxury-muted-strong)] sm:w-auto"
                                         >
                                             {cancelling
                                                 ? "Cancelling..."
@@ -293,7 +293,7 @@ export default function OrderDetailsPage() {
                                                 setConfirmingCancel(false)
                                             }
                                             disabled={cancelling}
-                                            className="rounded-full border border-[var(--luxury-line)] bg-[var(--luxury-paper)] px-6 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-[var(--luxury-ink)] transition hover:border-[var(--luxury-gold-strong)]"
+                                            className="rounded-full border border-[var(--luxury-line)] bg-[var(--luxury-paper)] px-6 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-[var(--luxury-ink)] transition hover:border-[var(--luxury-gold-strong)] sm:w-auto"
                                         >
                                             Keep Order
                                         </button>
@@ -302,7 +302,7 @@ export default function OrderDetailsPage() {
                             ) : (
                                 <button
                                     onClick={() => setConfirmingCancel(true)}
-                                    className="rounded-full bg-red-600 px-6 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-white hover:bg-red-700"
+                                    className="w-full rounded-full bg-red-600 px-6 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-white hover:bg-red-700 sm:w-auto"
                                 >
                                     Cancel Order
                                 </button>

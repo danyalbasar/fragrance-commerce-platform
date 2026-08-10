@@ -36,7 +36,7 @@ export default function OrderTimeline({
                             <div className="flex flex-col items-center">
                                 <div
                                     aria-hidden="true"
-                                    className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold ${completed
+                                    className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold sm:h-10 sm:w-10 ${completed
                                             ? "bg-[var(--luxury-gold)] text-[var(--luxury-ink)]"
                                             : "bg-[#efe3d0] text-[var(--luxury-muted-strong)]"
                                         }`}
@@ -46,7 +46,7 @@ export default function OrderTimeline({
 
                                 <span
                                     aria-current={isCurrent ? "step" : undefined}
-                                    className={`mt-2 text-sm font-semibold ${isCurrent
+                                    className={`mt-2 text-center text-[10px] font-semibold uppercase tracking-wide sm:text-sm sm:tracking-normal ${isCurrent
                                             ? "text-[var(--luxury-ink)]"
                                             : "text-[var(--luxury-muted-strong)]"
                                         }`}
@@ -58,7 +58,7 @@ export default function OrderTimeline({
                             {index < statuses.length - 1 && (
                                 <div
                                     aria-hidden="true"
-                                    className={`mx-2 h-1 flex-1 ${currentIndex > index
+                                    className={`mx-1 h-1 flex-1 sm:mx-2 ${currentIndex > index
                                             ? "bg-[var(--luxury-gold)]"
                                             : "bg-[#d8c8ad]"
                                         }`}

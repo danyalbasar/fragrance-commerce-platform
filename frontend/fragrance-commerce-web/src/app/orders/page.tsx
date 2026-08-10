@@ -76,7 +76,7 @@ export default function OrdersPage() {
                             Purchase Archive
                         </p>
 
-                        <h1 className="mt-3 text-4xl font-normal leading-[1.05] [font-family:var(--font-serif)] sm:text-5xl">
+                        <h1 className="mt-3 text-3xl font-normal leading-[1.05] [font-family:var(--font-serif)] sm:text-5xl">
                             My Orders
                         </h1>
                     </div>
@@ -106,7 +106,7 @@ export default function OrdersPage() {
                                     key={order.id}
                                     className="overflow-hidden rounded-[var(--luxury-radius)] border border-[var(--luxury-line)] bg-[var(--luxury-paper)] shadow-[var(--luxury-shadow-sm)]"
                                 >
-                                    <div className="grid gap-4 border-b border-[#d8c8ad] bg-[#efe3d0] px-6 py-4 md:grid-cols-4">
+                                    <div className="grid gap-3 border-b border-[#d8c8ad] bg-[#efe3d0] px-4 py-4 sm:px-6 md:grid-cols-4 md:gap-4">
                                         <div>
                                             <p className="text-xs uppercase tracking-[0.24em] text-[var(--luxury-muted)]">
                                                 Order Placed
@@ -145,14 +145,14 @@ export default function OrdersPage() {
                                         </div>
                                     </div>
 
-                                    <div className="p-6">
+                                    <div className="p-4 sm:p-6">
                                         <div className="space-y-5">
                                             {order.items.map((item) => (
                                                 <div
                                                     key={item.id}
-                                                    className="grid gap-5 border-b border-[#d8c8ad] pb-5 last:border-b-0 last:pb-0 md:grid-cols-[110px_1fr_220px]"
+                                                    className="grid gap-4 border-b border-[#d8c8ad] pb-5 last:border-b-0 last:pb-0 sm:gap-5 md:grid-cols-[110px_1fr_220px]"
                                                 >
-                                                    <div className="relative h-28 overflow-hidden rounded-[var(--luxury-radius)] bg-[var(--luxury-sand)]">
+                                                    <div className="relative h-24 w-full overflow-hidden rounded-[var(--luxury-radius)] bg-[var(--luxury-sand)] md:h-28 md:w-auto">
                                                         {item.imageUrl && (
                                                             <Image
                                                                 src={
@@ -189,7 +189,7 @@ export default function OrdersPage() {
                                                         </p>
                                                     </div>
 
-                                                    <div className="flex flex-col gap-3 md:items-end">
+                                                    <div className="grid gap-2 sm:grid-cols-3 md:flex md:flex-col md:gap-3 md:items-end">
                                                         <Link
                                                             href={`/orders/${order.id}`}
                                                             className="flex h-10 w-full items-center justify-center whitespace-nowrap rounded-full border border-[var(--luxury-line)] px-3 text-center text-xs font-semibold uppercase tracking-[0.1em] transition hover:border-[var(--luxury-gold-strong)] hover:bg-[#fffaf2] md:w-40"
