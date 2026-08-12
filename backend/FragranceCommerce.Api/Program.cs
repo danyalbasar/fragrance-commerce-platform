@@ -120,9 +120,20 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
     {
-        var allowedOrigins = builder.Configuration
-            .GetSection("Cors:AllowedOrigins")
-            .Get<string[]>() ?? [];
+        var rawOrigins = builder.Configuration["Cors:AllowedOrigins"] ?? "";
+        var allowedOrigins = rawOrigins
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Distinct()
+            .ToArray();
+
+        if (allowedOrigins.Length == 0)
+        {
+            allowedOrigins =
+            [
+                "http://localhost:3000",
+                "https://fragrance-commerce-platform.vercel.app",
+            ];
+        }
 
         policy
             .WithOrigins(allowedOrigins)
