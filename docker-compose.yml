@@ -26,6 +26,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=fragrance_db;Username=fragrance_user;Password=fragrance_password
+      Cors__AllowedOrigins__0: http://localhost:3000
       CloudinarySettings__CloudName: ${CLOUDINARY_CLOUD_NAME}
       CloudinarySettings__ApiKey: ${CLOUDINARY_API_KEY}
       CloudinarySettings__ApiSecret: ${CLOUDINARY_API_SECRET}

@@ -106,7 +106,7 @@ export default function OrdersPage() {
                                     key={order.id}
                                     className="overflow-hidden rounded-[var(--luxury-radius)] border border-[var(--luxury-line)] bg-[var(--luxury-paper)] shadow-[var(--luxury-shadow-sm)]"
                                 >
-                                    <div className="grid gap-3 border-b border-[#d8c8ad] bg-[#efe3d0] px-4 py-4 sm:px-6 md:grid-cols-4 md:gap-4">
+                                    <div className="grid grid-cols-2 gap-4 border-b border-[#d8c8ad] bg-[#efe3d0] px-4 py-4 sm:px-6 md:grid-cols-4 md:gap-4">
                                         <div>
                                             <p className="text-xs uppercase tracking-[0.24em] text-[var(--luxury-muted)]">
                                                 Order Placed

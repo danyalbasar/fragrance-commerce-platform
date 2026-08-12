@@ -120,11 +120,12 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
     {
+        var allowedOrigins = builder.Configuration
+            .GetSection("Cors:AllowedOrigins")
+            .Get<string[]>() ?? [];
+
         policy
-            .WithOrigins(
-                "http://localhost:3000",
-                "https://fragrance-commerce-platform.vercel.app"
-            )
+            .WithOrigins(allowedOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
@@ -132,6 +133,13 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto
+        | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor,
+    ForwardLimit = 2,
+});
 
 if (app.Environment.IsDevelopment())
 {
@@ -147,6 +155,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapGet("/", () => Results.Ok(new { status = "ok", service = "FragranceCommerce.Api" }));
 
 using (var scope = app.Services.CreateScope())
 {

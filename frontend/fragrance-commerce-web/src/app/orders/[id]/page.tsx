@@ -137,7 +137,7 @@ export default function OrderDetailsPage() {
                                     Order Details
                                 </p>
 
-                                <h1 className="mt-3 text-3xl font-normal leading-tight [font-family:var(--font-serif)] sm:text-4xl">
+                                <h1 className="mt-3 text-2xl font-normal leading-tight [font-family:var(--font-serif)] sm:text-3xl">
                                     Order #{order.orderNumber}
                                 </h1>
 

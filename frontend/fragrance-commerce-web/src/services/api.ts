@@ -3,12 +3,9 @@ import axios from "axios";
 const isDocker =
   process.env.NEXT_PUBLIC_DOCKER === "true";
 
-const baseURL =
-  typeof window === "undefined"
-    ? isDocker
-      ? "http://backend:8080/api"
-      : "http://localhost:5203/api"
-    : process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5203/api";
+const baseURL = isDocker
+  ? "http://backend:8080/api"
+  : process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5203/api";
 
 export const api = axios.create({
   baseURL,
