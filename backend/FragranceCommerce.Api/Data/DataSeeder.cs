@@ -165,7 +165,8 @@ public static class DataSeeder
                 Email = email,
                 PhoneNumber = phoneNumber,
                 PasswordHash = passwordHash,
-                IsActive = true
+                IsActive = true,
+                EmailVerified = true
             };
 
             context.Users.Add(user);

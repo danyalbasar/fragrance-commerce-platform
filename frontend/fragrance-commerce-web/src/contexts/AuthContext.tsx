@@ -9,9 +9,11 @@ interface AuthContextType {
     email: string | null;
     initials: string | null;
     roles: string[];
+    emailVerified: boolean;
     authReady: boolean;
     isLoggedIn: boolean;
-    loginUser: (email: string, roles?: string[]) => void;
+    loginUser: (email: string, roles?: string[], emailVerified?: boolean) => void;
+    setEmailVerified: (verified: boolean) => void;
     logoutUser: () => void;
 }
 
@@ -21,6 +23,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const [email, setEmail] = useState<string | null>(null);
     const [roles, setRoles] = useState<string[]>([]);
+    const [emailVerified, setEmailVerifiedState] = useState(true);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [authReady, setAuthReady] = useState(false);
 
@@ -37,6 +40,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
                 setEmail(data.email);
                 setRoles(data.roles);
+                setEmailVerifiedState(data.emailVerified);
                 setIsLoggedIn(true);
                 localStorage.setItem("email", data.email);
             })
@@ -52,14 +56,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         };
     }, []);
 
-    function loginUser(userEmail: string, userRoles: string[] = []) {
+    function loginUser(
+        userEmail: string,
+        userRoles: string[] = [],
+        verified: boolean = true
+    ) {
         localStorage.setItem("email", userEmail);
 
         setEmail(userEmail);
         setRoles(userRoles);
+        setEmailVerifiedState(verified);
         setIsLoggedIn(true);
 
+        if (!verified) {
+            router.replace("/verify-email");
+            return;
+        }
+
         router.replace(userRoles.includes("Vendor") ? "/vendor" : "/");
+    }
+
+    function setEmailVerified(verified: boolean) {
+        setEmailVerifiedState(verified);
     }
 
     function logoutUser() {
@@ -70,6 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         setEmail(null);
         setRoles([]);
+        setEmailVerifiedState(true);
         setIsLoggedIn(false);
 
         router.replace("/login");
@@ -81,9 +100,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 email,
                 initials,
                 roles,
+                emailVerified,
                 authReady,
                 isLoggedIn,
                 loginUser,
+                setEmailVerified,
                 logoutUser,
             }}
         >

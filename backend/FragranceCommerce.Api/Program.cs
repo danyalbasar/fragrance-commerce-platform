@@ -57,6 +57,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddHttpClient<IEmailService, ResendEmailService>();
+builder.Services.Configure<FragranceCommerce.Api.Settings.EmailSettings>(
+    builder.Configuration.GetSection("EmailSettings"));
 
 var privateKeyPem = builder.Configuration["Jwt:PrivateKeyPem"];
 

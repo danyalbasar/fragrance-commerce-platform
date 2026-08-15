@@ -30,6 +30,10 @@ services:
       CloudinarySettings__CloudName: ${CLOUDINARY_CLOUD_NAME}
       CloudinarySettings__ApiKey: ${CLOUDINARY_API_KEY}
       CloudinarySettings__ApiSecret: ${CLOUDINARY_API_SECRET}
+      EmailSettings__ApiKey: ${RESEND_API_KEY}
+      EmailSettings__FromAddress: ${RESEND_FROM_ADDRESS:-onboarding@resend.dev}
+      EmailSettings__FromName: Fragrance Commerce
+      EmailSettings__FrontendBaseUrl: http://localhost:3000
 
   frontend:
     build:

@@ -1,5 +1,8 @@
+using System.Security.Cryptography;
+using System.Text;
 using FragranceCommerce.Api.Data;
 using FragranceCommerce.Api.DTOs;
+using FragranceCommerce.Api.Exceptions;
 using FragranceCommerce.Api.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,11 +12,16 @@ public class AuthService : IAuthService
 {
     private readonly ApplicationDbContext _context;
     private readonly ITokenService _tokenService;
+    private readonly IEmailService _emailService;
 
-    public AuthService(ApplicationDbContext context, ITokenService tokenService)
+    public AuthService(
+        ApplicationDbContext context,
+        ITokenService tokenService,
+        IEmailService emailService)
     {
         _context = context;
         _tokenService = tokenService;
+        _emailService = emailService;
     }
 
     public async Task<AuthResponseDto> RegisterAsync(RegisterDto dto)
@@ -55,7 +63,8 @@ public class AuthService : IAuthService
             LastName = dto.LastName.Trim(),
             Email = email,
             PhoneNumber = dto.PhoneNumber,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
+            EmailVerified = false
         };
 
         var customerRole = await _context.Roles
@@ -71,7 +80,14 @@ public class AuthService : IAuthService
         });
 
         _context.Users.Add(user);
+
+        var (verificationToken, verificationTokenHash) = GenerateVerificationToken();
+        user.EmailVerificationToken = verificationTokenHash;
+        user.EmailVerificationTokenExpiresAt = DateTime.UtcNow.AddHours(24);
+
         await _context.SaveChangesAsync();
+
+        await _emailService.SendEmailVerificationAsync(user, verificationToken);
 
         var roles = new List<string> { "Customer" };
         var token = _tokenService.GenerateToken(user, roles);
@@ -82,6 +98,7 @@ public class AuthService : IAuthService
             FullName = $"{user.FirstName} {user.LastName}",
             Email = user.Email,
             Roles = roles,
+            EmailVerified = false,
             Token = token
         };
     }
@@ -101,6 +118,10 @@ public class AuthService : IAuthService
         if (!isPasswordValid)
             throw new InvalidOperationException("Invalid email or password.");
 
+        if (!user.EmailVerified)
+            throw new EmailNotVerifiedException(
+                "Please verify your email address before signing in.");
+
         var roles = user.UserRoles
             .Select(ur => ur.Role.Name)
             .ToList();
@@ -113,8 +134,90 @@ public class AuthService : IAuthService
             FullName = $"{user.FirstName} {user.LastName}",
             Email = user.Email,
             Roles = roles,
+            EmailVerified = true,
             Token = token
         };
+    }
+
+    public async Task<AuthResponseDto> VerifyEmailAsync(string token)
+    {
+        var tokenHash = HashToken(token);
+
+        var user = await _context.Users
+            .Include(u => u.UserRoles)
+            .ThenInclude(ur => ur.Role)
+            .FirstOrDefaultAsync(u => u.EmailVerificationToken == tokenHash);
+
+        if (user == null)
+            throw new InvalidOperationException("This verification link is invalid.");
+
+        if (user.EmailVerificationTokenExpiresAt == null ||
+            user.EmailVerificationTokenExpiresAt < DateTime.UtcNow)
+        {
+            throw new InvalidOperationException("This verification link has expired.");
+        }
+
+        user.EmailVerified = true;
+        user.EmailVerificationToken = null;
+        user.EmailVerificationTokenExpiresAt = null;
+        user.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        var roles = user.UserRoles
+            .Select(ur => ur.Role.Name)
+            .ToList();
+
+        var authToken = _tokenService.GenerateToken(user, roles);
+
+        return new AuthResponseDto
+        {
+            UserId = user.Id,
+            FullName = $"{user.FirstName} {user.LastName}",
+            Email = user.Email,
+            Roles = roles,
+            EmailVerified = true,
+            Token = authToken
+        };
+    }
+
+    public async Task ResendVerificationAsync(string email)
+    {
+        var normalizedEmail = email.Trim().ToLowerInvariant();
+
+        var user = await _context.Users
+            .FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail);
+
+        if (user == null || user.EmailVerified)
+            return;
+
+        var (verificationToken, verificationTokenHash) = GenerateVerificationToken();
+        user.EmailVerificationToken = verificationTokenHash;
+        user.EmailVerificationTokenExpiresAt = DateTime.UtcNow.AddHours(24);
+        user.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        await _emailService.SendEmailVerificationAsync(user, verificationToken);
+    }
+
+    public async Task<User?> GetUserByIdAsync(Guid userId)
+    {
+        return await _context.Users
+            .FirstOrDefaultAsync(u => u.Id == userId);
+    }
+
+    private static (string Token, string Hash) GenerateVerificationToken()
+    {
+        var bytes = RandomNumberGenerator.GetBytes(32);
+        var token = Convert.ToHexString(bytes);
+        return (token, HashToken(token));
+    }
+
+    private static string HashToken(string token)
+    {
+        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(token));
+        return Convert.ToHexString(bytes);
     }
 
     private static bool IsValidEmail(string email)

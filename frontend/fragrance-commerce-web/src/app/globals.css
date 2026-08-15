@@ -122,9 +122,6 @@ textarea::placeholder {
   color: var(--luxury-muted-strong);
 }
 
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible,
 button:focus-visible,
 a:focus-visible,
 [tabindex]:focus-visible {
@@ -142,12 +139,6 @@ a:focus-visible,
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-}
-
-input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):focus,
-select:focus,
-textarea:focus {
-  box-shadow: 0 0 0 4px rgba(182, 138, 66, 0.1);
 }
 
 @media (prefers-reduced-motion: no-preference) {

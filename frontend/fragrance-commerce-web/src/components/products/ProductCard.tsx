@@ -156,7 +156,7 @@ const ProductCard = memo(function ProductCard({
                         size={20}
                         fill={isWishlisted ? "var(--luxury-gold)" : "var(--luxury-paper)"}
                         strokeWidth={isWishlisted ? 0 : 2}
-                        className={`transition-all duration-200 drop-shadow-[0_1px_2px_rgba(22,18,13,0.4)] ${isWishlisted ? "text-transparent" : "text-[var(--luxury-muted-strong)]"}`}
+                        className={`transition-all duration-200 drop-shadow-[0_1px_2px_rgba(22,18,13,0.4)] ${isWishlisted ? "text-transparent" : "text-[var(--luxury-muted)]"}`}
                     />
                 </button>
 

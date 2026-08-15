@@ -1,5 +1,13 @@
 import type { NextConfig } from "next";
 
+const connectSources = [
+  "'self'",
+  "https://fragrance-api-654j.onrender.com",
+  ...(process.env.NODE_ENV === "development"
+    ? ["http://localhost:5203"]
+    : []),
+].join(" ");
+
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
@@ -33,7 +41,7 @@ const nextConfig: NextConfig = {
           {
             key: "Content-Security-Policy",
             value:
-              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://res.cloudinary.com; font-src 'self' data:; connect-src 'self' https://fragrance-api-654j.onrender.com; frame-ancestors 'none'; base-uri 'self'",
+              `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://res.cloudinary.com; font-src 'self' data:; connect-src ${connectSources}; frame-ancestors 'none'; base-uri 'self'`,
           },
         ],
       },
