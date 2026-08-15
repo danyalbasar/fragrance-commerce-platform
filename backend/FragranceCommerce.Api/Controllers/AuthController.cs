@@ -1,4 +1,3 @@
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using FragranceCommerce.Api.DTOs;
 using FragranceCommerce.Api.Services;
@@ -79,8 +78,8 @@ public class AuthController : ControllerBase
         return Ok(new AuthResponseDto
         {
             UserId = Guid.Parse(userIdClaim.Value),
-            FullName = User.FindFirst(JwtRegisteredClaimNames.GivenName)?.Value ?? "",
-            Email = User.FindFirst(JwtRegisteredClaimNames.Email)?.Value ?? "",
+            FullName = User.FindFirst(ClaimTypes.GivenName)?.Value ?? "",
+            Email = User.FindFirst(ClaimTypes.Email)?.Value ?? "",
             Roles = User.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList(),
             Token = null
         });
