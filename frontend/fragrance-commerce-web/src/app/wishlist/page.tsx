@@ -76,7 +76,7 @@ export default function WishlistPage() {
                             actionHref="/products"
                         />
                     ) : (
-                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+                        <div className="grid grid-cols-2 gap-3 gap-y-6 sm:gap-6 xl:grid-cols-3">
                             {wishlist?.items.map((item) => (
                                 <WishlistCard
                                     key={item.id}
