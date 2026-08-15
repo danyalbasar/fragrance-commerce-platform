@@ -2,16 +2,16 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { me, logout as logoutRequest } from "@/services/authService";
 import { clearUserCache } from "@/utils/swrCache";
 
 interface AuthContextType {
     email: string | null;
     initials: string | null;
-    token: string | null;
     roles: string[];
     authReady: boolean;
     isLoggedIn: boolean;
-    loginUser: (token: string, email: string, roles?: string[]) => void;
+    loginUser: (email: string, roles?: string[]) => void;
     logoutUser: () => void;
 }
 
@@ -20,8 +20,8 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const [email, setEmail] = useState<string | null>(null);
-    const [token, setToken] = useState<string | null>(null);
     const [roles, setRoles] = useState<string[]>([]);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [authReady, setAuthReady] = useState(false);
 
     const initials = email
@@ -29,44 +29,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         : null;
 
     useEffect(() => {
-        const savedToken = localStorage.getItem("token");
-        const savedEmail = localStorage.getItem("email");
-        const savedRoles = localStorage.getItem("roles");
+        let cancelled = false;
 
-        queueMicrotask(() => {
-            setToken(savedToken);
-            setEmail(savedEmail);
-            try {
-                setRoles(savedRoles ? JSON.parse(savedRoles) : []);
-            } catch {
-                setRoles([]);
-            }
+        me()
+            .then((data) => {
+                if (cancelled) return;
 
-            setAuthReady(true);
-        });
+                setEmail(data.email);
+                setRoles(data.roles);
+                setIsLoggedIn(true);
+                localStorage.setItem("email", data.email);
+            })
+            .catch(() => {
+                if (cancelled) return;
+            })
+            .finally(() => {
+                if (!cancelled) setAuthReady(true);
+            });
+
+        return () => {
+            cancelled = true;
+        };
     }, []);
 
-    function loginUser(newToken: string, userEmail: string, userRoles: string[] = []) {
-        localStorage.setItem("token", newToken);
+    function loginUser(userEmail: string, userRoles: string[] = []) {
         localStorage.setItem("email", userEmail);
-        localStorage.setItem("roles", JSON.stringify(userRoles));
 
-        setToken(newToken);
         setEmail(userEmail);
         setRoles(userRoles);
+        setIsLoggedIn(true);
 
         router.replace(userRoles.includes("Vendor") ? "/vendor" : "/");
     }
 
     function logoutUser() {
-        localStorage.removeItem("token");
+        logoutRequest().catch(() => {});
+
         localStorage.removeItem("email");
-        localStorage.removeItem("roles");
         clearUserCache();
 
-        setToken(null);
         setEmail(null);
         setRoles([]);
+        setIsLoggedIn(false);
 
         router.replace("/login");
     }
@@ -76,10 +80,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             value={{
                 email,
                 initials,
-                token,
                 roles,
                 authReady,
-                isLoggedIn: !!token,
+                isLoggedIn,
                 loginUser,
                 logoutUser,
             }}

@@ -24,7 +24,7 @@ export default function LoginPage() {
                 password,
             });
 
-            loginUser(response.token, response.email, response.roles);
+            loginUser(response.email, response.roles);
         } catch {
             setError("Invalid email or password.");
         } finally {

@@ -1,12 +1,12 @@
 const PREFIX = "fcp:";
 
 function keyFor(name: string): string {
-    const token =
+    const email =
         typeof window === "undefined"
             ? ""
-            : (localStorage.getItem("token") ?? "").slice(0, 16);
+            : (localStorage.getItem("email") ?? "");
 
-    return `${PREFIX}${name}:${token}`;
+    return `${PREFIX}${name}:${email}`;
 }
 
 export function readCache<T>(name: string): T | null {
