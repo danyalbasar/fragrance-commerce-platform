@@ -79,6 +79,7 @@ Re-deploy the frontend. The API CORS policy only allows the origins listed in `C
 ### Hardening notes (security assessment)
 
 - **Kestrel `Server` header** is suppressed (`AddServerHeader = false`). Headers like `x-render-origin-server`, `Server: cloudflare`, `rndr-id`, `CF-RAY` (API) and `Server: Vercel`, `X-Nextjs-*`, `X-Vercel-*` (frontend) are injected by the Render/Cloudflare/Vercel platforms and **cannot** be removed from application code.
+- **Frontend `Access-Control-Allow-Origin: *`** is injected by Vercel's CDN on all responses and is **not** removable from application code (verified: not overridable via `next.config.ts` `headers()` or middleware; not listed in Vercel's system headers). It is benign here: the header never applies to credentialed requests, and the frontend only serves public content — the API enforces its own strict CORS via `CORS__AllowedOrigins`. Strip it only by placing a proxy (e.g. Cloudflare) in front of the Vercel domain with a response-header transform rule.
 - **JWT**: tokens are signed with **RS256** when `Jwt__PrivateKeyPem` is set (asymmetric; recommended for production). The API falls back to HS256 with `Jwt__Key` for local dev only.
 - **Auth session**: the JWT is delivered as an `HttpOnly` cookie (`authToken`) and read via `GET /Auth/me`; it never touches `localStorage`. Log out through `POST /Auth/logout`.
 - **Rate limiting**: `/Auth/login`, `/Auth/register` (10 req / 5 min / IP) and `/Cart/apply-coupon` (20 req / 10 min / IP) return `429` when exceeded.
