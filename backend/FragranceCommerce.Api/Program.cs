@@ -11,6 +11,11 @@ using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.AddServerHeader = false;
+});
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {

@@ -75,3 +75,10 @@ Re-deploy the frontend. The API CORS policy only allows the origins listed in `C
 - **CORS errors in the browser**: confirm the exact origin (no trailing slash) is in `CORS__AllowedOrigins`.
 - **API cold start**: Render free tier wakes on demand; first hit after sleep is slow but then responsive.
 - **DB migration**: applied automatically on each deploy via `context.Database.MigrateAsync()` in `Program.cs`.
+
+### Hardening notes (security assessment)
+
+- **Kestrel `Server` header** is suppressed (`AddServerHeader = false`). Headers like `x-render-origin-server`, `Server: cloudflare`, `rndr-id`, `CF-RAY` (API) and `Server: Vercel`, `X-Nextjs-*`, `X-Vercel-*` (frontend) are injected by the Render/Cloudflare/Vercel platforms and **cannot** be removed from application code.
+- **JWT**: tokens are signed with **RS256** when `Jwt__PrivateKeyPem` is set (asymmetric; recommended for production). The API falls back to HS256 with `Jwt__Key` for local dev only.
+- **Auth session**: the JWT is delivered as an `HttpOnly` cookie (`authToken`) and read via `GET /Auth/me`; it never touches `localStorage`. Log out through `POST /Auth/logout`.
+- **Rate limiting**: `/Auth/login`, `/Auth/register` (10 req / 5 min / IP) and `/Cart/apply-coupon` (20 req / 10 min / IP) return `429` when exceeded.
