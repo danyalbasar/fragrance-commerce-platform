@@ -35,55 +35,10 @@ public class ProductService : IProductService
     {
         var products = await _productRepository.GetAllAsync();
 
-        return products.Select(product => new ProductDto
-        {
-            Id = product.Id,
-            VendorId = product.VendorId,
-            VendorName = product.Vendor.BusinessName,
-
-            BrandId = product.BrandId,
-            BrandName = product.Brand.Name,
-
-            CategoryId = product.CategoryId,
-            CategoryName = product.Category.Name,
-
-            Gender = product.Gender.ToString(),
-
-            Name = product.Name,
-            Description = product.Description,
-            IsActive = product.IsActive,
-
-            Variants = product.Variants.Select(v => new ProductVariantDto
-            {
-                Id = v.Id,
-                VariantName = v.VariantName,
-                SKU = v.SKU,
-                MRP = v.MRP,
-                SellingPrice = v.SellingPrice,
-                CostPrice = v.CostPrice,
-                StockQuantity = v.StockQuantity,
-                IsActive = v.IsActive,
-
-                Images = v.Images.Select(i => new ProductVariantImageDto
-                {
-                    Id = i.Id,
-                    ImageUrl = i.ImageUrl,
-                    DisplayOrder = i.DisplayOrder,
-                    IsPrimary = i.IsPrimary
-                }).ToList()
-            }).ToList(),
-
-            Images = product.Images.Select(i => new ProductImageDto
-            {
-                Id = i.Id,
-                ImageUrl = i.ImageUrl,
-                DisplayOrder = i.DisplayOrder,
-                IsPrimary = i.IsPrimary
-            }).ToList()
-        }).ToList();
+        return products.Select(MapToProductDto).ToList();
     }
 
-    public async Task<List<ProductDto>> GetVendorProductsAsync(Guid currentUserId)
+    public async Task<List<VendorProductDto>> GetVendorProductsAsync(Guid currentUserId)
     {
         var vendor = await _vendorRepository.GetByUserIdAsync(currentUserId);
 
@@ -92,52 +47,7 @@ public class ProductService : IProductService
 
         var products = await _productRepository.GetByVendorIdAsync(vendor.Id);
 
-        return products.Select(product => new ProductDto
-        {
-            Id = product.Id,
-            VendorId = product.VendorId,
-            VendorName = vendor.BusinessName,
-
-            BrandId = product.BrandId,
-            BrandName = product.Brand.Name,
-
-            CategoryId = product.CategoryId,
-            CategoryName = product.Category.Name,
-
-            Gender = product.Gender.ToString(),
-
-            Name = product.Name,
-            Description = product.Description,
-            IsActive = product.IsActive,
-
-            Variants = product.Variants.Select(v => new ProductVariantDto
-            {
-                Id = v.Id,
-                VariantName = v.VariantName,
-                SKU = v.SKU,
-                MRP = v.MRP,
-                SellingPrice = v.SellingPrice,
-                CostPrice = v.CostPrice,
-                StockQuantity = v.StockQuantity,
-                IsActive = v.IsActive,
-
-                Images = v.Images.Select(i => new ProductVariantImageDto
-                {
-                    Id = i.Id,
-                    ImageUrl = i.ImageUrl,
-                    DisplayOrder = i.DisplayOrder,
-                    IsPrimary = i.IsPrimary
-                }).ToList()
-            }).ToList(),
-
-            Images = product.Images.Select(i => new ProductImageDto
-            {
-                Id = i.Id,
-                ImageUrl = i.ImageUrl,
-                DisplayOrder = i.DisplayOrder,
-                IsPrimary = i.IsPrimary
-            }).ToList()
-        }).ToList();
+        return products.Select(MapToVendorProductDto).ToList();
     }
 
     public async Task<ProductDto?> GetByIdAsync(Guid id)
@@ -147,55 +57,10 @@ public class ProductService : IProductService
         if (product == null)
             return null;
 
-        return new ProductDto
-        {
-            Id = product.Id,
-            VendorId = product.VendorId,
-            VendorName = product.Vendor.BusinessName,
-
-            BrandId = product.BrandId,
-            BrandName = product.Brand.Name,
-
-            CategoryId = product.CategoryId,
-            CategoryName = product.Category.Name,
-
-            Gender = product.Gender.ToString(),
-
-            Name = product.Name,
-            Description = product.Description,
-            IsActive = product.IsActive,
-
-            Variants = product.Variants.Select(v => new ProductVariantDto
-            {
-                Id = v.Id,
-                VariantName = v.VariantName,
-                SKU = v.SKU,
-                MRP = v.MRP,
-                SellingPrice = v.SellingPrice,
-                CostPrice = v.CostPrice,
-                StockQuantity = v.StockQuantity,
-                IsActive = v.IsActive,
-
-                Images = v.Images.Select(i => new ProductVariantImageDto
-                {
-                    Id = i.Id,
-                    ImageUrl = i.ImageUrl,
-                    DisplayOrder = i.DisplayOrder,
-                    IsPrimary = i.IsPrimary
-                }).ToList()
-            }).ToList(),
-
-            Images = product.Images.Select(i => new ProductImageDto
-            {
-                Id = i.Id,
-                ImageUrl = i.ImageUrl,
-                DisplayOrder = i.DisplayOrder,
-                IsPrimary = i.IsPrimary
-            }).ToList()
-        };
+        return MapToProductDto(product);
     }
 
-    public async Task<ProductDto> CreateAsync(
+    public async Task<VendorProductDto> CreateAsync(
         CreateProductDto dto,
         Guid currentUserId)
     {
@@ -249,52 +114,7 @@ public class ProductService : IProductService
         await _productRepository.AddAsync(product);
         await _productRepository.SaveChangesAsync();
 
-        return new ProductDto
-        {
-            Id = product.Id,
-            VendorId = product.VendorId,
-            VendorName = product.Vendor.BusinessName,
-
-            BrandId = product.BrandId,
-            BrandName = product.Brand.Name,
-
-            CategoryId = product.CategoryId,
-            CategoryName = product.Category.Name,
-
-            Gender = product.Gender.ToString(),
-
-            Name = product.Name,
-            Description = product.Description,
-            IsActive = product.IsActive,
-
-            Variants = product.Variants.Select(v => new ProductVariantDto
-            {
-                Id = v.Id,
-                VariantName = v.VariantName,
-                SKU = v.SKU,
-                MRP = v.MRP,
-                SellingPrice = v.SellingPrice,
-                CostPrice = v.CostPrice,
-                StockQuantity = v.StockQuantity,
-                IsActive = v.IsActive,
-
-                Images = v.Images.Select(i => new ProductVariantImageDto
-                {
-                    Id = i.Id,
-                    ImageUrl = i.ImageUrl,
-                    DisplayOrder = i.DisplayOrder,
-                    IsPrimary = i.IsPrimary
-                }).ToList()
-            }).ToList(),
-
-            Images = product.Images.Select(i => new ProductImageDto
-            {
-                Id = i.Id,
-                ImageUrl = i.ImageUrl,
-                DisplayOrder = i.DisplayOrder,
-                IsPrimary = i.IsPrimary
-            }).ToList()
-        };
+        return MapToVendorProductDto(product);
     }
     public async Task<bool> UpdateAsync(
         Guid id,
@@ -377,52 +197,7 @@ public class ProductService : IProductService
 
         var result = await _productRepository.SearchAsync(request);
 
-        var productDtos = result.Products.Select(product => new ProductDto
-        {
-            Id = product.Id,
-            VendorId = product.VendorId,
-            VendorName = product.Vendor.BusinessName,
-
-            BrandId = product.BrandId,
-            BrandName = product.Brand.Name,
-
-            CategoryId = product.CategoryId,
-            CategoryName = product.Category.Name,
-
-            Gender = product.Gender.ToString(),
-
-            Name = product.Name,
-            Description = product.Description,
-            IsActive = product.IsActive,
-
-            Variants = product.Variants.Select(v => new ProductVariantDto
-            {
-                Id = v.Id,
-                VariantName = v.VariantName,
-                SKU = v.SKU,
-                MRP = v.MRP,
-                SellingPrice = v.SellingPrice,
-                CostPrice = v.CostPrice,
-                StockQuantity = v.StockQuantity,
-                IsActive = v.IsActive,
-
-                Images = v.Images.Select(i => new ProductVariantImageDto
-                {
-                    Id = i.Id,
-                    ImageUrl = i.ImageUrl,
-                    DisplayOrder = i.DisplayOrder,
-                    IsPrimary = i.IsPrimary
-                }).ToList()
-            }).ToList(),
-
-            Images = product.Images.Select(i => new ProductImageDto
-            {
-                Id = i.Id,
-                ImageUrl = i.ImageUrl,
-                DisplayOrder = i.DisplayOrder,
-                IsPrimary = i.IsPrimary
-            }).ToList()
-        }).ToList();
+        var productDtos = result.Products.Select(MapToProductDto).ToList();
 
         return new PagedResultDto<ProductDto>
         {
@@ -433,7 +208,7 @@ public class ProductService : IProductService
         };
     }
 
-    public async Task<ProductVariantDto> UpdateStockAsync(
+    public async Task<VendorProductVariantDto> UpdateStockAsync(
         Guid variantId,
         UpdateStockDto dto,
         Guid currentUserId)
@@ -462,27 +237,10 @@ public class ProductService : IProductService
 
         await _context.SaveChangesAsync();
 
-        return new ProductVariantDto
-        {
-            Id = variant.Id,
-            VariantName = variant.VariantName,
-            SKU = variant.SKU,
-            MRP = variant.MRP,
-            SellingPrice = variant.SellingPrice,
-            CostPrice = variant.CostPrice,
-            StockQuantity = variant.StockQuantity,
-            IsActive = variant.IsActive,
-            Images = variant.Images.Select(i => new ProductVariantImageDto
-            {
-                Id = i.Id,
-                ImageUrl = i.ImageUrl,
-                DisplayOrder = i.DisplayOrder,
-                IsPrimary = i.IsPrimary
-            }).ToList()
-        };
+        return MapToVendorVariantDto(variant);
     }
 
-    public async Task<ProductVariantDto> UpdateVariantAsync(
+    public async Task<VendorProductVariantDto> UpdateVariantAsync(
         Guid variantId,
         UpdateProductVariantDto dto,
         Guid currentUserId)
@@ -523,26 +281,7 @@ public class ProductService : IProductService
 
         await _productRepository.SaveChangesAsync();
 
-        return new ProductVariantDto
-        {
-            Id = variant.Id,
-            VariantName = variant.VariantName,
-            SKU = variant.SKU,
-            MRP = variant.MRP,
-            SellingPrice = variant.SellingPrice,
-            CostPrice = variant.CostPrice,
-            StockQuantity = variant.StockQuantity,
-            IsActive = variant.IsActive,
-            Images = variant.Images
-                .OrderBy(i => i.DisplayOrder)
-                .Select(i => new ProductVariantImageDto
-                {
-                    Id = i.Id,
-                    ImageUrl = i.ImageUrl,
-                    DisplayOrder = i.DisplayOrder,
-                    IsPrimary = i.IsPrimary
-                }).ToList()
-        };
+        return MapToVendorVariantDto(variant);
     }
 
     public async Task<ProductImageDto> UpdateProductImageAsync(
@@ -746,4 +485,118 @@ public class ProductService : IProductService
             DisplayOrder = variantImage.DisplayOrder
         };
     }
+
+    private static ProductDto MapToProductDto(Product product) => new()
+    {
+        Id = product.Id,
+        VendorId = product.VendorId,
+        VendorName = product.Vendor.BusinessName,
+
+        BrandId = product.BrandId,
+        BrandName = product.Brand.Name,
+
+        CategoryId = product.CategoryId,
+        CategoryName = product.Category.Name,
+
+        Gender = product.Gender.ToString(),
+
+        Name = product.Name,
+        Description = product.Description,
+        IsActive = product.IsActive,
+
+        Variants = product.Variants.Select(v => new ProductVariantDto
+        {
+            Id = v.Id,
+            VariantName = v.VariantName,
+            SKU = v.SKU,
+            MRP = v.MRP,
+            SellingPrice = v.SellingPrice,
+            StockQuantity = v.StockQuantity,
+            IsActive = v.IsActive,
+
+            Images = v.Images.Select(i => new ProductVariantImageDto
+            {
+                Id = i.Id,
+                ImageUrl = i.ImageUrl,
+                DisplayOrder = i.DisplayOrder,
+                IsPrimary = i.IsPrimary
+            }).ToList()
+        }).ToList(),
+
+        Images = product.Images.Select(i => new ProductImageDto
+        {
+            Id = i.Id,
+            ImageUrl = i.ImageUrl,
+            DisplayOrder = i.DisplayOrder,
+            IsPrimary = i.IsPrimary
+        }).ToList()
+    };
+
+    private static VendorProductDto MapToVendorProductDto(Product product) => new()
+    {
+        Id = product.Id,
+        VendorId = product.VendorId,
+        VendorName = product.Vendor.BusinessName,
+
+        BrandId = product.BrandId,
+        BrandName = product.Brand.Name,
+
+        CategoryId = product.CategoryId,
+        CategoryName = product.Category.Name,
+
+        Gender = product.Gender.ToString(),
+
+        Name = product.Name,
+        Description = product.Description,
+        IsActive = product.IsActive,
+
+        Variants = product.Variants.Select(v => new VendorProductVariantDto
+        {
+            Id = v.Id,
+            VariantName = v.VariantName,
+            SKU = v.SKU,
+            MRP = v.MRP,
+            SellingPrice = v.SellingPrice,
+            CostPrice = v.CostPrice,
+            StockQuantity = v.StockQuantity,
+            IsActive = v.IsActive,
+
+            Images = v.Images.Select(i => new ProductVariantImageDto
+            {
+                Id = i.Id,
+                ImageUrl = i.ImageUrl,
+                DisplayOrder = i.DisplayOrder,
+                IsPrimary = i.IsPrimary
+            }).ToList()
+        }).ToList(),
+
+        Images = product.Images.Select(i => new ProductImageDto
+        {
+            Id = i.Id,
+            ImageUrl = i.ImageUrl,
+            DisplayOrder = i.DisplayOrder,
+            IsPrimary = i.IsPrimary
+        }).ToList()
+    };
+
+    private static VendorProductVariantDto MapToVendorVariantDto(ProductVariant variant) => new()
+    {
+        Id = variant.Id,
+        VariantName = variant.VariantName,
+        SKU = variant.SKU,
+        MRP = variant.MRP,
+        SellingPrice = variant.SellingPrice,
+        CostPrice = variant.CostPrice,
+        StockQuantity = variant.StockQuantity,
+        IsActive = variant.IsActive,
+        Images = variant.Images
+            .OrderBy(i => i.DisplayOrder)
+            .Select(i => new ProductVariantImageDto
+            {
+                Id = i.Id,
+                ImageUrl = i.ImageUrl,
+                DisplayOrder = i.DisplayOrder,
+                IsPrimary = i.IsPrimary
+            }).ToList()
+    };
 }

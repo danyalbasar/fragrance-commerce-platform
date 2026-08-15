@@ -1,6 +1,7 @@
 using FragranceCommerce.Api.DTOs;
 using FragranceCommerce.Api.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace FragranceCommerce.Api.Controllers;
 
@@ -16,6 +17,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
+    [EnableRateLimiting("AuthPerIp")]
     public async Task<ActionResult<AuthResponseDto>> Register(RegisterDto dto)
     {
         try
@@ -30,6 +32,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
+    [EnableRateLimiting("AuthPerIp")]
     public async Task<ActionResult<AuthResponseDto>> Login(LoginDto dto)
     {
         try

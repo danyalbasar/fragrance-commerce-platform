@@ -5,9 +5,9 @@ namespace FragranceCommerce.Api.Services;
 public interface IProductService
 {
     Task<List<ProductDto>> GetAllAsync();
-    Task<List<ProductDto>> GetVendorProductsAsync(Guid currentUserId);
+    Task<List<VendorProductDto>> GetVendorProductsAsync(Guid currentUserId);
     Task<ProductDto?> GetByIdAsync(Guid id);
-    Task<ProductDto> CreateAsync(
+    Task<VendorProductDto> CreateAsync(
         CreateProductDto dto,
         Guid currentUserId);
     Task<bool> UpdateAsync(
@@ -19,11 +19,11 @@ public interface IProductService
         Guid currentUserId);
     Task<PagedResultDto<ProductDto>> SearchAsync(
         ProductSearchRequestDto request);
-    Task<ProductVariantDto> UpdateStockAsync(
+    Task<VendorProductVariantDto> UpdateStockAsync(
         Guid variantId,
         UpdateStockDto dto,
         Guid currentUserId);
-    Task<ProductVariantDto> UpdateVariantAsync(
+    Task<VendorProductVariantDto> UpdateVariantAsync(
         Guid variantId,
         UpdateProductVariantDto dto,
         Guid currentUserId);

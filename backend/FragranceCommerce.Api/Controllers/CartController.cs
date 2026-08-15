@@ -3,6 +3,7 @@ using FragranceCommerce.Api.DTOs;
 using FragranceCommerce.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace FragranceCommerce.Api.Controllers;
 
@@ -86,6 +87,7 @@ public class CartController : ControllerBase
     }
 
     [HttpPost("apply-coupon")]
+    [EnableRateLimiting("CouponPerIp")]
     public async Task<ActionResult<CartDto>> ApplyCoupon(ApplyCouponDto dto)
     {
         try

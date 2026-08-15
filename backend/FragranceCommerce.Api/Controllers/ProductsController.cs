@@ -37,7 +37,7 @@ public class ProductsController : ControllerBase
 
     [Authorize(Roles = "Vendor")]
     [HttpGet("vendor")]
-    public async Task<ActionResult<List<ProductDto>>> GetVendorProducts()
+    public async Task<ActionResult<List<VendorProductDto>>> GetVendorProducts()
     {
         try
         {
@@ -60,7 +60,7 @@ public class ProductsController : ControllerBase
 
     [Authorize(Roles = "Vendor")]
     [HttpPost]
-    public async Task<ActionResult<ProductDto>> CreateProduct(CreateProductDto dto)
+    public async Task<ActionResult<VendorProductDto>> CreateProduct(CreateProductDto dto)
     {
         try
         {
@@ -156,7 +156,7 @@ public class ProductsController : ControllerBase
 
     [Authorize(Roles = "Vendor")]
     [HttpPut("variants/{variantId}/stock")]
-    public async Task<ActionResult<ProductVariantDto>> UpdateStock(
+    public async Task<ActionResult<VendorProductVariantDto>> UpdateStock(
         Guid variantId,
         UpdateStockDto dto)
     {
@@ -184,7 +184,7 @@ public class ProductsController : ControllerBase
 
     [Authorize(Roles = "Vendor")]
     [HttpPut("variants/{variantId}")]
-    public async Task<ActionResult<ProductVariantDto>> UpdateVariant(
+    public async Task<ActionResult<VendorProductVariantDto>> UpdateVariant(
         Guid variantId,
         UpdateProductVariantDto dto)
     {

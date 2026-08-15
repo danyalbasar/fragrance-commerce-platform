@@ -18,17 +18,42 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponseDto> RegisterAsync(RegisterDto dto)
     {
+        if (string.IsNullOrWhiteSpace(dto.FirstName) ||
+            string.IsNullOrWhiteSpace(dto.LastName))
+        {
+            throw new InvalidOperationException("First name and last name are required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(dto.Email))
+            throw new InvalidOperationException("Email is required.");
+
+        if (!IsValidEmail(dto.Email))
+            throw new InvalidOperationException("A valid email address is required.");
+
+        if (string.IsNullOrWhiteSpace(dto.Password) || dto.Password.Length < 8)
+            throw new InvalidOperationException("Password must be at least 8 characters long.");
+
+        if (!dto.Password.Any(char.IsUpper) ||
+            !dto.Password.Any(char.IsLower) ||
+            !dto.Password.Any(char.IsDigit))
+        {
+            throw new InvalidOperationException(
+                "Password must contain at least one uppercase letter, one lowercase letter, and one digit.");
+        }
+
+        var email = dto.Email.Trim().ToLowerInvariant();
+
         var existingUser = await _context.Users
-            .FirstOrDefaultAsync(u => u.Email.ToLower() == dto.Email.ToLower());
+            .FirstOrDefaultAsync(u => u.Email.ToLower() == email);
 
         if (existingUser != null)
             throw new InvalidOperationException("Email is already registered.");
 
         var user = new User
         {
-            FirstName = dto.FirstName,
-            LastName = dto.LastName,
-            Email = dto.Email,
+            FirstName = dto.FirstName.Trim(),
+            LastName = dto.LastName.Trim(),
+            Email = email,
             PhoneNumber = dto.PhoneNumber,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
         };
@@ -90,5 +115,11 @@ public class AuthService : IAuthService
             Roles = roles,
             Token = token
         };
+    }
+
+    private static bool IsValidEmail(string email)
+    {
+        return System.Text.RegularExpressions.Regex.IsMatch(email,
+            @"^[^@\s]+@[^@\s]+\.[^@\s]+$");
     }
 }
