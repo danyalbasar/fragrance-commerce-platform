@@ -16,6 +16,8 @@ services:
         sync: false
       - key: Jwt__Key
         sync: false
+      - key: Jwt__PrivateKeyPem
+        sync: false
       - key: Jwt__Issuer
         sync: false
       - key: Jwt__Audience

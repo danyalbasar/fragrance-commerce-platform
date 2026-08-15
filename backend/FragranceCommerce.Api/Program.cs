@@ -53,6 +53,21 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
+var privateKeyPem = builder.Configuration["Jwt:PrivateKeyPem"];
+
+SecurityKey jwtSigningKey;
+
+if (!string.IsNullOrWhiteSpace(privateKeyPem))
+{
+    jwtSigningKey = new RsaSecurityKey(
+        FragranceCommerce.Api.Security.RsaKeyLoader.Load(privateKeyPem));
+}
+else
+{
+    jwtSigningKey = new SymmetricSecurityKey(
+        Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!));
+}
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -70,8 +85,7 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
 
-        IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+        IssuerSigningKey = jwtSigningKey
     };
 
     options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
