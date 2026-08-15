@@ -50,8 +50,8 @@ The API and database are hosted for free. The frontend stays on Vercel.
    - `ConnectionStrings__DefaultConnection` — your Neon EF Core connection string
    - `Jwt__Key` — a long random secret (32+ chars), used only as a local-dev fallback. **Not used when `Jwt__PrivateKeyPem` is set.**
    - `Jwt__PrivateKeyPem` — **base64-encoded PKCS#8 RSA private key** (recommended, enables RS256 asymmetric signing). Generate with `openssl genrsa 2048` / `openssl pkcs8 -topk8`, then base64-encode the PEM text (no newlines). When set, tokens are signed with RS256 and `Jwt__Key` is ignored. When unset, the API falls back to HS256 with `Jwt__Key` (fine for local dev).
-   - `Jwt__Issuer` — `FragranceCommerceApi`
-   - `Jwt__Audience` — `FragranceCommerceClient`
+   - `Jwt__Issuer` — `luxuria-auth`
+   - `Jwt__Audience` — `luxuria-web`
    - `CloudinarySettings__CloudName` / `ApiKey` / `ApiSecret`
    - `CORS__AllowedOrigins` — comma-separated, e.g. `https://fragrance-commerce-platform.vercel.app`
 4. Deploy. Render builds the Dockerfile, runs `MigrateAsync` + the data seeder on startup, and gives you a URL like `https://fragrance-api.onrender.com`.
