@@ -1,0 +1,17 @@
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "https://fragrance-commerce-platform.vercel.app"
+        },
+        {
+          "key": "Vary",
+          "value": "Origin"
+        }
+      ]
+    }
+  ]
+}

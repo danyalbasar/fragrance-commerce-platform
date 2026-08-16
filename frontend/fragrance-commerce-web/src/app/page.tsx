@@ -4,8 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { motion, type Variants } from "framer-motion";
-import { useEffect, useState } from "react";
-import { Mail } from "lucide-react";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { ChevronLeft, ChevronRight, Mail } from "lucide-react";
 import VendorHomeRedirect from "@/components/vendor/VendorHomeRedirect";
 import ProductCard from "@/components/products/ProductCard";
 import { productService } from "@/services/productService";
@@ -532,15 +532,102 @@ function ProductGrid({
   }
 
   return (
-    <div className="flex snap-x snap-mandatory items-stretch gap-4 overflow-x-auto scroll-smooth px-5 pb-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:px-6 md:grid md:grid-cols-4 md:gap-6 md:overflow-visible md:px-0 md:pb-0">
-      {products.map((product) => (
-        <div
-          key={product.id}
-          className="min-w-[70%] max-w-[70%] basis-[70%] shrink-0 snap-start md:min-w-0 md:max-w-none md:basis-auto md:shrink"
+    <ProductGridScroller products={products} />
+  );
+}
+
+function ProductGridScroller({ products }: { products: Product[] }) {
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  function scrollProducts(direction: "left" | "right") {
+    const scroller = scrollerRef.current;
+
+    if (!scroller) return;
+
+    scroller.scrollBy({
+      left:
+        direction === "left"
+          ? -scroller.clientWidth * 0.85
+          : scroller.clientWidth * 0.85,
+      behavior: "smooth",
+    });
+  }
+
+  const updateScrollControls = useCallback(() => {
+    const scroller = scrollerRef.current;
+
+    if (!scroller) return;
+
+    const firstCard = scroller.firstElementChild as HTMLElement | null;
+    const lastCard = scroller.lastElementChild as HTMLElement | null;
+    const scrollerBounds = scroller.getBoundingClientRect();
+    const firstCardBounds = firstCard?.getBoundingClientRect();
+    const lastCardBounds = lastCard?.getBoundingClientRect();
+
+    setCanScrollLeft(
+      firstCardBounds ? firstCardBounds.left < scrollerBounds.left - 2 : false
+    );
+    setCanScrollRight(
+      lastCardBounds ? lastCardBounds.right > scrollerBounds.right + 2 : false
+    );
+  }, []);
+
+  useEffect(() => {
+    updateScrollControls();
+
+    const scroller = scrollerRef.current;
+
+    if (!scroller) return;
+
+    scroller.addEventListener("scroll", updateScrollControls);
+    window.addEventListener("resize", updateScrollControls);
+
+    return () => {
+      scroller.removeEventListener("scroll", updateScrollControls);
+      window.removeEventListener("resize", updateScrollControls);
+    };
+  }, [updateScrollControls]);
+
+  return (
+    <div className="relative">
+      {canScrollLeft && (
+        <button
+          type="button"
+          onClick={() => scrollProducts("left")}
+          className="absolute left-4 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--luxury-paper)] text-[var(--luxury-ink)] shadow-[0_14px_30px_rgba(22,18,13,0.18)] transition-all duration-200 hover:scale-105 hover:text-[var(--luxury-gold)] active:scale-90 md:hidden"
+          aria-label="Scroll products left"
         >
-          <ProductCard product={product} compactMobile />
-        </div>
-      ))}
+          <ChevronLeft size={24} />
+        </button>
+      )}
+
+      <div
+        ref={scrollerRef}
+        onScroll={updateScrollControls}
+        className="flex snap-x snap-mandatory items-stretch gap-4 overflow-x-auto scroll-smooth px-5 pb-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:px-6 md:grid md:grid-cols-4 md:gap-6 md:overflow-visible md:px-0 md:pb-0"
+      >
+        {products.map((product) => (
+          <div
+            key={product.id}
+            className="min-w-[70%] max-w-[70%] basis-[70%] shrink-0 snap-start md:min-w-0 md:max-w-none md:basis-auto md:shrink"
+          >
+            <ProductCard product={product} compactMobile />
+          </div>
+        ))}
+      </div>
+
+      {canScrollRight && (
+        <button
+          type="button"
+          onClick={() => scrollProducts("right")}
+          className="absolute right-4 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--luxury-paper)] text-[var(--luxury-ink)] shadow-[0_14px_30px_rgba(22,18,13,0.18)] transition-all duration-200 hover:scale-105 hover:text-[var(--luxury-gold)] active:scale-90 md:hidden"
+          aria-label="Scroll products right"
+        >
+          <ChevronRight size={24} />
+        </button>
+      )}
     </div>
   );
 }

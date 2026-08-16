@@ -283,16 +283,39 @@ export default function CartPage() {
                                                     ),
                                                     ease: easeLuxury,
                                                 }}
-                                                className="grid gap-4 overflow-hidden border-b border-[#d8c8ad] py-6 sm:grid-cols-[132px_1fr_auto] md:grid-cols-[170px_1fr_auto] md:gap-5"
+                                                className="grid grid-cols-[96px_1fr] gap-x-4 gap-y-5 overflow-hidden border-b border-[#d8c8ad] py-6 sm:grid-cols-[132px_1fr_auto] md:grid-cols-[170px_1fr_auto] md:gap-5"
                                             >
                                                 {item.imageUrl && (
-                                                    <div className="relative h-36 w-full overflow-hidden rounded-[var(--luxury-radius)] bg-[var(--luxury-sand)] sm:h-32 sm:w-32 md:h-40 md:w-40">
+                                                    <div className="relative h-32 w-full overflow-hidden rounded-[var(--luxury-radius)] bg-[var(--luxury-sand)] sm:h-32 sm:w-32 md:h-40 md:w-40">
                                                         <Image
                                                             src={item.imageUrl}
                                                             alt={item.productName}
                                                             fill
                                                             className="object-contain p-5 drop-shadow-[0_20px_22px_rgba(22,18,13,0.16)]"
                                                         />
+
+                                                        <button
+                                                            onClick={() =>
+                                                                deleteItem(item.id)
+                                                            }
+                                                            disabled={
+                                                                updatingId !== null ||
+                                                                removingIds.has(item.id)
+                                                            }
+                                                            aria-label={`Remove ${item.productName} from cart`}
+                                                            className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(255,250,242,0.95)] text-red-600 shadow-[0_12px_30px_rgba(22,18,13,0.16)] backdrop-blur-md transition-all duration-200 hover:bg-red-50 hover:text-red-700 active:scale-90 disabled:opacity-50 sm:hidden"
+                                                        >
+                                                            {removingIds.has(
+                                                                item.id
+                                                            ) ? (
+                                                                <Loader2
+                                                                    size={15}
+                                                                    className="animate-spin"
+                                                                />
+                                                            ) : (
+                                                                <Trash2 size={15} />
+                                                            )}
+                                                        </button>
                                                     </div>
                                                 )}
 
@@ -419,7 +442,7 @@ export default function CartPage() {
                                                         removingIds.has(item.id)
                                                     }
                                                     aria-label={`Remove ${item.productName} from cart`}
-                                                    className="flex h-10 w-10 items-center justify-center justify-self-end rounded-full bg-[var(--luxury-paper)] text-red-600 shadow-sm transition-all duration-200 hover:bg-red-50 hover:shadow-[0_8px_20px_rgba(127,29,29,0.08)] active:scale-90 disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--luxury-gold)] sm:justify-self-auto"
+                                                    className="hidden h-10 w-10 items-center justify-center justify-self-end rounded-full bg-[var(--luxury-paper)] text-red-600 shadow-sm transition-all duration-200 hover:bg-red-50 hover:shadow-[0_8px_20px_rgba(127,29,29,0.08)] active:scale-90 disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--luxury-gold)] sm:flex sm:justify-self-auto"
                                                 >
                                                     {removingIds.has(
                                                         item.id

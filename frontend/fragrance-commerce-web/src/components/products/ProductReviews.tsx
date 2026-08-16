@@ -1018,7 +1018,7 @@ export default function ProductReviews({
                         <div className="mt-6 flex justify-end gap-3">
                             <button
                                 onClick={() => setShowModal(false)}
-                                className="cursor-pointer rounded-full border border-[var(--luxury-line)] px-6 py-3 text-sm font-semibold uppercase tracking-[0.12em] transition hover:border-[var(--luxury-gold)]"
+                                className="cursor-pointer rounded-full border border-[var(--luxury-line)] px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] transition hover:border-[var(--luxury-gold)] sm:px-6 sm:py-3 sm:text-sm"
                             >
                                 Cancel
                             </button>
@@ -1026,7 +1026,7 @@ export default function ProductReviews({
                             <button
                                 onClick={handleSubmitReview}
                                 disabled={submitting}
-                                className="flex cursor-pointer items-center justify-center gap-2 rounded-full bg-[var(--luxury-ink)] px-6 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-[var(--luxury-paper)] shadow-[0_14px_30px_rgba(22,18,13,0.12)] transition hover:bg-[var(--luxury-moss)] hover:shadow-[0_18px_38px_rgba(22,18,13,0.16)] disabled:cursor-not-allowed disabled:bg-[var(--luxury-muted-strong)]"
+                                className="flex cursor-pointer items-center justify-center gap-2 rounded-full bg-[var(--luxury-ink)] px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--luxury-paper)] shadow-[0_14px_30px_rgba(22,18,13,0.12)] transition hover:bg-[var(--luxury-moss)] hover:shadow-[0_18px_38px_rgba(22,18,13,0.16)] disabled:cursor-not-allowed disabled:bg-[var(--luxury-muted-strong)] sm:px-6 sm:py-3 sm:text-sm"
                             >
                                 {submitting && (
                                     <Loader2

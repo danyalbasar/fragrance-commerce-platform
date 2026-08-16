@@ -6,7 +6,7 @@ import { Plus, Save, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { getApiResponse } from "@/services/api";
-import ProtectedRoute from "@/components/common/ProtectedRoute";
+import VendorRoute from "@/components/common/VendorRoute";
 import { getBrands } from "@/services/brandService";
 import { getCategories } from "@/services/categoryService";
 import {
@@ -411,7 +411,7 @@ export default function VendorProductEditor({
 
     if (loading) {
         return (
-            <ProtectedRoute>
+            <VendorRoute>
                 <main aria-hidden="true" className="min-h-screen bg-[var(--luxury-ivory)] px-4 py-6 text-[var(--luxury-ink)] sm:py-8 md:px-8">
                     <div className="mx-auto max-w-[1500px]">
                         <div className="mb-2.5 h-4 w-28 animate-pulse rounded bg-[#e5d9c4]" />
@@ -482,12 +482,12 @@ export default function VendorProductEditor({
                         </div>
                     </div>
                 </main>
-            </ProtectedRoute>
+            </VendorRoute>
         );
     }
 
     return (
-        <ProtectedRoute>
+        <VendorRoute>
             <main className="min-h-screen bg-[var(--luxury-ivory)] px-4 py-6 text-[var(--luxury-ink)] sm:py-8 md:px-8">
                 <div className="mx-auto max-w-[1500px]">
                     <button
@@ -956,7 +956,7 @@ export default function VendorProductEditor({
                     </div>
                 </div>
             </main>
-        </ProtectedRoute>
+        </VendorRoute>
     );
 }
 

@@ -20,7 +20,7 @@ import {
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { getApiResponse } from "@/services/api";
 import { motion } from "framer-motion";
-import ProtectedRoute from "@/components/common/ProtectedRoute";
+import VendorRoute from "@/components/common/VendorRoute";
 import { VendorDashboardSkeleton } from "@/components/common/VendorDashboardSkeleton";
 import { EmptyState } from "@/components/common/EmptyState";
 import { getVendorOrders, updateOrderStatus } from "@/services/orderService";
@@ -268,14 +268,14 @@ export default function VendorPage() {
 
     if (loading && products.length === 0) {
         return (
-            <ProtectedRoute>
+            <VendorRoute>
                 <VendorDashboardSkeleton />
-            </ProtectedRoute>
+            </VendorRoute>
         );
     }
 
     return (
-        <ProtectedRoute>
+        <VendorRoute>
             <main className="min-h-screen bg-[var(--luxury-ivory)] text-[var(--luxury-ink)]">
                 <div
                     className={
@@ -840,7 +840,7 @@ export default function VendorPage() {
                     </section>
                 </div>
             </main>
-        </ProtectedRoute>
+        </VendorRoute>
     );
 }
 
