@@ -539,8 +539,7 @@ export default function CartPage() {
                                         </span>
                                     </div>
 
-                                    {cart?.discountAmount &&
-                                        cart.discountAmount > 0 && (
+                                    {(cart?.discountAmount ?? 0) > 0 && (
                                         <div className="border-b border-[#d8c8ad] py-4">
                                             <div className="flex justify-between">
                                                 <span className="font-medium">
@@ -613,8 +612,7 @@ export default function CartPage() {
                                     </div>
                                 </div>
 
-                                {cart?.discountAmount &&
-                                    cart.discountAmount > 0 && (
+                                {(cart?.discountAmount ?? 0) > 0 && (
                                         <p className="mt-1 text-xs uppercase tracking-[0.18em] text-[#3f5f32]">
                                             You&apos;re saving ₹
                                             {cart.discountAmount} today
