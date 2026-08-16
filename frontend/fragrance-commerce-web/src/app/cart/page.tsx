@@ -728,7 +728,7 @@ export default function CartPage() {
                                                             </div>
                                                         </div>
                                                     ) : (
-                                                        <div className="flex flex-row items-center gap-2">
+                                                        <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
                                                             <input
                                                                 value={couponCode}
                                                                 onChange={(e) =>
@@ -740,7 +740,7 @@ export default function CartPage() {
                                                                 placeholder="Coupon code"
                                                                 aria-label="Coupon code"
                                                                 autoComplete="off"
-                                                                className="min-w-0 flex-1 border border-[var(--luxury-line)] bg-[var(--luxury-input)] px-3 py-2.5 text-sm outline-none transition-colors duration-200 focus:border-[var(--luxury-gold)]"
+                                                                className="w-full border border-[var(--luxury-line)] bg-[var(--luxury-input)] px-3 py-2.5 text-sm outline-none transition-colors duration-200 focus:border-[var(--luxury-gold)] sm:min-w-0 sm:flex-1"
                                                             />
 
                                                             <button
@@ -751,7 +751,7 @@ export default function CartPage() {
                                                                     applyingCoupon ||
                                                                     cartBusy
                                                                 }
-                                                                className="flex shrink-0 items-center justify-center gap-2 rounded-full bg-[var(--luxury-ink)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-[var(--luxury-paper)] transition-all duration-200 hover:bg-[var(--luxury-moss)] active:scale-[0.96] disabled:bg-[var(--luxury-muted-strong)] disabled:hover:scale-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--luxury-gold)]"
+                                                                className="flex w-full items-center justify-center gap-2 rounded-full bg-[var(--luxury-ink)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-[var(--luxury-paper)] transition-all duration-200 hover:bg-[var(--luxury-moss)] active:scale-[0.96] disabled:bg-[var(--luxury-muted-strong)] disabled:hover:scale-100 sm:w-auto sm:shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--luxury-gold)]"
                                                             >
                                                                 {applyingCoupon && (
                                                                     <Loader2
