@@ -353,10 +353,6 @@ export default function CartPage() {
                                                         >
                                                             ₹{item.totalPrice}
                                                         </motion.p>
-                                                        <p className="mt-1 text-xs uppercase tracking-[0.14em] text-[var(--luxury-muted)]">
-                                                            ₹{item.unitPrice} ×{" "}
-                                                            {item.quantity}
-                                                        </p>
                                                     </div>
 
                                                     <div className="mt-5 flex items-center gap-4">
@@ -543,52 +539,45 @@ export default function CartPage() {
                                         </span>
                                     </div>
 
-                                    <div className="border-b border-[#d8c8ad] py-4">
-                                        <div className="flex justify-between">
-                                            <span className="font-medium">
-                                                Discount
-                                            </span>
+                                    {cart?.discountAmount &&
+                                        cart.discountAmount > 0 && (
+                                        <div className="border-b border-[#d8c8ad] py-4">
+                                            <div className="flex justify-between">
+                                                <span className="font-medium">
+                                                    Discount
+                                                </span>
 
-                                            <span
-                                                className={
-                                                    cart?.discountAmount &&
-                                                    cart.discountAmount > 0
-                                                        ? "font-semibold text-[#3f5f32]"
-                                                        : "font-semibold"
-                                                }
-                                            >
-                                                <motion.span
-                                                    key={
-                                                        cart?.discountAmount ?? 0
-                                                    }
-                                                    initial={{
-                                                        opacity: 0,
-                                                        y: 6,
-                                                    }}
-                                                    animate={{
-                                                        opacity: 1,
-                                                        y: 0,
-                                                    }}
-                                                    transition={{
-                                                        duration: 0.18,
-                                                        ease: easeLuxury,
-                                                    }}
-                                                    className="inline-block"
-                                                >
-                                                    {cart?.discountAmount &&
-                                                    cart.discountAmount > 0
-                                                        ? `-₹${cart.discountAmount}`
-                                                        : "₹0"}
-                                                </motion.span>
-                                            </span>
+                                                <span className="font-semibold text-[#3f5f32]">
+                                                    <motion.span
+                                                        key={
+                                                            cart?.discountAmount ?? 0
+                                                        }
+                                                        initial={{
+                                                            opacity: 0,
+                                                            y: 6,
+                                                        }}
+                                                        animate={{
+                                                            opacity: 1,
+                                                            y: 0,
+                                                        }}
+                                                        transition={{
+                                                            duration: 0.18,
+                                                            ease: easeLuxury,
+                                                        }}
+                                                        className="inline-block"
+                                                    >
+                                                        {`-₹${cart.discountAmount}`}
+                                                    </motion.span>
+                                                </span>
+                                            </div>
+
+                                            {cart?.couponCode && (
+                                                <p className="mt-1 text-xs uppercase tracking-[0.24em] text-[var(--luxury-muted)]">
+                                                    {cart.couponCode}
+                                                </p>
+                                            )}
                                         </div>
-
-                                        {cart?.couponCode && (
-                                            <p className="mt-1 text-xs uppercase tracking-[0.24em] text-[var(--luxury-muted)]">
-                                                {cart.couponCode}
-                                            </p>
-                                        )}
-                                    </div>
+                                    )}
 
                                     <div className="flex justify-between border-b border-[#d8c8ad] py-4">
                                         <span className="font-medium">
@@ -674,7 +663,7 @@ export default function CartPage() {
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="flex flex-col gap-2 sm:flex-row">
+                                        <div className="flex flex-row items-center gap-2">
                                             <input
                                                 value={couponCode}
                                                 onChange={(e) =>
@@ -691,7 +680,7 @@ export default function CartPage() {
                                                 disabled={
                                                     applyingCoupon || cartBusy
                                                 }
-                                                className="flex items-center justify-center gap-2 rounded-full bg-[var(--luxury-ink)] px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.1em] text-[var(--luxury-paper)] transition-all duration-200 hover:bg-[var(--luxury-moss)] active:scale-[0.96] disabled:bg-[var(--luxury-muted-strong)] disabled:hover:scale-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--luxury-gold)]"
+                                                className="flex shrink-0 items-center justify-center gap-2 rounded-full bg-[var(--luxury-ink)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-[var(--luxury-paper)] transition-all duration-200 hover:bg-[var(--luxury-moss)] active:scale-[0.96] disabled:bg-[var(--luxury-muted-strong)] disabled:hover:scale-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--luxury-gold)]"
                                             >
                                                 {applyingCoupon && (
                                                     <Loader2
