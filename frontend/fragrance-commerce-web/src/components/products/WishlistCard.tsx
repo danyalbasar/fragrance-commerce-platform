@@ -15,9 +15,14 @@ import {
 interface WishlistCardProps {
     item: WishlistItem;
     onRemove: (productId: string) => Promise<void>;
+    compactMobile?: boolean;
 }
 
-export default function WishlistCard({ item, onRemove }: WishlistCardProps) {
+export default function WishlistCard({
+    item,
+    onRemove,
+    compactMobile = false,
+}: WishlistCardProps) {
     const [quantity, setQuantity] = useState(0);
     const [cartItemId, setCartItemId] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
@@ -94,7 +99,13 @@ export default function WishlistCard({ item, onRemove }: WishlistCardProps) {
 
     return (
         <div className="group flex h-full flex-col overflow-hidden rounded-[var(--luxury-radius)] border border-[var(--luxury-line)] bg-[var(--luxury-paper)] shadow-[var(--luxury-shadow-sm)] transition-all duration-200 hover:-translate-y-1 hover:border-[var(--luxury-gold)] hover:shadow-[var(--luxury-shadow-md)] active:scale-[0.99]">
-            <div className="relative aspect-square overflow-hidden bg-[var(--luxury-sand)]">
+            <div
+                className={
+                    compactMobile
+                        ? "relative aspect-[1/1.08] overflow-hidden bg-[var(--luxury-sand)] md:aspect-square"
+                        : "relative aspect-square overflow-hidden bg-[var(--luxury-sand)]"
+                }
+            >
                 <div className="absolute inset-x-8 bottom-0 h-px bg-[linear-gradient(90deg,transparent,var(--luxury-gold),transparent)]" />
 
                 <Link
@@ -108,7 +119,7 @@ export default function WishlistCard({ item, onRemove }: WishlistCardProps) {
                             src={item.primaryImageUrl}
                             alt=""
                             fill
-                            sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
+                            sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 50vw"
                             className="object-cover transition-transform duration-200 ease-out group-hover:scale-[1.03]"
                         />
                     )}
@@ -117,46 +128,60 @@ export default function WishlistCard({ item, onRemove }: WishlistCardProps) {
                 <button
                     onClick={handleRemove}
                     disabled={removing}
-                    className="absolute right-4 top-4 z-10 rounded-full border border-[#e0b8ad] bg-[rgba(255,250,242,0.95)] p-2 text-red-600 opacity-100 shadow-[0_12px_30px_rgba(22,18,13,0.16)] backdrop-blur-md transition-all duration-200 ease-out hover:border-red-300 hover:text-red-700 hover:scale-110 active:scale-90 disabled:opacity-50 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100"
+                    className={
+                        compactMobile
+                            ? "absolute right-3 top-3 z-10 rounded-full border border-[#e0b8ad] bg-[rgba(255,250,242,0.95)] p-1.5 text-red-600 opacity-100 shadow-[0_12px_30px_rgba(22,18,13,0.16)] backdrop-blur-md transition-all duration-200 ease-out hover:border-red-300 hover:text-red-700 hover:scale-110 active:scale-90 disabled:opacity-50 sm:right-4 sm:top-4 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100"
+                            : "absolute right-4 top-4 z-10 rounded-full border border-[#e0b8ad] bg-[rgba(255,250,242,0.95)] p-2 text-red-600 opacity-100 shadow-[0_12px_30px_rgba(22,18,13,0.16)] backdrop-blur-md transition-all duration-200 ease-out hover:border-red-300 hover:text-red-700 hover:scale-110 active:scale-90 disabled:opacity-50 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100"
+                    }
                     aria-label={`Remove ${item.productName} from wishlist`}
                 >
                     <Trash2 size={18} className="transition-all duration-200 hover:text-red-700" />
                 </button>
 
-                <div className="pointer-events-none absolute inset-x-4 bottom-4 translate-y-0 opacity-100 transition-all duration-300 md:inset-x-6 md:bottom-5 md:translate-y-3 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 md:group-focus-within:translate-y-0 md:group-focus-within:opacity-100">
+                <div
+                    className={
+                        compactMobile
+                            ? "pointer-events-none absolute inset-x-3 bottom-3 translate-y-0 opacity-100 transition-all duration-300 md:inset-x-6 md:bottom-5 md:translate-y-3 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 md:group-focus-within:translate-y-0 md:group-focus-within:opacity-100"
+                            : "pointer-events-none absolute inset-x-4 bottom-4 translate-y-0 opacity-100 transition-all duration-300 md:inset-x-6 md:bottom-5 md:translate-y-3 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 md:group-focus-within:translate-y-0 md:group-focus-within:opacity-100"
+                    }
+                >
                     <button
                         onClick={handleQuickAdd}
                         disabled={loading || item.stockQuantity <= 0}
-                        className="pointer-events-auto mx-auto flex h-11 w-full max-w-[300px] items-center justify-center rounded-[var(--luxury-radius)] bg-[var(--luxury-paper)] text-sm font-semibold uppercase tracking-[0.14em] text-[var(--luxury-ink)] shadow-[0_16px_35px_rgba(22,18,13,0.16)] transition-all duration-200 hover:bg-[var(--luxury-ink)] hover:text-[var(--luxury-paper)] hover:shadow-[0_20px_40px_rgba(22,18,13,0.24)] active:scale-[0.98] disabled:bg-[#e5ddd0] disabled:text-[var(--luxury-muted-strong)]"
+                        className={
+                            compactMobile
+                                ? "pointer-events-auto mx-auto flex h-10 w-full max-w-[300px] items-center justify-center rounded-[var(--luxury-radius)] bg-[var(--luxury-paper)] text-xs font-semibold uppercase tracking-[0.08em] text-[var(--luxury-ink)] shadow-[0_16px_35px_rgba(22,18,13,0.16)] transition-all duration-200 hover:bg-[var(--luxury-ink)] hover:text-[var(--luxury-paper)] hover:shadow-[0_20px_40px_rgba(22,18,13,0.24)] active:scale-[0.98] disabled:bg-[#e5ddd0] disabled:text-[var(--luxury-muted-strong)] sm:h-11 sm:text-sm sm:tracking-[0.14em]"
+                                : "pointer-events-auto mx-auto flex h-11 w-full max-w-[300px] items-center justify-center rounded-[var(--luxury-radius)] bg-[var(--luxury-paper)] text-sm font-semibold uppercase tracking-[0.14em] text-[var(--luxury-ink)] shadow-[0_16px_35px_rgba(22,18,13,0.16)] transition-all duration-200 hover:bg-[var(--luxury-ink)] hover:text-[var(--luxury-paper)] hover:shadow-[0_20px_40px_rgba(22,18,13,0.24)] active:scale-[0.98] disabled:bg-[#e5ddd0] disabled:text-[var(--luxury-muted-strong)]"
+                        }
                     >
                         {loading ? "Adding..." : "+ Quick Add"}
                     </button>
                 </div>
             </div>
 
-            <div className="flex flex-1 flex-col p-4 sm:p-5">
+            <div className={compactMobile ? "flex flex-1 flex-col p-3 sm:p-5" : "flex flex-1 flex-col p-4 sm:p-5"}>
                 <Link href={`/products/${item.productId}`} className="block">
-                    <p className="text-xs uppercase tracking-[0.28em] text-[var(--luxury-gold-strong)]">
+                    <p className={compactMobile ? "text-[10px] uppercase tracking-[0.12em] text-[var(--luxury-gold-strong)] sm:text-xs sm:tracking-[0.28em]" : "text-xs uppercase tracking-[0.28em] text-[var(--luxury-gold-strong)]"}>
                         {item.brandName}
                     </p>
 
-                    <h3 className="mt-2 text-xl font-normal leading-[1.08] [font-family:var(--font-serif)] sm:text-2xl">
+                    <h3 className={compactMobile ? "mt-2 line-clamp-2 text-base font-normal leading-tight [font-family:var(--font-serif)] sm:text-2xl" : "mt-2 text-xl font-normal leading-[1.08] [font-family:var(--font-serif)] sm:text-2xl"}>
                         {item.productName}
                     </h3>
                 </Link>
 
-                <p className="mt-2 text-sm text-[var(--luxury-muted)]">
+                <p className={compactMobile ? "mt-2 line-clamp-2 text-xs leading-5 text-[var(--luxury-muted)] sm:text-sm" : "mt-2 text-sm text-[var(--luxury-muted)]"}>
                     {item.gender} &#8226; {item.categoryName} &#8226;{" "}
                     {item.variantName}
                 </p>
 
-                <p className="mt-3 line-clamp-2 text-sm leading-6 text-[var(--luxury-muted)]">
+                <p className={compactMobile ? "hidden sm:mt-3 sm:line-clamp-2 sm:block sm:text-sm sm:leading-6 sm:text-[var(--luxury-muted)]" : "mt-3 line-clamp-2 text-sm leading-6 text-[var(--luxury-muted)]"}>
                     {item.description}
                 </p>
 
                 <div className="mt-auto pt-5">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                        <span className="text-2xl font-semibold">
+                        <span className={compactMobile ? "text-base font-semibold sm:text-2xl" : "text-2xl font-semibold"}>
                             {formatPrice(item.sellingPrice)}
                         </span>
 

@@ -82,6 +82,7 @@ export default function WishlistPage() {
                                     key={item.id}
                                     item={item}
                                     onRemove={handleRemove}
+                                    compactMobile
                                 />
                             ))}
                         </div>
