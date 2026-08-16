@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import {
     Check,
+    ChevronDown,
     Loader2,
     Minus,
     Plus,
@@ -38,6 +39,7 @@ export default function CartPage() {
     );
     const [loading, setLoading] = useState(cart === null);
     const [couponCode, setCouponCode] = useState("");
+    const [couponExpanded, setCouponExpanded] = useState(false);
     const [applyingCoupon, setApplyingCoupon] = useState(false);
     const [updatingId, setUpdatingId] = useState<string | null>(null);
     const [removingIds, setRemovingIds] = useState<Set<string>>(new Set());
@@ -630,68 +632,143 @@ export default function CartPage() {
                                 )}
 
                                 <div className="mt-6">
-                                    <h3 className="mb-3 text-sm font-semibold uppercase tracking-[0.18em]">
-                                        Coupon
-                                    </h3>
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setCouponExpanded(
+                                                (prev) => !prev
+                                            )
+                                        }
+                                        aria-expanded={
+                                            couponExpanded ||
+                                            Boolean(cart?.couponCode)
+                                        }
+                                        aria-controls="coupon-panel"
+                                        className="flex w-full items-center justify-between gap-3 py-1 text-left outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--luxury-gold)]"
+                                    >
+                                        <h3 className="text-sm font-semibold uppercase tracking-[0.18em]">
+                                            Coupon
+                                        </h3>
 
-                                    {cart?.couponCode ? (
-                                        <div className="rounded-[var(--luxury-radius)] border border-[var(--luxury-line)] bg-[var(--luxury-input)] px-4 py-3">
-                                            <div className="flex items-center justify-between gap-3">
-                                                <div className="min-w-0">
-                                                    <p className="flex items-center gap-2 text-sm font-semibold">
-                                                        {cart.couponCode}
-                                                        <Check
-                                                            size={15}
-                                                            className="text-green-700"
-                                                        />
-                                                    </p>
-
-                                                    <p className="mt-1 text-sm text-[var(--luxury-muted)]">
-                                                        You saved ₹
-                                                        {cart.discountAmount}
-                                                    </p>
-                                                </div>
-
-                                                <button
-                                                    onClick={handleRemoveCoupon}
-                                                    className="shrink-0 text-sm font-semibold uppercase tracking-[0.12em] text-red-600 transition-colors duration-200 hover:text-red-700"
-                                                >
-                                                    Remove
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="flex flex-row items-center gap-2">
-                                            <input
-                                                value={couponCode}
-                                                onChange={(e) =>
-                                                    setCouponCode(e.target.value)
-                                                }
-                                                placeholder="Coupon code"
-                                                aria-label="Coupon code"
-                                                autoComplete="off"
-                                                className="min-w-0 flex-1 border border-[var(--luxury-line)] bg-[var(--luxury-input)] px-3 py-2.5 text-sm outline-none transition-colors duration-200 focus:border-[var(--luxury-gold)]"
-                                            />
-
-                                            <button
-                                                onClick={handleApplyCoupon}
-                                                disabled={
-                                                    applyingCoupon || cartBusy
-                                                }
-                                                className="flex shrink-0 items-center justify-center gap-2 rounded-full bg-[var(--luxury-ink)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-[var(--luxury-paper)] transition-all duration-200 hover:bg-[var(--luxury-moss)] active:scale-[0.96] disabled:bg-[var(--luxury-muted-strong)] disabled:hover:scale-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--luxury-gold)]"
-                                            >
-                                                {applyingCoupon && (
-                                                    <Loader2
-                                                        size={13}
-                                                        className="animate-spin"
+                                        <span className="flex items-center gap-2">
+                                            {cart?.couponCode && (
+                                                <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-[#3f5f32]">
+                                                    <Check
+                                                        size={14}
                                                     />
-                                                )}
-                                                {applyingCoupon
-                                                    ? "Applying"
-                                                    : "Apply"}
-                                            </button>
-                                        </div>
-                                    )}
+                                                    {cart.couponCode}
+                                                </span>
+                                            )}
+
+                                            <ChevronDown
+                                                size={16}
+                                                className={`shrink-0 text-[var(--luxury-muted)] transition-transform duration-300 ${
+                                                    couponExpanded ||
+                                                    Boolean(
+                                                        cart?.couponCode
+                                                    )
+                                                        ? "rotate-180"
+                                                        : ""
+                                                }`}
+                                            />
+                                        </span>
+                                    </button>
+
+                                    <AnimatePresence initial={false}>
+                                        {(couponExpanded ||
+                                            Boolean(cart?.couponCode)) && (
+                                            <motion.div
+                                                id="coupon-panel"
+                                                key="coupon-panel"
+                                                initial={{
+                                                    height: 0,
+                                                    opacity: 0,
+                                                }}
+                                                animate={{
+                                                    height: "auto",
+                                                    opacity: 1,
+                                                }}
+                                                exit={{
+                                                    height: 0,
+                                                    opacity: 0,
+                                                }}
+                                                transition={{
+                                                    duration: 0.22,
+                                                    ease: easeLuxury,
+                                                }}
+                                                className="overflow-hidden"
+                                            >
+                                                <div className="mt-3">
+                                                    {cart?.couponCode ? (
+                                                        <div className="rounded-[var(--luxury-radius)] border border-[var(--luxury-line)] bg-[var(--luxury-input)] px-4 py-3">
+                                                            <div className="flex items-center justify-between gap-3">
+                                                                <div className="min-w-0">
+                                                                    <p className="flex items-center gap-2 text-sm font-semibold">
+                                                                        {cart.couponCode}
+                                                                        <Check
+                                                                            size={15}
+                                                                            className="text-green-700"
+                                                                        />
+                                                                    </p>
+
+                                                                    <p className="mt-1 text-sm text-[var(--luxury-muted)]">
+                                                                        You saved ₹
+                                                                        {cart.discountAmount}
+                                                                    </p>
+                                                                </div>
+
+                                                                <button
+                                                                    onClick={
+                                                                        handleRemoveCoupon
+                                                                    }
+                                                                    className="shrink-0 text-sm font-semibold uppercase tracking-[0.12em] text-red-600 transition-colors duration-200 hover:text-red-700"
+                                                                >
+                                                                    Remove
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex flex-row items-center gap-2">
+                                                            <input
+                                                                value={couponCode}
+                                                                onChange={(e) =>
+                                                                    setCouponCode(
+                                                                        e.target
+                                                                            .value
+                                                                    )
+                                                                }
+                                                                placeholder="Coupon code"
+                                                                aria-label="Coupon code"
+                                                                autoComplete="off"
+                                                                className="min-w-0 flex-1 border border-[var(--luxury-line)] bg-[var(--luxury-input)] px-3 py-2.5 text-sm outline-none transition-colors duration-200 focus:border-[var(--luxury-gold)]"
+                                                            />
+
+                                                            <button
+                                                                onClick={
+                                                                    handleApplyCoupon
+                                                                }
+                                                                disabled={
+                                                                    applyingCoupon ||
+                                                                    cartBusy
+                                                                }
+                                                                className="flex shrink-0 items-center justify-center gap-2 rounded-full bg-[var(--luxury-ink)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-[var(--luxury-paper)] transition-all duration-200 hover:bg-[var(--luxury-moss)] active:scale-[0.96] disabled:bg-[var(--luxury-muted-strong)] disabled:hover:scale-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--luxury-gold)]"
+                                                            >
+                                                                {applyingCoupon && (
+                                                                    <Loader2
+                                                                        size={13}
+                                                                        className="animate-spin"
+                                                                    />
+                                                                )}
+                                                                {applyingCoupon
+                                                                    ? "Applying"
+                                                                    : "Apply"}
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
                                 </div>
 
                                 <Link
