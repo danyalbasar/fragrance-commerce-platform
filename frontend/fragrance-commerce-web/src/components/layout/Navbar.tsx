@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ChevronDown, Heart, Menu, Minus, Plus, Search, ShoppingBag, Trash2, User, X } from "lucide-react";
+import { ChevronDown, Heart, MapPin, Menu, Minus, Plus, Search, ShoppingBag, Trash2, User, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { AnimatePresence, motion } from "framer-motion";
 import { getCart, removeCartItem, updateCartItem } from "@/services/cartService";
@@ -606,6 +606,16 @@ export default function Navbar() {
                                                 className="block rounded-lg px-3 py-2 text-sm font-normal transition-all duration-200 hover:bg-[#efe3d0] hover:translate-x-1"
                                             >
                                                 My Orders
+                                            </Link>
+
+                                            <Link
+                                                href="/addresses"
+                                                role="menuitem"
+                                                onClick={() => setShowAccountMenu(false)}
+                                                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-normal transition-all duration-200 hover:bg-[#efe3d0] hover:translate-x-1"
+                                            >
+                                                <MapPin size={14} />
+                                                Saved Addresses
                                             </Link>
                                         </>
                                     )}

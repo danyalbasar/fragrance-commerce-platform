@@ -17,3 +17,7 @@ export async function updateAddress(
 ): Promise<void> {
     await api.put(`/Addresses/${id}`, data);
 }
+
+export async function deleteAddress(id: string): Promise<void> {
+    await api.delete(`/Addresses/${id}`);
+}
