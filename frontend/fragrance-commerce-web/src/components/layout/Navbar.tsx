@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useCallback, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronDown, Heart, MapPin, Menu, Minus, Plus, Search, ShoppingBag, Trash2, User, X } from "lucide-react";
@@ -10,8 +10,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { AnimatePresence, motion } from "framer-motion";
 import { getCart, removeCartItem, updateCartItem } from "@/services/cartService";
 import { getWishlist } from "@/services/wishlistService";
+import { productService } from "@/services/productService";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import type { Cart } from "@/types/cart";
+import type { Product } from "@/types/product";
 import { EmptyState } from "@/components/common/EmptyState";
 
 const subscribeToMounted = () => () => {};
@@ -31,6 +33,8 @@ export default function Navbar() {
     });
     const [openMobileGroups, setOpenMobileGroups] = useState<Record<string, boolean>>({});
     const [search, setSearch] = useState("");
+    const [suggestions, setSuggestions] = useState<Product[]>([]);
+    const [loadingSuggestions, setLoadingSuggestions] = useState(false);
     const [showAccountMenu, setShowAccountMenu] = useState(false);
     const [activeMenu, setActiveMenu] = useState<string | null>(null);
     const [cartCount, setCartCount] = useState(0);
@@ -109,6 +113,7 @@ export default function Navbar() {
                 !searchButtonRef.current.contains(target)
             ) {
                 setShowSearch(false);
+                setSuggestions([]);
             }
         }
 
@@ -123,6 +128,7 @@ export default function Navbar() {
         function handleEscape(event: KeyboardEvent) {
             if (event.key === "Escape") {
                 setShowSearch(false);
+                setSuggestions([]);
                 setActiveMenu(null);
                 setShowMobileMenu(false);
                 setShowAccountMenu(false);
@@ -283,6 +289,44 @@ export default function Navbar() {
         router.push(`/products?search=${encodeURIComponent(search.trim())}`);
         setShowSearch(false);
     }
+
+    const handleSuggestionClick = useCallback(
+        (product: Product) => {
+            setSearch("");
+            setSuggestions([]);
+            setShowSearch(false);
+            router.push(`/products/${product.id}`);
+        },
+        [router]
+    );
+
+    useEffect(() => {
+        const trimmed = search.trim();
+
+        if (trimmed.length < 2) {
+            setSuggestions([]);
+            setLoadingSuggestions(false);
+            return;
+        }
+
+        setLoadingSuggestions(true);
+        const timer = window.setTimeout(async () => {
+            try {
+                const result = await productService.search({
+                    search: trimmed,
+                    pageSize: 6,
+                    pageNumber: 1,
+                });
+                setSuggestions(result.items);
+            } catch {
+                setSuggestions([]);
+            } finally {
+                setLoadingSuggestions(false);
+            }
+        }, 250);
+
+        return () => window.clearTimeout(timer);
+    }, [search]);
 
     async function loadCartPreview() {
         if (!isLoggedIn) {
@@ -975,27 +1019,103 @@ export default function Navbar() {
                                 <form
                                     role="search"
                                     onSubmit={handleSearchSubmit}
-                                    className="mx-auto flex max-w-2xl flex-col gap-4 sm:flex-row sm:items-center"
+                                    className="mx-auto max-w-2xl"
                                 >
-                                    <input
-                                        autoFocus
-                                        value={search}
-                                        onChange={(e) => setSearch(e.target.value)}
-                                        placeholder="Enter search keyword"
-                                        aria-label="Search products"
-                                        className="w-full border-b border-[var(--luxury-ink)] bg-transparent px-1 py-2 text-sm tracking-[0.12em] outline-none transition-colors duration-200 focus:border-[var(--luxury-gold)] placeholder:text-[var(--luxury-muted-strong)] sm:py-2.5 sm:text-base"
-                                    />
+                                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                                        <input
+                                            autoFocus
+                                            value={search}
+                                            onChange={(e) => setSearch(e.target.value)}
+                                            placeholder="Search for fragrances..."
+                                            aria-label="Search products"
+                                            aria-autocomplete="list"
+                                            aria-controls="search-suggestions"
+                                            className="w-full border-b border-[var(--luxury-ink)] bg-transparent px-1 py-2 text-sm tracking-[0.12em] outline-none transition-colors duration-200 focus:border-[var(--luxury-gold)] placeholder:text-[var(--luxury-muted-strong)] sm:py-2.5 sm:text-base"
+                                        />
 
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setSearch("");
-                                            setShowSearch(false);
-                                        }}
-                                        className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold-strong)] transition-colors duration-200 hover:text-[var(--luxury-ink)]"
-                                    >
-                                        Close
-                                    </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setSearch("");
+                                                setSuggestions([]);
+                                                setShowSearch(false);
+                                            }}
+                                            className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold-strong)] transition-colors duration-200 hover:text-[var(--luxury-ink)]"
+                                        >
+                                            Close
+                                        </button>
+                                    </div>
+
+                                    {suggestions.length > 0 && (
+                                        <ul
+                                            id="search-suggestions"
+                                            role="listbox"
+                                            className="mt-3 space-y-1"
+                                        >
+                                            {suggestions.map((product) => (
+                                                <li
+                                                    key={product.id}
+                                                    role="option"
+                                                >
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            handleSuggestionClick(
+                                                                product
+                                                            )
+                                                        }
+                                                        className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all duration-200 hover:bg-[#efe3d0]"
+                                                    >
+                                                        {product.images[0] && (
+                                                            <Image
+                                                                src={
+                                                                    product
+                                                                        .images[0]
+                                                                        .imageUrl
+                                                                }
+                                                                alt={
+                                                                    product.name
+                                                                }
+                                                                width={36}
+                                                                height={36}
+                                                                className="h-9 w-9 shrink-0 rounded object-cover"
+                                                            />
+                                                        )}
+
+                                                        <div className="min-w-0">
+                                                            <p className="truncate text-sm font-medium">
+                                                                {product.name}
+                                                            </p>
+
+                                                            <p className="text-xs text-[var(--luxury-muted)]">
+                                                                {
+                                                                    product.brandName
+                                                                }
+                                                            </p>
+                                                        </div>
+                                                    </button>
+                                                </li>
+                                            ))}
+
+                                            <li className="px-3 pt-1">
+                                                <button
+                                                    type="submit"
+                                                    className="w-full rounded-lg py-2 text-center text-xs font-semibold uppercase tracking-[0.1em] text-[var(--luxury-gold-strong)] transition-colors duration-200 hover:bg-[#efe3d0]"
+                                                >
+                                                    See all results for &ldquo;{search}&rdquo;
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    )}
+
+                                    {search.trim().length >= 2 &&
+                                        !loadingSuggestions &&
+                                        suggestions.length === 0 && (
+                                            <p className="mt-3 px-3 text-xs text-[var(--luxury-muted)]">
+                                                No products found. Try a
+                                                different keyword.
+                                            </p>
+                                        )}
                                 </form>
                             </div>
                         </motion.div>
