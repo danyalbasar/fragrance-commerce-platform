@@ -303,7 +303,7 @@ export default function Navbar() {
     useEffect(() => {
         const trimmed = search.trim();
 
-        if (trimmed.length < 2) {
+        if (trimmed.length < 1) {
             setSuggestions([]);
             setLoadingSuggestions(false);
             return;
@@ -323,7 +323,7 @@ export default function Navbar() {
             } finally {
                 setLoadingSuggestions(false);
             }
-        }, 250);
+        }, 150);
 
         return () => window.clearTimeout(timer);
     }, [search]);
@@ -1108,7 +1108,7 @@ export default function Navbar() {
                                         </ul>
                                     )}
 
-                                    {search.trim().length >= 2 &&
+                                    {search.trim().length >= 1 &&
                                         !loadingSuggestions &&
                                         suggestions.length === 0 && (
                                             <p className="mt-3 px-3 text-xs text-[var(--luxury-muted)]">
