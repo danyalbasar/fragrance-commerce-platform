@@ -607,16 +607,6 @@ export default function Navbar() {
                                             >
                                                 My Orders
                                             </Link>
-
-                                            <Link
-                                                href="/addresses"
-                                                role="menuitem"
-                                                onClick={() => setShowAccountMenu(false)}
-                                                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-normal transition-all duration-200 hover:bg-[#efe3d0] hover:translate-x-1"
-                                            >
-                                                <MapPin size={14} />
-                                                Saved Addresses
-                                            </Link>
                                         </>
                                     )}
 
