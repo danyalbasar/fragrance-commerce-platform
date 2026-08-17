@@ -117,9 +117,9 @@ public class ProductRepository : IProductRepository
             var search = request.Search.ToLower();
 
             query = query.Where(p =>
-                p.Name.ToLower().Contains(search) ||
-                (p.Description != null && p.Description.ToLower().Contains(search)) ||
-                p.Brand.Name.ToLower().Contains(search));
+                p.Name.ToLower().StartsWith(search) ||
+                (p.Description != null && p.Description.ToLower().StartsWith(search)) ||
+                p.Brand.Name.ToLower().StartsWith(search));
         }
 
         if (request.BrandId.HasValue)
