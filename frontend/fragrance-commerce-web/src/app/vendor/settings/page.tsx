@@ -74,7 +74,7 @@ export default function VendorSettingsPage() {
                 </div>
             )}
 
-            <div className="mx-auto max-w-3xl border border-[#d8c8ad] bg-[var(--luxury-paper)] p-5 shadow-[0_18px_50px_rgba(22,18,13,0.08)] sm:p-8">
+            <div className="max-w-3xl border border-[#d8c8ad] bg-[var(--luxury-paper)] p-5 shadow-[0_18px_50px_rgba(22,18,13,0.08)] sm:p-8">
                 <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-full border border-[#d8c8ad] text-[var(--luxury-gold)]">
                     <Store size={24} />
                 </div>
