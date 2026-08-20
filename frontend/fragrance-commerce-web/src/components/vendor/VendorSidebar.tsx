@@ -102,7 +102,7 @@ export default function VendorSidebar() {
     );
 
     const sidebarContent = (
-        <nav className="flex flex-col gap-1 px-3 py-2">
+        <nav className="flex flex-1 flex-col gap-1 px-3 py-2">
             {navItems.map((item) => {
                 const active = isActive(item.href, item.exact);
                 return (
@@ -173,7 +173,7 @@ export default function VendorSidebar() {
 
             {/* Desktop sidebar */}
             <aside
-                className={`hidden lg:flex lg:flex-col lg:border-r lg:border-[var(--luxury-line)] lg:bg-[var(--luxury-paper)] transition-all duration-200 ${
+                className={`hidden lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:border-r lg:border-[var(--luxury-line)] lg:bg-[var(--luxury-paper)] transition-all duration-200 ${
                     collapsed ? "lg:w-[68px]" : "lg:w-60"
                 }`}
             >
