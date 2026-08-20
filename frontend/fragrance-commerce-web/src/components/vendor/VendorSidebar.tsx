@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
     BarChart3,
     Boxes,
     ClipboardList,
+    LogOut,
     Menu,
     PanelLeftClose,
     PanelLeftOpen,
@@ -13,6 +14,7 @@ import {
     X,
 } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
     { href: "/vendor", label: "Overview", icon: BarChart3, exact: true },
@@ -23,8 +25,15 @@ const navItems = [
 
 export default function VendorSidebar() {
     const pathname = usePathname();
+    const router = useRouter();
+    const { logoutUser } = useAuth();
     const [collapsed, setCollapsed] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
+
+    function handleLogout() {
+        logoutUser();
+        router.replace("/login");
+    }
 
     function isActive(href: string, exact?: boolean) {
         return exact ? pathname === href : pathname.startsWith(href);
@@ -51,6 +60,18 @@ export default function VendorSidebar() {
                     </Link>
                 );
             })}
+
+            <div className="mt-auto border-t border-[var(--luxury-line)] pt-2">
+                <button
+                    type="button"
+                    onClick={() => { handleLogout(); setMobileOpen(false); }}
+                    className={`flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-[var(--luxury-muted)] transition-all duration-200 hover:bg-red-50 hover:text-red-700 ${collapsed ? "justify-center" : ""}`}
+                    title="Log out"
+                >
+                    <LogOut size={18} strokeWidth={1.5} />
+                    {!collapsed && <span>Log Out</span>}
+                </button>
+            </div>
         </nav>
     );
 
