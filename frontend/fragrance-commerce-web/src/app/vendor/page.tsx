@@ -107,6 +107,34 @@ export default function VendorDashboardPage() {
                 </h1>
             </div>
 
+            {/* Quick Actions */}
+            <section className="border border-[#d8c8ad] bg-[var(--luxury-paper)] p-6 shadow-[0_18px_50px_rgba(22,18,13,0.08)]">
+                <h2 className="text-2xl font-normal [font-family:var(--font-serif)]">Quick Actions</h2>
+                <div className="mt-5 flex flex-wrap gap-3">
+                    <Link
+                        href="/vendor/products/new"
+                        className="inline-flex items-center gap-2 rounded-full bg-[var(--luxury-ink)] px-5 py-2.5 text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-paper)] hover:bg-[var(--luxury-moss)] transition-colors"
+                    >
+                        <PackagePlus size={16} />
+                        Add Product
+                    </Link>
+                    <Link
+                        href="/vendor/products"
+                        className="inline-flex items-center gap-2 rounded-full border border-[var(--luxury-line)] px-5 py-2.5 text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-ink)] hover:border-[var(--luxury-gold)] hover:text-[var(--luxury-gold)] transition-colors"
+                    >
+                        <Boxes size={16} />
+                        Manage Products
+                    </Link>
+                    <Link
+                        href="/vendor/orders"
+                        className="inline-flex items-center gap-2 rounded-full border border-[var(--luxury-line)] px-5 py-2.5 text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-ink)] hover:border-[var(--luxury-gold)] hover:text-[var(--luxury-gold)] transition-colors"
+                    >
+                        <ClipboardList size={16} />
+                        View Orders
+                    </Link>
+                </div>
+            </section>
+
             {/* Metric cards */}
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <StatCard
@@ -235,34 +263,6 @@ export default function VendorDashboardPage() {
                         </table>
                     </div>
                 )}
-            </section>
-
-            {/* Quick Actions */}
-            <section className="border border-[#d8c8ad] bg-[var(--luxury-paper)] p-6 shadow-[0_18px_50px_rgba(22,18,13,0.08)]">
-                <h2 className="text-2xl font-normal [font-family:var(--font-serif)]">Quick Actions</h2>
-                <div className="mt-5 flex flex-wrap gap-3">
-                    <Link
-                        href="/vendor/products/new"
-                        className="inline-flex items-center gap-2 rounded-full bg-[var(--luxury-ink)] px-5 py-2.5 text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-paper)] hover:bg-[var(--luxury-moss)] transition-colors"
-                    >
-                        <PackagePlus size={16} />
-                        Add Product
-                    </Link>
-                    <Link
-                        href="/vendor/products"
-                        className="inline-flex items-center gap-2 rounded-full border border-[var(--luxury-line)] px-5 py-2.5 text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-ink)] hover:border-[var(--luxury-gold)] hover:text-[var(--luxury-gold)] transition-colors"
-                    >
-                        <Boxes size={16} />
-                        Manage Products
-                    </Link>
-                    <Link
-                        href="/vendor/orders"
-                        className="inline-flex items-center gap-2 rounded-full border border-[var(--luxury-line)] px-5 py-2.5 text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-ink)] hover:border-[var(--luxury-gold)] hover:text-[var(--luxury-gold)] transition-colors"
-                    >
-                        <ClipboardList size={16} />
-                        View Orders
-                    </Link>
-                </div>
             </section>
         </div>
     );

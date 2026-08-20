@@ -40,7 +40,7 @@ export default function VendorProductsPage() {
     const [loading, setLoading] = useState(
         () => readCache<Product[]>("vendor-products") === null
     );
-    const [showFilters, setShowFilters] = useState(false);
+    const [showFilters, setShowFilters] = useState(true);
     const [filters, setFilters] = useState({
         name: "",
         sku: "",

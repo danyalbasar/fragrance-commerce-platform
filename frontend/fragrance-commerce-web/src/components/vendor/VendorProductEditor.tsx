@@ -330,7 +330,7 @@ export default function VendorProductEditor({
             setSaving(true);
             setError("");
             await productService.delete(productId);
-            router.replace("/vendor");
+            router.replace("/vendor/products");
         } catch (err: unknown) {
             const response = getApiResponse(err);
             setError(
@@ -492,7 +492,7 @@ export default function VendorProductEditor({
                 <div className="mx-auto max-w-[1500px]">
                     <button
                         type="button"
-                        onClick={() => router.push("/vendor")}
+                        onClick={() => router.push("/vendor/products")}
                         className="-my-2.5 mb-2.5 py-2.5 text-sm font-semibold uppercase tracking-[0.12em] text-[var(--luxury-muted)] transition hover:text-[var(--luxury-gold-strong)] sm:tracking-[0.16em]"
                     >
                         &larr; Back to Products
@@ -501,7 +501,7 @@ export default function VendorProductEditor({
                     <div className="mb-6 flex flex-col gap-5 border-b border-[#d8c8ad] pb-6 md:mb-8 md:flex-row md:items-end md:justify-between">
                         <div>
                             <Link
-                                href="/vendor"
+                                href="/vendor/products"
                                 className="-my-3 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--luxury-gold-strong)] hover:text-[var(--luxury-ink)] sm:tracking-[0.22em]"
                             >
                                 Vendor Studio
