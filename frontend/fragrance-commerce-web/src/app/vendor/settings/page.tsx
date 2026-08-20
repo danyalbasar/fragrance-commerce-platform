@@ -18,8 +18,6 @@ export default function VendorSettingsPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Check if vendor profile exists by trying to load dashboard
-        // If the API returns 400 with "vendor profile", they need to create one
         setLoading(false);
         setNeedsProfile(true);
     }, []);
@@ -48,7 +46,7 @@ export default function VendorSettingsPage() {
 
     if (loading) {
         return (
-            <div className="py-20 text-center text-gray-400">Loading...</div>
+            <div className="py-20 text-center text-[var(--luxury-muted)]">Loading...</div>
         );
     }
 
@@ -56,62 +54,72 @@ export default function VendorSettingsPage() {
         <div className="space-y-6">
             {/* Header */}
             <div>
-                <p className="text-sm font-medium text-gray-500">Settings</p>
-                <h1 className="mt-1 text-2xl font-semibold text-gray-900">
-                    Vendor Profile
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--luxury-gold-strong)] sm:tracking-[0.34em]">
+                    Vendor Studio
+                </p>
+                <h1 className="mt-3 text-4xl font-normal [font-family:var(--font-serif)] sm:text-5xl">
+                    Settings
                 </h1>
             </div>
 
             {message && (
-                <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+                <div className="border border-[#b9c8a8] bg-[#f6fbef] p-4 text-sm text-[#455c2b]">
                     {message}
                 </div>
             )}
 
             {error && (
-                <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <div className="border border-red-200 bg-red-50 p-4 text-sm text-red-700">
                     {error}
                 </div>
             )}
 
-            <div className="rounded-xl border border-gray-200 bg-white p-6 sm:p-8">
-                <div className="mb-6 flex h-11 w-11 items-center justify-center rounded-lg bg-gray-100">
-                    <Store size={20} className="text-gray-600" />
+            <div className="mx-auto max-w-3xl border border-[#d8c8ad] bg-[var(--luxury-paper)] p-5 shadow-[0_18px_50px_rgba(22,18,13,0.08)] sm:p-8">
+                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-full border border-[#d8c8ad] text-[var(--luxury-gold)]">
+                    <Store size={24} />
                 </div>
-
-                <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
-                    Business Details
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold-strong)] sm:tracking-[0.28em]">
+                    Vendor Profile
                 </p>
+                <h2 className="mt-3 text-3xl font-normal [font-family:var(--font-serif)] sm:text-4xl">
+                    Business Details
+                </h2>
 
-                <form onSubmit={handleSubmit} className="mt-6 max-w-xl space-y-5">
+                <form onSubmit={handleSubmit} className="mt-7 grid gap-5">
                     <label className="block">
-                        <span className="text-sm font-medium text-gray-700">Business Name</span>
+                        <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--luxury-muted)]">
+                            Business Name
+                        </span>
                         <input
                             value={form.businessName}
                             onChange={(e) => setForm((f) => ({ ...f, businessName: e.target.value }))}
                             required
-                            className="mt-1.5 h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-gray-400"
+                            className="mt-2 h-11 w-full border border-[#d8c8ad] bg-[var(--luxury-input)] px-3 outline-none transition focus:border-[var(--luxury-gold)]"
                             placeholder="Your business name"
                         />
                     </label>
 
                     <label className="block">
-                        <span className="text-sm font-medium text-gray-700">GST Number</span>
+                        <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--luxury-muted)]">
+                            GST Number
+                        </span>
                         <input
                             value={form.gstNumber}
                             onChange={(e) => setForm((f) => ({ ...f, gstNumber: e.target.value }))}
-                            className="mt-1.5 h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-gray-400"
+                            className="mt-2 h-11 w-full border border-[#d8c8ad] bg-[var(--luxury-input)] px-3 outline-none transition focus:border-[var(--luxury-gold)]"
                             placeholder="Optional"
                         />
                     </label>
 
                     <label className="block">
-                        <span className="text-sm font-medium text-gray-700">Address</span>
+                        <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--luxury-muted)]">
+                            Address
+                        </span>
                         <textarea
                             value={form.address}
                             onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
-                            rows={3}
-                            className="mt-1.5 w-full resize-none rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-gray-400"
+                            rows={4}
+                            className="mt-2 w-full resize-none border border-[#d8c8ad] bg-[var(--luxury-input)] px-3 py-3 outline-none transition focus:border-[var(--luxury-gold)]"
                             placeholder="Business address"
                         />
                     </label>
@@ -119,7 +127,7 @@ export default function VendorSettingsPage() {
                     <button
                         type="submit"
                         disabled={saving}
-                        className="inline-flex h-10 items-center justify-center rounded-lg bg-gray-900 px-5 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50 transition-colors"
+                        className="mt-2 inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[var(--luxury-ink)] px-6 text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-paper)] transition hover:bg-[var(--luxury-moss)] disabled:opacity-50 sm:tracking-[0.16em]"
                     >
                         {saving ? "Saving..." : "Save Profile"}
                     </button>

@@ -15,7 +15,7 @@ import {
 import { useState } from "react";
 
 const navItems = [
-    { href: "/vendor", label: "Home", icon: BarChart3, exact: true },
+    { href: "/vendor", label: "Overview", icon: BarChart3, exact: true },
     { href: "/vendor/products", label: "Products", icon: Boxes },
     { href: "/vendor/orders", label: "Orders", icon: ClipboardList },
     { href: "/vendor/settings", label: "Settings", icon: Settings },
@@ -31,7 +31,7 @@ export default function VendorSidebar() {
     }
 
     const sidebarContent = (
-        <nav className="flex flex-col gap-0.5 px-2 py-1">
+        <nav className="flex flex-col gap-1 px-3 py-2">
             {navItems.map((item) => {
                 const active = isActive(item.href, item.exact);
                 return (
@@ -39,14 +39,14 @@ export default function VendorSidebar() {
                         key={item.href}
                         href={item.href}
                         onClick={() => setMobileOpen(false)}
-                        className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                        className={`flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
                             active
-                                ? "bg-[var(--luxury-ink)] text-white"
-                                : "text-gray-700 hover:bg-gray-100"
+                                ? "bg-[var(--luxury-ink)] text-[var(--luxury-paper)]"
+                                : "text-[var(--luxury-muted)] hover:bg-[var(--luxury-sand)] hover:text-[var(--luxury-ink)]"
                         } ${collapsed ? "justify-center" : ""}`}
                         title={item.label}
                     >
-                        <item.icon size={20} strokeWidth={active ? 2 : 1.5} />
+                        <item.icon size={18} strokeWidth={active ? 2 : 1.5} />
                         {!collapsed && <span>{item.label}</span>}
                     </Link>
                 );
@@ -60,10 +60,10 @@ export default function VendorSidebar() {
             <button
                 type="button"
                 onClick={() => setMobileOpen(true)}
-                className="fixed left-4 top-20 z-40 flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white shadow-sm lg:hidden"
+                className="fixed left-4 top-20 z-40 flex h-10 w-10 items-center justify-center rounded-full border border-[#d8c8ad] bg-[var(--luxury-paper)] text-[var(--luxury-ink)] shadow-sm lg:hidden"
                 aria-label="Open menu"
             >
-                <Menu size={20} />
+                <Menu size={18} />
             </button>
 
             {/* Mobile overlay */}
@@ -76,18 +76,18 @@ export default function VendorSidebar() {
 
             {/* Mobile sidebar */}
             <aside
-                className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-gray-200 bg-white transition-transform duration-200 lg:hidden ${
+                className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-[var(--luxury-line)] bg-[var(--luxury-paper)] transition-transform duration-200 lg:hidden ${
                     mobileOpen ? "translate-x-0" : "-translate-x-full"
                 }`}
             >
-                <div className="flex h-16 items-center justify-between border-b border-gray-200 px-4">
-                    <Link href="/vendor" onClick={() => setMobileOpen(false)} className="text-base font-semibold text-gray-900">
-                        Fragrance Studio
+                <div className="flex h-16 items-center justify-between border-b border-[var(--luxury-line)] px-4">
+                    <Link href="/vendor" onClick={() => setMobileOpen(false)} className="text-base font-semibold text-[var(--luxury-ink)]">
+                        Vendor Studio
                     </Link>
                     <button
                         type="button"
                         onClick={() => setMobileOpen(false)}
-                        className="flex h-8 w-8 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100"
+                        className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--luxury-muted)] hover:bg-[var(--luxury-sand)]"
                         aria-label="Close menu"
                     >
                         <X size={18} />
@@ -98,23 +98,23 @@ export default function VendorSidebar() {
 
             {/* Desktop sidebar */}
             <aside
-                className={`hidden lg:flex lg:flex-col lg:border-r lg:border-gray-200 lg:bg-gray-50/50 transition-all duration-200 ${
+                className={`hidden lg:flex lg:flex-col lg:border-r lg:border-[var(--luxury-line)] lg:bg-[var(--luxury-paper)] transition-all duration-200 ${
                     collapsed ? "lg:w-[68px]" : "lg:w-60"
                 }`}
             >
-                <div className={`flex h-16 items-center border-b border-gray-200 ${collapsed ? "justify-center px-2" : "justify-between px-4"}`}>
+                <div className={`flex h-16 items-center border-b border-[var(--luxury-line)] ${collapsed ? "justify-center px-2" : "justify-between px-4"}`}>
                     {!collapsed && (
-                        <Link href="/vendor" className="text-base font-semibold text-gray-900">
-                            Fragrance Studio
+                        <Link href="/vendor" className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--luxury-gold-strong)]">
+                            Vendor Studio
                         </Link>
                     )}
                     <button
                         type="button"
                         onClick={() => setCollapsed((v) => !v)}
-                        className="flex h-8 w-8 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100"
+                        className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--luxury-line)] bg-[var(--luxury-ivory)] text-[var(--luxury-ink)] hover:border-[var(--luxury-gold)] hover:text-[var(--luxury-gold)] transition-colors"
                         aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
                     >
-                        {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+                        {collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
                     </button>
                 </div>
                 {sidebarContent}

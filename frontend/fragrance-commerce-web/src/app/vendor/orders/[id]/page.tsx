@@ -53,10 +53,10 @@ export default function VendorOrderDetailPage() {
 
     if (loading && !order) {
         return (
-            <div className="space-y-6 animate-pulse">
-                <div className="h-4 w-32 rounded bg-gray-200" />
-                <div className="h-8 w-48 rounded bg-gray-200" />
-                <div className="h-64 rounded-xl border border-gray-200 bg-white" />
+            <div className="space-y-6">
+                <div className="h-4 w-32 animate-pulse rounded bg-[#e5d9c4]" />
+                <div className="h-10 w-48 animate-pulse rounded bg-[#e5d9c4]" />
+                <div className="h-64 border border-[#d8c8ad] bg-[var(--luxury-paper)] animate-pulse" />
             </div>
         );
     }
@@ -66,7 +66,7 @@ export default function VendorOrderDetailPage() {
             <div>
                 <Link
                     href="/vendor/orders"
-                    className="mb-6 inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900"
+                    className="mb-6 inline-flex items-center gap-1.5 text-sm text-[var(--luxury-muted)] hover:text-[var(--luxury-gold-strong)]"
                 >
                     <ArrowLeft size={14} />
                     Back to Orders
@@ -88,7 +88,7 @@ export default function VendorOrderDetailPage() {
             {/* Back link */}
             <Link
                 href="/vendor/orders"
-                className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900"
+                className="inline-flex items-center gap-1.5 text-sm text-[var(--luxury-muted)] hover:text-[var(--luxury-gold-strong)]"
             >
                 <ArrowLeft size={14} />
                 Back to Orders
@@ -97,11 +97,13 @@ export default function VendorOrderDetailPage() {
             {/* Header */}
             <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                    <p className="text-sm font-medium text-gray-500">Order Details</p>
-                    <h1 className="mt-1 text-2xl font-semibold text-gray-900">
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--luxury-gold-strong)] sm:tracking-[0.34em]">
+                        Order Details
+                    </p>
+                    <h1 className="mt-3 text-4xl font-normal [font-family:var(--font-serif)] sm:text-5xl">
                         #{order.orderNumber}
                     </h1>
-                    <p className="mt-1 text-sm text-gray-500">
+                    <p className="mt-2 text-sm text-[var(--luxury-muted)]">
                         {new Date(order.orderedAt).toLocaleDateString("en-IN", {
                             day: "numeric",
                             month: "long",
@@ -118,39 +120,39 @@ export default function VendorOrderDetailPage() {
 
             {/* Info cards */}
             <div className="grid gap-4 sm:grid-cols-2">
-                <div className="rounded-xl border border-gray-200 bg-white p-5">
-                    <h2 className="text-sm font-medium text-gray-500">Shipping Address</h2>
-                    <div className="mt-3 space-y-1 text-sm text-gray-900">
+                <div className="border border-[#d8c8ad] bg-[var(--luxury-paper)] p-5 shadow-[0_18px_50px_rgba(22,18,13,0.08)]">
+                    <h2 className="text-sm font-semibold uppercase tracking-[0.18em]">Shipping Address</h2>
+                    <div className="mt-3 space-y-1 text-sm">
                         <p className="font-medium">{order.shippingAddress.fullName}</p>
-                        <p>{order.shippingAddress.addressLine1}{order.shippingAddress.addressLine2 ? `, ${order.shippingAddress.addressLine2}` : ""}</p>
-                        <p>{order.shippingAddress.city}, {order.shippingAddress.state} - {order.shippingAddress.postalCode}</p>
-                        <p>{order.shippingAddress.country}</p>
-                        <p className="text-gray-500">Phone: {order.shippingAddress.phoneNumber}</p>
+                        <p className="text-[var(--luxury-muted)]">{order.shippingAddress.addressLine1}{order.shippingAddress.addressLine2 ? `, ${order.shippingAddress.addressLine2}` : ""}</p>
+                        <p className="text-[var(--luxury-muted)]">{order.shippingAddress.city}, {order.shippingAddress.state} - {order.shippingAddress.postalCode}</p>
+                        <p className="text-[var(--luxury-muted)]">{order.shippingAddress.country}</p>
+                        <p className="text-[var(--luxury-muted)]">Phone: {order.shippingAddress.phoneNumber}</p>
                     </div>
                 </div>
 
-                <div className="rounded-xl border border-gray-200 bg-white p-5">
-                    <h2 className="text-sm font-medium text-gray-500">Payment</h2>
-                    <div className="mt-3 space-y-1 text-sm text-gray-900">
-                        <p>Method: <span className="font-medium">{order.payment.paymentMethod}</span></p>
-                        <p>Status: <span className="font-medium">{order.payment.paymentStatus}</span></p>
-                        <p>Amount: <span className="font-medium">{currency(order.payment.amount)}</span></p>
+                <div className="border border-[#d8c8ad] bg-[var(--luxury-paper)] p-5 shadow-[0_18px_50px_rgba(22,18,13,0.08)]">
+                    <h2 className="text-sm font-semibold uppercase tracking-[0.18em]">Payment</h2>
+                    <div className="mt-3 space-y-1 text-sm">
+                        <p className="text-[var(--luxury-muted)]">Method: <span className="font-medium text-[var(--luxury-ink)]">{order.payment.paymentMethod}</span></p>
+                        <p className="text-[var(--luxury-muted)]">Status: <span className="font-medium text-[var(--luxury-ink)]">{order.payment.paymentStatus}</span></p>
+                        <p className="text-[var(--luxury-muted)]">Amount: <span className="font-medium text-[var(--luxury-ink)]">{currency(order.payment.amount)}</span></p>
                         {order.payment.transactionId && (
-                            <p className="text-gray-500">Txn: {order.payment.transactionId}</p>
+                            <p className="text-[var(--luxury-muted)]">Txn: {order.payment.transactionId}</p>
                         )}
                     </div>
                 </div>
             </div>
 
             {/* Items */}
-            <div className="rounded-xl border border-gray-200 bg-white">
-                <div className="border-b border-gray-200 px-5 py-3">
-                    <h2 className="text-sm font-medium text-gray-900">Items</h2>
+            <div className="border border-[#d8c8ad] bg-[var(--luxury-paper)] shadow-[0_18px_50px_rgba(22,18,13,0.08)]">
+                <div className="border-b border-[#d8c8ad] px-5 py-4">
+                    <h2 className="text-sm font-semibold uppercase tracking-[0.18em]">Items</h2>
                 </div>
-                <div className="divide-y divide-gray-100">
+                <div className="divide-y divide-[#d8c8ad]">
                     {order.items.map((item) => (
                         <div key={item.id} className="flex items-center gap-4 px-5 py-4">
-                            <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                            <div className="relative h-14 w-14 shrink-0 overflow-hidden bg-[var(--luxury-sand)]">
                                 {item.imageUrl && (
                                     <Image
                                         src={item.imageUrl}
@@ -161,29 +163,29 @@ export default function VendorOrderDetailPage() {
                                 )}
                             </div>
                             <div className="min-w-0 flex-1">
-                                <p className="text-sm font-medium text-gray-900 truncate">{item.productName}</p>
-                                <p className="text-xs text-gray-500">{item.variantName} · Qty {item.quantity}</p>
+                                <p className="font-semibold truncate">{item.productName}</p>
+                                <p className="text-xs text-[var(--luxury-muted)]">{item.variantName} · Qty {item.quantity}</p>
                             </div>
-                            <p className="text-sm font-semibold text-gray-900">{currency(item.totalPrice)}</p>
+                            <p className="font-semibold">{currency(item.totalPrice)}</p>
                         </div>
                     ))}
                 </div>
             </div>
 
             {/* Totals */}
-            <div className="rounded-xl border border-gray-200 bg-white p-5">
+            <div className="border border-[#d8c8ad] bg-[var(--luxury-paper)] p-5 shadow-[0_18px_50px_rgba(22,18,13,0.08)]">
                 <div className="space-y-2 text-sm">
-                    <div className="flex justify-between text-gray-600">
+                    <div className="flex justify-between text-[var(--luxury-muted)]">
                         <span>Subtotal</span>
                         <span>{currency(order.totalAmount)}</span>
                     </div>
                     {order.discountAmount > 0 && (
-                        <div className="flex justify-between text-green-600">
+                        <div className="flex justify-between text-[#455c2b]">
                             <span>Discount</span>
                             <span>-{currency(order.discountAmount)}</span>
                         </div>
                     )}
-                    <div className="flex justify-between border-t border-gray-200 pt-2 text-base font-semibold text-gray-900">
+                    <div className="flex justify-between border-t border-[#d8c8ad] pt-2 text-base font-semibold">
                         <span>Total</span>
                         <span>{currency(order.finalAmount)}</span>
                     </div>

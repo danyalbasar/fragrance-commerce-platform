@@ -16,7 +16,7 @@ export default function VendorLayout({
 }: Readonly<{ children: React.ReactNode }>) {
     return (
         <VendorRoute>
-            <div className="flex min-h-screen bg-white">
+            <div className="flex min-h-screen bg-[var(--luxury-ivory)] text-[var(--luxury-ink)]">
                 <VendorSidebar />
                 <main className="flex-1 min-w-0 overflow-x-hidden">
                     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">

@@ -85,7 +85,7 @@ export default function VendorDashboardPage() {
 
     if (!dashboard) {
         return (
-            <div className="py-20 text-center text-gray-500">
+            <div className="py-20 text-center text-[var(--luxury-muted)]">
                 Could not load dashboard data.
             </div>
         );
@@ -99,8 +99,10 @@ export default function VendorDashboardPage() {
         <div className="space-y-8">
             {/* Header */}
             <div>
-                <p className="text-sm font-medium text-gray-500">Overview</p>
-                <h1 className="mt-1 text-2xl font-semibold text-gray-900">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--luxury-gold-strong)] sm:tracking-[0.34em]">
+                    Vendor Studio
+                </p>
+                <h1 className="mt-3 text-4xl font-normal [font-family:var(--font-serif)] sm:text-5xl">
                     Welcome back
                 </h1>
             </div>
@@ -108,48 +110,48 @@ export default function VendorDashboardPage() {
             {/* Metric cards */}
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <StatCard
-                    icon={<BarChart3 size={20} />}
+                    icon={<BarChart3 size={22} />}
                     label="Total Sales"
                     value={currency(dashboard.totalSalesAmount)}
                 />
                 <StatCard
-                    icon={<Truck size={20} />}
+                    icon={<Truck size={22} />}
                     label="Orders"
                     value={String(dashboard.totalOrders)}
                     sub={`${dashboard.pendingOrders} pending`}
                 />
                 <StatCard
-                    icon={<Boxes size={20} />}
+                    icon={<Boxes size={22} />}
                     label="Products"
                     value={String(dashboard.totalProducts)}
                     sub={`${dashboard.lowStockProducts} low stock`}
                 />
                 <StatCard
-                    icon={<ShieldCheck size={20} />}
+                    icon={<ShieldCheck size={22} />}
                     label="Low Stock"
                     value={String(dashboard.lowStockProducts)}
                     highlight={dashboard.lowStockProducts > 0}
                 />
             </div>
 
-            <div className="grid gap-6 lg:grid-cols-[1fr_0.8fr]">
+            <div className="grid gap-6 xl:grid-cols-[1fr_0.8fr]">
                 {/* Order Flow */}
-                <section className="rounded-xl border border-gray-200 bg-white p-6">
-                    <h2 className="text-lg font-semibold text-gray-900">
+                <section className="border border-[#d8c8ad] bg-[var(--luxury-paper)] p-6 shadow-[0_18px_50px_rgba(22,18,13,0.08)]">
+                    <h2 className="text-2xl font-normal [font-family:var(--font-serif)]">
                         Order Flow
                     </h2>
                     <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-5">
-                        <MiniStat label="Pending" value={dashboard.pendingOrders} color="text-amber-600" />
-                        <MiniStat label="Confirmed" value={dashboard.confirmedOrders} color="text-blue-600" />
-                        <MiniStat label="Shipped" value={dashboard.shippedOrders} color="text-purple-600" />
-                        <MiniStat label="Delivered" value={dashboard.deliveredOrders} color="text-green-600" />
-                        <MiniStat label="Cancelled" value={dashboard.cancelledOrders} color="text-red-500" />
+                        <MiniStat label="Pending" value={dashboard.pendingOrders} />
+                        <MiniStat label="Confirmed" value={dashboard.confirmedOrders} />
+                        <MiniStat label="Shipped" value={dashboard.shippedOrders} />
+                        <MiniStat label="Delivered" value={dashboard.deliveredOrders} />
+                        <MiniStat label="Cancelled" value={dashboard.cancelledOrders} />
                     </div>
                 </section>
 
                 {/* Top Sellers */}
-                <section className="rounded-xl border border-gray-200 bg-white p-6">
-                    <h2 className="text-lg font-semibold text-gray-900">
+                <section className="border border-[#d8c8ad] bg-[var(--luxury-paper)] p-6 shadow-[0_18px_50px_rgba(22,18,13,0.08)]">
+                    <h2 className="text-2xl font-normal [font-family:var(--font-serif)]">
                         Top Sellers
                     </h2>
                     <div className="mt-5 space-y-4">
@@ -164,14 +166,11 @@ export default function VendorDashboardPage() {
                             dashboard.topSellingProducts.map((p) => (
                                 <div
                                     key={p.productId}
-                                    className="flex items-center justify-between border-b border-gray-100 pb-3 last:border-0 last:pb-0"
+                                    className="border-b border-[#d8c8ad] pb-3 last:border-0 last:pb-0"
                                 >
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-900">{p.productName}</p>
-                                        <p className="text-xs text-gray-500">{p.quantitySold} sold</p>
-                                    </div>
-                                    <p className="text-sm font-semibold text-gray-900">
-                                        {currency(p.revenue)}
+                                    <p className="font-semibold">{p.productName}</p>
+                                    <p className="mt-1 text-sm text-[var(--luxury-muted)]">
+                                        {p.quantitySold} sold / {currency(p.revenue)}
                                     </p>
                                 </div>
                             ))
@@ -181,12 +180,12 @@ export default function VendorDashboardPage() {
             </div>
 
             {/* Recent Orders */}
-            <section className="rounded-xl border border-gray-200 bg-white">
-                <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-                    <h2 className="text-lg font-semibold text-gray-900">Recent Orders</h2>
+            <section className="border border-[#d8c8ad] bg-[var(--luxury-paper)] shadow-[0_18px_50px_rgba(22,18,13,0.08)]">
+                <div className="flex items-center justify-between border-b border-[#d8c8ad] px-6 py-4">
+                    <h2 className="text-2xl font-normal [font-family:var(--font-serif)]">Recent Orders</h2>
                     <Link
                         href="/vendor/orders"
-                        className="text-sm font-medium text-gray-600 hover:text-gray-900"
+                        className="text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-gold-strong)] hover:text-[var(--luxury-gold)]"
                     >
                         View all
                     </Link>
@@ -206,20 +205,20 @@ export default function VendorDashboardPage() {
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm">
                             <thead>
-                                <tr className="border-b border-gray-100 text-xs font-medium uppercase tracking-wider text-gray-500">
-                                    <th className="px-6 py-3">Order</th>
-                                    <th className="px-6 py-3">Date</th>
-                                    <th className="px-6 py-3">Status</th>
-                                    <th className="px-6 py-3 text-right">Total</th>
+                                <tr className="border-b border-[#d8c8ad] bg-[var(--luxury-sand)] text-xs uppercase tracking-[0.18em] text-[var(--luxury-muted-strong)]">
+                                    <th className="px-6 py-3 font-semibold">Order</th>
+                                    <th className="px-6 py-3 font-semibold">Date</th>
+                                    <th className="px-6 py-3 font-semibold">Status</th>
+                                    <th className="px-6 py-3 text-right font-semibold">Total</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {recentOrders.map((order) => (
-                                    <tr key={order.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50">
-                                        <td className="px-6 py-3 font-medium text-gray-900">
+                                    <tr key={order.id} className="border-b border-[#d8c8ad] last:border-0 hover:bg-[var(--luxury-sand)]/50">
+                                        <td className="px-6 py-3 font-medium">
                                             #{order.orderNumber}
                                         </td>
-                                        <td className="px-6 py-3 text-gray-500">
+                                        <td className="px-6 py-3 text-[var(--luxury-muted)]">
                                             {formatDate(order.orderedAt)}
                                         </td>
                                         <td className="px-6 py-3">
@@ -227,7 +226,7 @@ export default function VendorDashboardPage() {
                                                 {order.status}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-3 text-right font-medium text-gray-900">
+                                        <td className="px-6 py-3 text-right font-semibold">
                                             {currency(order.finalAmount)}
                                         </td>
                                     </tr>
@@ -239,26 +238,26 @@ export default function VendorDashboardPage() {
             </section>
 
             {/* Quick Actions */}
-            <section className="rounded-xl border border-gray-200 bg-white p-6">
-                <h2 className="text-lg font-semibold text-gray-900">Quick Actions</h2>
+            <section className="border border-[#d8c8ad] bg-[var(--luxury-paper)] p-6 shadow-[0_18px_50px_rgba(22,18,13,0.08)]">
+                <h2 className="text-2xl font-normal [font-family:var(--font-serif)]">Quick Actions</h2>
                 <div className="mt-5 flex flex-wrap gap-3">
                     <Link
                         href="/vendor/products/new"
-                        className="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-gray-800 transition-colors"
+                        className="inline-flex items-center gap-2 rounded-full bg-[var(--luxury-ink)] px-5 py-2.5 text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-paper)] hover:bg-[var(--luxury-moss)] transition-colors"
                     >
                         <PackagePlus size={16} />
                         Add Product
                     </Link>
                     <Link
                         href="/vendor/products"
-                        className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                        className="inline-flex items-center gap-2 rounded-full border border-[var(--luxury-line)] px-5 py-2.5 text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-ink)] hover:border-[var(--luxury-gold)] hover:text-[var(--luxury-gold)] transition-colors"
                     >
                         <Boxes size={16} />
                         Manage Products
                     </Link>
                     <Link
                         href="/vendor/orders"
-                        className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                        className="inline-flex items-center gap-2 rounded-full border border-[var(--luxury-line)] px-5 py-2.5 text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-ink)] hover:border-[var(--luxury-gold)] hover:text-[var(--luxury-gold)] transition-colors"
                     >
                         <ClipboardList size={16} />
                         View Orders
@@ -283,16 +282,18 @@ function StatCard({
     highlight?: boolean;
 }) {
     return (
-        <div className={`rounded-xl border bg-white p-5 ${highlight ? "border-amber-300 bg-amber-50" : "border-gray-200"}`}>
-            <div className={`mb-4 flex h-9 w-9 items-center justify-center rounded-lg ${highlight ? "bg-amber-100 text-amber-600" : "bg-gray-100 text-gray-600"}`}>
+        <div className={`border bg-[var(--luxury-paper)] p-5 shadow-[0_18px_50px_rgba(22,18,13,0.08)] sm:p-6 ${highlight ? "border-[var(--luxury-gold)]" : "border-[#d8c8ad]"}`}>
+            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full border border-[#d8c8ad] text-[var(--luxury-gold)]">
                 {icon}
             </div>
-            <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--luxury-muted)] sm:tracking-[0.28em]">
                 {label}
             </p>
-            <p className="mt-1 text-2xl font-semibold text-gray-900">{value}</p>
+            <p className="mt-2 text-2xl font-normal [font-family:var(--font-serif)] sm:text-3xl">
+                {value}
+            </p>
             {sub && (
-                <p className="mt-1 text-xs text-gray-500">{sub}</p>
+                <p className="mt-1 text-xs text-[var(--luxury-muted)]">{sub}</p>
             )}
         </div>
     );
@@ -301,16 +302,14 @@ function StatCard({
 function MiniStat({
     label,
     value,
-    color,
 }: {
     label: string;
     value: number;
-    color: string;
 }) {
     return (
-        <div className="rounded-lg border border-gray-100 bg-gray-50 p-3 text-center">
-            <p className={`text-2xl font-bold ${color}`}>{value}</p>
-            <p className="mt-1 text-xs font-medium text-gray-500">{label}</p>
+        <div className="border border-[#d8c8ad] bg-[var(--luxury-sand)] p-3 text-center">
+            <p className="text-2xl font-semibold">{value}</p>
+            <p className="mt-1 text-xs font-medium uppercase tracking-[0.12em] text-[var(--luxury-muted)]">{label}</p>
         </div>
     );
 }

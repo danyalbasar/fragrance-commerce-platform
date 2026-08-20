@@ -98,23 +98,25 @@ export default function VendorOrdersPage() {
         <div className="space-y-6">
             {/* Header */}
             <div>
-                <p className="text-sm font-medium text-gray-500">Orders</p>
-                <h1 className="mt-1 text-2xl font-semibold text-gray-900">
-                    Order Management
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--luxury-gold-strong)] sm:tracking-[0.34em]">
+                    Vendor Studio
+                </p>
+                <h1 className="mt-3 text-4xl font-normal [font-family:var(--font-serif)] sm:text-5xl">
+                    Orders
                 </h1>
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-2 text-sm text-[var(--luxury-muted)]">
                     {orders.length} total orders
                 </p>
             </div>
 
             {message && (
-                <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+                <div className="border border-[#b9c8a8] bg-[#f6fbef] p-4 text-sm text-[#455c2b]">
                     {message}
                 </div>
             )}
 
             {error && (
-                <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <div className="border border-red-200 bg-red-50 p-4 text-sm text-red-700">
                     {error}
                 </div>
             )}
@@ -122,11 +124,11 @@ export default function VendorOrdersPage() {
             {/* Orders list */}
             <div className="space-y-4">
                 {loading && orders.length === 0 ? (
-                    <div className="rounded-xl border border-gray-200 bg-white p-10 text-center text-gray-400">
+                    <div className="border border-[#d8c8ad] bg-[var(--luxury-paper)] p-10 text-center text-[var(--luxury-muted)] shadow-[0_18px_50px_rgba(22,18,13,0.08)]">
                         Loading orders...
                     </div>
                 ) : sortedOrders.length === 0 ? (
-                    <div className="rounded-xl border border-gray-200 bg-white p-10">
+                    <div className="border border-[#d8c8ad] bg-[var(--luxury-paper)] p-10 shadow-[0_18px_50px_rgba(22,18,13,0.08)]">
                         <EmptyState
                             icon={ClipboardList}
                             title="No orders yet"
@@ -139,32 +141,32 @@ export default function VendorOrdersPage() {
                 ) : (
                     <>
                         {/* Desktop table */}
-                        <div className="hidden rounded-xl border border-gray-200 bg-white md:block">
+                        <div className="hidden border border-[#d8c8ad] bg-[var(--luxury-paper)] shadow-[0_18px_50px_rgba(22,18,13,0.08)] md:block">
                             <div className="overflow-x-auto">
-                                <table className="w-full min-w-[800px] text-left text-sm">
+                                <table className="w-full min-w-[800px] border-collapse text-left text-sm">
                                     <thead>
-                                        <tr className="border-b border-gray-200 text-xs font-medium uppercase tracking-wider text-gray-500">
-                                            <th className="px-5 py-3">Order</th>
-                                            <th className="px-5 py-3">Date</th>
-                                            <th className="px-5 py-3">Customer</th>
-                                            <th className="px-5 py-3">Status</th>
-                                            <th className="px-5 py-3 text-right">Total</th>
-                                            <th className="px-5 py-3 text-right">Actions</th>
+                                        <tr className="border-b border-[#d8c8ad] bg-[var(--luxury-sand)] text-xs uppercase tracking-[0.18em] text-[var(--luxury-muted-strong)]">
+                                            <th className="px-5 py-4 font-semibold">Order</th>
+                                            <th className="px-5 py-4 font-semibold">Date</th>
+                                            <th className="px-5 py-4 font-semibold">Customer</th>
+                                            <th className="px-5 py-4 font-semibold">Status</th>
+                                            <th className="px-5 py-4 text-right font-semibold">Total</th>
+                                            <th className="px-5 py-4 text-right font-semibold">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {sortedOrders.map((order) => (
-                                            <tr key={order.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50">
-                                                <td className="px-5 py-3 font-medium text-gray-900">
+                                            <tr key={order.id} className="border-b border-[#d8c8ad] last:border-0 hover:bg-[var(--luxury-sand)]/50">
+                                                <td className="px-5 py-4 font-semibold">
                                                     #{order.orderNumber}
                                                 </td>
-                                                <td className="px-5 py-3 text-gray-500">
+                                                <td className="px-5 py-4 text-[var(--luxury-muted)]">
                                                     {formatDate(order.orderedAt)}
                                                 </td>
-                                                <td className="px-5 py-3 text-gray-500">
+                                                <td className="px-5 py-4 text-[var(--luxury-muted)]">
                                                     {order.shippingAddress.fullName}
                                                 </td>
-                                                <td className="px-5 py-3">
+                                                <td className="px-5 py-4">
                                                     <select
                                                         value={statusForms[order.id] || order.status}
                                                         onChange={(e) =>
@@ -173,28 +175,28 @@ export default function VendorOrdersPage() {
                                                                 [order.id]: e.target.value,
                                                             }))
                                                         }
-                                                        className="h-8 rounded-md border border-gray-200 bg-white px-2 text-xs outline-none focus:border-gray-400"
+                                                        className="h-9 border border-[#d8c8ad] bg-[var(--luxury-input)] px-2 text-xs outline-none focus:border-[var(--luxury-gold)]"
                                                     >
                                                         {orderStatuses.map((s) => (
                                                             <option key={s} value={s}>{s}</option>
                                                         ))}
                                                     </select>
                                                 </td>
-                                                <td className="px-5 py-3 text-right font-medium text-gray-900">
+                                                <td className="px-5 py-4 text-right font-semibold">
                                                     {currency(order.finalAmount)}
                                                 </td>
-                                                <td className="px-5 py-3 text-right">
+                                                <td className="px-5 py-4 text-right">
                                                     <div className="flex items-center justify-end gap-2">
                                                         <button
                                                             onClick={() => handleUpdateStatus(order.id)}
                                                             disabled={updatingId === order.id || (statusForms[order.id] || order.status) === order.status}
-                                                            className="rounded-md bg-gray-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-800 disabled:opacity-40 transition-colors"
+                                                            className="rounded-full bg-[var(--luxury-ink)] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.1em] text-[var(--luxury-paper)] hover:bg-[var(--luxury-moss)] disabled:opacity-40 transition-colors"
                                                         >
                                                             {updatingId === order.id ? "Saving..." : "Save"}
                                                         </button>
                                                         <Link
                                                             href={`/vendor/orders/${order.id}`}
-                                                            className="rounded-md border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                                                            className="rounded-full border border-[#d8c8ad] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.1em] hover:border-[var(--luxury-gold)] transition-colors"
                                                         >
                                                             Details
                                                         </Link>
@@ -212,18 +214,18 @@ export default function VendorOrdersPage() {
                             {sortedOrders.map((order) => (
                                 <div
                                     key={order.id}
-                                    className="rounded-xl border border-gray-200 bg-white p-4"
+                                    className="border border-[#d8c8ad] bg-[var(--luxury-paper)] p-4 shadow-[0_18px_50px_rgba(22,18,13,0.08)]"
                                 >
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <p className="font-medium text-gray-900">
+                                            <p className="font-semibold">
                                                 #{order.orderNumber}
                                             </p>
-                                            <p className="text-xs text-gray-500">
+                                            <p className="text-xs text-[var(--luxury-muted)]">
                                                 {formatDate(order.orderedAt)} · {order.shippingAddress.fullName}
                                             </p>
                                         </div>
-                                        <p className="font-semibold text-gray-900">
+                                        <p className="font-semibold">
                                             {currency(order.finalAmount)}
                                         </p>
                                     </div>
@@ -237,7 +239,7 @@ export default function VendorOrdersPage() {
                                                     [order.id]: e.target.value,
                                                 }))
                                             }
-                                            className="flex-1 h-9 rounded-lg border border-gray-200 bg-white px-3 text-sm outline-none focus:border-gray-400"
+                                            className="flex-1 h-11 border border-[#d8c8ad] bg-[var(--luxury-input)] px-3 text-sm outline-none focus:border-[var(--luxury-gold)]"
                                         >
                                             {orderStatuses.map((s) => (
                                                 <option key={s} value={s}>{s}</option>
@@ -246,13 +248,13 @@ export default function VendorOrdersPage() {
                                         <button
                                             onClick={() => handleUpdateStatus(order.id)}
                                             disabled={updatingId === order.id || (statusForms[order.id] || order.status) === order.status}
-                                            className="rounded-lg bg-gray-900 px-3 py-2 text-xs font-medium text-white hover:bg-gray-800 disabled:opacity-40 transition-colors"
+                                            className="rounded-full bg-[var(--luxury-ink)] px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.1em] text-[var(--luxury-paper)] hover:bg-[var(--luxury-moss)] disabled:opacity-40 transition-colors"
                                         >
                                             {updatingId === order.id ? "..." : "Save"}
                                         </button>
                                         <Link
                                             href={`/vendor/orders/${order.id}`}
-                                            className="rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                                            className="rounded-full border border-[#d8c8ad] px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.1em] hover:border-[var(--luxury-gold)] transition-colors"
                                         >
                                             Details
                                         </Link>

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { Boxes, PackagePlus, Search, SlidersHorizontal, X } from "lucide-react";
+import { Boxes, PackagePlus, SlidersHorizontal, X } from "lucide-react";
 import { productService } from "@/services/productService";
 import { EmptyState } from "@/components/common/EmptyState";
 import type { Product } from "@/types/product";
@@ -117,22 +117,24 @@ export default function VendorProductsPage() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-wrap items-end justify-between gap-4">
                 <div>
-                    <p className="text-sm font-medium text-gray-500">Products</p>
-                    <h1 className="mt-1 text-2xl font-semibold text-gray-900">
-                        Product List
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--luxury-gold-strong)] sm:tracking-[0.34em]">
+                        Vendor Studio
+                    </p>
+                    <h1 className="mt-3 text-4xl font-normal [font-family:var(--font-serif)] sm:text-5xl">
+                        Products
                     </h1>
-                    <p className="mt-1 text-sm text-gray-500">
-                        {filtered.length} of {products.length} products
+                    <p className="mt-2 text-sm text-[var(--luxury-muted)]">
+                        Showing {filtered.length} of {products.length} products
                         {lowStockCount > 0 && (
-                            <span className="ml-2 text-amber-600">· {lowStockCount} low stock</span>
+                            <span className="ml-2 text-[var(--luxury-gold-strong)]">· {lowStockCount} low stock</span>
                         )}
                     </p>
                 </div>
                 <Link
                     href="/vendor/products/new"
-                    className="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-gray-800 transition-colors"
+                    className="inline-flex items-center gap-2 rounded-full bg-[var(--luxury-ink)] px-5 py-2.5 text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-paper)] hover:bg-[var(--luxury-moss)] transition-colors"
                 >
                     <PackagePlus size={16} />
                     Add Product
@@ -140,17 +142,17 @@ export default function VendorProductsPage() {
             </div>
 
             {/* Filters bar */}
-            <div className="rounded-xl border border-gray-200 bg-white">
-                <div className="flex items-center justify-between px-4 py-3">
+            <div className="border border-[#d8c8ad] bg-[var(--luxury-paper)] shadow-[0_18px_50px_rgba(22,18,13,0.08)]">
+                <div className="flex items-center justify-between border-b border-[#d8c8ad] px-4 py-3 sm:px-6">
                     <button
                         type="button"
                         onClick={() => setShowFilters((v) => !v)}
-                        className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+                        className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-ink)] hover:text-[var(--luxury-gold)]"
                     >
                         <SlidersHorizontal size={16} />
                         Filters
                         {hasActiveFilters && (
-                            <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-gray-900 px-1.5 text-[10px] font-bold text-white">
+                            <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--luxury-ink)] px-1.5 text-[10px] font-bold text-[var(--luxury-paper)]">
                                 {Object.values(filters).filter(Boolean).length}
                             </span>
                         )}
@@ -161,7 +163,7 @@ export default function VendorProductsPage() {
                             onClick={() =>
                                 setFilters({ name: "", sku: "", category: "", gender: "", status: "", stock: "" })
                             }
-                            className="text-sm text-gray-500 hover:text-gray-900"
+                            className="text-sm text-[var(--luxury-muted)] hover:text-[var(--luxury-ink)]"
                         >
                             Clear all
                         </button>
@@ -169,7 +171,7 @@ export default function VendorProductsPage() {
                 </div>
 
                 {showFilters && (
-                    <div className="grid gap-4 border-t border-gray-100 px-4 py-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid gap-4 px-4 py-5 sm:px-6 sm:py-6 lg:grid-cols-3">
                         <FilterInput
                             label="Product Name"
                             value={filters.name}
@@ -225,9 +227,9 @@ export default function VendorProductsPage() {
             </div>
 
             {/* Product table */}
-            <div className="rounded-xl border border-gray-200 bg-white">
+            <div className="border border-[#d8c8ad] bg-[var(--luxury-paper)] shadow-[0_18px_50px_rgba(22,18,13,0.08)]">
                 {loading && products.length === 0 ? (
-                    <div className="p-10 text-center text-gray-400">Loading products...</div>
+                    <div className="p-10 text-center text-[var(--luxury-muted)]">Loading products...</div>
                 ) : filtered.length === 0 ? (
                     <div className="p-10">
                         <EmptyState
@@ -247,23 +249,23 @@ export default function VendorProductsPage() {
                     <>
                         {/* Desktop table */}
                         <div className="hidden overflow-x-auto md:block">
-                            <table className="w-full min-w-[900px] text-left text-sm">
+                            <table className="w-full min-w-[900px] border-collapse text-left text-sm">
                                 <thead>
-                                    <tr className="border-b border-gray-200 text-xs font-medium uppercase tracking-wider text-gray-500">
-                                        <th className="px-5 py-3">Product</th>
-                                        <th className="px-5 py-3">SKU</th>
-                                        <th className="px-5 py-3">Price</th>
-                                        <th className="px-5 py-3">Stock</th>
-                                        <th className="px-5 py-3">Status</th>
-                                        <th className="px-5 py-3"></th>
+                                    <tr className="border-b border-[#d8c8ad] bg-[var(--luxury-sand)] text-xs uppercase tracking-[0.18em] text-[var(--luxury-muted-strong)]">
+                                        <th className="px-5 py-4 font-semibold">Product</th>
+                                        <th className="px-5 py-4 font-semibold">SKU</th>
+                                        <th className="px-5 py-4 font-semibold">Price</th>
+                                        <th className="px-5 py-4 font-semibold">Stock</th>
+                                        <th className="px-5 py-4 font-semibold">Status</th>
+                                        <th className="px-5 py-4 font-semibold"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {filtered.map((product) => (
-                                        <tr key={product.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50">
-                                            <td className="px-5 py-3">
+                                        <tr key={product.id} className="border-b border-[#d8c8ad] last:border-0 hover:bg-[var(--luxury-sand)]/50">
+                                            <td className="px-5 py-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                                                    <div className="relative h-10 w-10 shrink-0 overflow-hidden bg-[var(--luxury-sand)]">
                                                         {primaryImage(product) && (
                                                             <Image
                                                                 src={primaryImage(product)}
@@ -274,45 +276,45 @@ export default function VendorProductsPage() {
                                                         )}
                                                     </div>
                                                     <div className="min-w-0">
-                                                        <p className="font-medium text-gray-900 truncate">
+                                                        <p className="font-semibold truncate">
                                                             {product.name}
                                                         </p>
-                                                        <p className="text-xs text-gray-500 truncate">
+                                                        <p className="text-xs text-[var(--luxury-muted)] truncate">
                                                             {product.brandName} · {product.gender}
                                                         </p>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-5 py-3 text-gray-500">
+                                            <td className="px-5 py-4 text-[var(--luxury-muted)]">
                                                 {product.variants[0]?.sku || "-"}
                                             </td>
-                                            <td className="px-5 py-3 font-medium text-gray-900">
+                                            <td className="px-5 py-4 font-semibold">
                                                 {currency(product.variants[0]?.sellingPrice || 0)}
                                             </td>
-                                            <td className="px-5 py-3">
+                                            <td className="px-5 py-4">
                                                 <span className={
                                                     totalStock(product) === 0
-                                                        ? "text-red-500 font-medium"
+                                                        ? "text-red-500 font-semibold"
                                                         : totalStock(product) <= 5
-                                                        ? "text-amber-600 font-medium"
-                                                        : "text-gray-700"
+                                                        ? "text-[var(--luxury-gold-strong)] font-semibold"
+                                                        : ""
                                                 }>
                                                     {totalStock(product)}
                                                 </span>
                                             </td>
-                                            <td className="px-5 py-3">
+                                            <td className="px-5 py-4">
                                                 <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
                                                     product.isActive
                                                         ? "bg-green-50 text-green-700"
-                                                        : "bg-gray-100 text-gray-500"
+                                                        : "bg-[var(--luxury-sand)] text-[var(--luxury-muted)]"
                                                 }`}>
                                                     {product.isActive ? "Active" : "Draft"}
                                                 </span>
                                             </td>
-                                            <td className="px-5 py-3">
+                                            <td className="px-5 py-4">
                                                 <Link
                                                     href={`/vendor/products/${product.id}`}
-                                                    className="text-sm font-medium text-gray-600 hover:text-gray-900"
+                                                    className="text-sm font-semibold uppercase tracking-[0.08em] text-[var(--luxury-gold-strong)] hover:text-[var(--luxury-gold)]"
                                                 >
                                                     Edit
                                                 </Link>
@@ -329,9 +331,9 @@ export default function VendorProductsPage() {
                                 <Link
                                     key={product.id}
                                     href={`/vendor/products/${product.id}`}
-                                    className="flex gap-3 rounded-lg border border-gray-100 p-3 hover:bg-gray-50"
+                                    className="flex gap-3 border border-[#d8c8ad] bg-[var(--luxury-sand)]/50 p-3 hover:bg-[var(--luxury-sand)]"
                                 >
-                                    <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                                    <div className="relative h-16 w-16 shrink-0 overflow-hidden bg-[var(--luxury-sand)]">
                                         {primaryImage(product) && (
                                             <Image
                                                 src={primaryImage(product)}
@@ -342,22 +344,22 @@ export default function VendorProductsPage() {
                                         )}
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                        <p className="font-medium text-gray-900 truncate">
+                                        <p className="font-semibold truncate">
                                             {product.name}
                                         </p>
-                                        <p className="text-xs text-gray-500">
+                                        <p className="text-xs text-[var(--luxury-muted)]">
                                             {product.brandName} · {currency(product.variants[0]?.sellingPrice || 0)}
                                         </p>
                                         <div className="mt-1 flex items-center gap-2">
                                             <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ${
                                                 product.isActive
                                                     ? "bg-green-50 text-green-700"
-                                                    : "bg-gray-100 text-gray-500"
+                                                    : "bg-[var(--luxury-sand)] text-[var(--luxury-muted)]"
                                             }`}>
                                                 {product.isActive ? "Active" : "Draft"}
                                             </span>
                                             <span className={`text-xs font-medium ${
-                                                totalStock(product) <= 5 ? "text-amber-600" : "text-gray-500"
+                                                totalStock(product) <= 5 ? "text-[var(--luxury-gold-strong)]" : "text-[var(--luxury-muted)]"
                                             }`}>
                                                 Stock: {totalStock(product)}
                                             </span>
@@ -384,18 +386,18 @@ function FilterInput({
 }) {
     return (
         <label className="block">
-            <span className="text-xs font-medium text-gray-500">{label}</span>
-            <div className="relative mt-1">
+            <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--luxury-muted)]">{label}</span>
+            <div className="relative mt-2">
                 <input
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
-                    className="h-10 w-full rounded-lg border border-gray-200 bg-white pl-3 pr-8 text-sm outline-none transition focus:border-gray-400"
+                    className="h-11 w-full border border-[#d8c8ad] bg-[var(--luxury-input)] px-3 pr-8 text-sm outline-none transition focus:border-[var(--luxury-gold)]"
                 />
                 {value && (
                     <button
                         type="button"
                         onClick={() => onChange("")}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--luxury-muted)] hover:text-[var(--luxury-ink)]"
                     >
                         <X size={14} />
                     </button>
@@ -418,11 +420,11 @@ function FilterSelect({
 }) {
     return (
         <label className="block">
-            <span className="text-xs font-medium text-gray-500">{label}</span>
+            <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--luxury-muted)]">{label}</span>
             <select
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
-                className="mt-1 h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-gray-400"
+                className="mt-2 h-11 w-full border border-[#d8c8ad] bg-[var(--luxury-input)] px-3 text-sm outline-none transition focus:border-[var(--luxury-gold)]"
             >
                 {options.map((option) => (
                     <option key={option.value} value={option.value}>
