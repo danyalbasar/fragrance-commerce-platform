@@ -26,7 +26,7 @@ const emptyForm = {
     gender: "Unisex" as ProductGender,
     name: "",
     description: "",
-    status: 0 as number,
+    status: "" as string,
 };
 
 type DraftVariant = {
@@ -131,7 +131,7 @@ export default function VendorProductEditor({
                     gender: productData.gender,
                     name: productData.name,
                     description: productData.description || "",
-                    status: productData.status === "Active" ? 1 : productData.status === "Deactivated" ? 2 : 0,
+                    status: productData.status,
                 });
                 setVariantEditForms(
                     productData.variants.reduce<Record<string, VariantEditForm>>(
@@ -211,7 +211,7 @@ export default function VendorProductEditor({
                     gender: form.gender,
                     name: form.name,
                     description: form.description,
-                    status: form.status,
+                    status: form.status === "Active" ? 1 : 0,
                 };
 
                 await productService.update(productId, request);
@@ -277,7 +277,7 @@ export default function VendorProductEditor({
                     gender: form.gender,
                     name: form.name,
                     description: form.description,
-                    status: form.status,
+                    status: form.status === "Active" ? 1 : 0,
                     images: [],
                     variants: draftVariants.map((variant) => ({
                         variantName: variant.variantName,
@@ -605,17 +605,18 @@ export default function VendorProductEditor({
                                     />
                                     <SelectField
                                         label="Status"
-                                        value={String(form.status)}
+                                        value={form.status}
                                         onChange={(value) =>
                                             setForm((current) => ({
                                                 ...current,
-                                                status: Number(value),
+                                                status: value,
                                             }))
                                         }
                                         options={[
-                                            { value: "0", label: "Draft" },
-                                            { value: "1", label: "Active" },
+                                            { value: "Draft", label: "Draft" },
+                                            { value: "Active", label: "Active" },
                                         ]}
+                                        required
                                     />
                                     <SelectField
                                         label="Brand"
