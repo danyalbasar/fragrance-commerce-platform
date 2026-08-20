@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
     BarChart3,
     Boxes,
+    ChevronDown,
     ClipboardList,
     LogOut,
     Menu,
@@ -13,31 +14,92 @@ import {
     Settings,
     X,
 } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
     { href: "/vendor", label: "Overview", icon: BarChart3, exact: true },
     { href: "/vendor/products", label: "Products", icon: Boxes },
     { href: "/vendor/orders", label: "Orders", icon: ClipboardList },
-    { href: "/vendor/settings", label: "Settings", icon: Settings },
 ];
 
 export default function VendorSidebar() {
     const pathname = usePathname();
     const router = useRouter();
-    const { logoutUser } = useAuth();
+    const { logoutUser, initials, email } = useAuth();
     const [collapsed, setCollapsed] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [showProfileMenu, setShowProfileMenu] = useState(false);
+    const profileMenuRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        function handleClickOutside(e: MouseEvent) {
+            if (profileMenuRef.current && !profileMenuRef.current.contains(e.target as Node)) {
+                setShowProfileMenu(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     function handleLogout() {
         logoutUser();
-        router.replace("/login");
     }
 
     function isActive(href: string, exact?: boolean) {
         return exact ? pathname === href : pathname.startsWith(href);
     }
+
+    function closeAll() {
+        setShowProfileMenu(false);
+        setMobileOpen(false);
+    }
+
+    const profileSection = (
+        <div className="relative border-t border-[var(--luxury-line)] px-3 py-2" ref={profileMenuRef}>
+            <button
+                type="button"
+                onClick={() => setShowProfileMenu((v) => !v)}
+                className={`flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-all duration-200 hover:bg-[var(--luxury-sand)] ${collapsed ? "justify-center" : ""}`}
+            >
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--luxury-ink)] text-[11px] font-bold uppercase tracking-wider text-[var(--luxury-paper)]">
+                    {initials || "?"}
+                </div>
+                {!collapsed && (
+                    <>
+                        <span className="min-w-0 flex-1 truncate text-left text-[var(--luxury-ink)]">
+                            {email || "Vendor"}
+                        </span>
+                        <ChevronDown
+                            size={14}
+                            className={`shrink-0 text-[var(--luxury-muted)] transition-transform duration-200 ${showProfileMenu ? "rotate-180" : ""}`}
+                        />
+                    </>
+                )}
+            </button>
+
+            {showProfileMenu && (
+                <div className={`absolute bottom-full ${collapsed ? "left-2 w-48" : "left-3 right-3"} mb-1 border border-[var(--luxury-line)] bg-[var(--luxury-paper)] py-1 shadow-lg`}>
+                    <Link
+                        href="/vendor/settings"
+                        onClick={closeAll}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--luxury-ink)] hover:bg-[var(--luxury-sand)]"
+                    >
+                        <Settings size={16} />
+                        Settings
+                    </Link>
+                    <button
+                        type="button"
+                        onClick={() => { handleLogout(); closeAll(); }}
+                        className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-red-700 hover:bg-red-50"
+                    >
+                        <LogOut size={16} />
+                        Log Out
+                    </button>
+                </div>
+            )}
+        </div>
+    );
 
     const sidebarContent = (
         <nav className="flex flex-col gap-1 px-3 py-2">
@@ -61,16 +123,8 @@ export default function VendorSidebar() {
                 );
             })}
 
-            <div className="mt-auto border-t border-[var(--luxury-line)] pt-2">
-                <button
-                    type="button"
-                    onClick={() => { handleLogout(); setMobileOpen(false); }}
-                    className={`flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-[var(--luxury-muted)] transition-all duration-200 hover:bg-red-50 hover:text-red-700 ${collapsed ? "justify-center" : ""}`}
-                    title="Log out"
-                >
-                    <LogOut size={18} strokeWidth={1.5} />
-                    {!collapsed && <span>Log Out</span>}
-                </button>
+            <div className="mt-auto">
+                {profileSection}
             </div>
         </nav>
     );
