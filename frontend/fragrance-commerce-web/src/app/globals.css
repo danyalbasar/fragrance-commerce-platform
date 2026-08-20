@@ -67,7 +67,10 @@ body {
   text-rendering: geometricPrecision;
 }
 
-html,
+html {
+  max-width: 100%;
+}
+
 body {
   max-width: 100%;
   overflow-x: hidden;
