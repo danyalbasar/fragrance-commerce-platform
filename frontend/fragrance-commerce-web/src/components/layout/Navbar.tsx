@@ -402,10 +402,10 @@ export default function Navbar() {
 
     if (pathname.startsWith("/vendor")) return null;
 
-    return (<>
+    return (
         <nav
             aria-label="Main"
-            className={`fixed inset-x-0 top-0 z-50 border-b border-[#d8c8ad] bg-[var(--luxury-paper)]/92 text-[var(--luxury-ink)] backdrop-blur-xl transition-shadow duration-300 ${scrolled ? "shadow-[0_14px_34px_rgba(22,18,13,0.1)]" : ""}`}
+            className={`sticky top-0 z-50 border-b border-[#d8c8ad] bg-[var(--luxury-paper)]/92 text-[var(--luxury-ink)] backdrop-blur-xl transition-shadow duration-300 ${scrolled ? "shadow-[0_14px_34px_rgba(22,18,13,0.1)]" : ""}`}
         >
             <div
                 className={
@@ -1288,6 +1288,5 @@ export default function Navbar() {
                 document.body
             )}
         </nav>
-        <div className="h-[65px] md:h-[73px]" aria-hidden="true" />
-    </>);
+    );
 }

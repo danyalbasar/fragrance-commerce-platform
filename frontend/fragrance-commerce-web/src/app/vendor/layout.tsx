@@ -19,7 +19,7 @@ export default function VendorLayout({
             <div className="flex min-h-screen bg-[var(--luxury-ivory)] text-[var(--luxury-ink)]">
                 <VendorSidebar />
                 <main className="flex-1 min-w-0 overflow-x-hidden">
-                    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+                    <div className="mx-auto max-w-6xl px-2 py-8 sm:px-4 lg:px-6 lg:py-10">
                         {children}
                     </div>
                 </main>
