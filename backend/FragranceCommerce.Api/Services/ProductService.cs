@@ -513,6 +513,7 @@ public class ProductService : IProductService
             SKU = v.SKU,
             MRP = v.MRP,
             SellingPrice = v.SellingPrice,
+            CostPrice = v.CostPrice,
             StockQuantity = v.StockQuantity,
             IsActive = v.IsActive,
 
