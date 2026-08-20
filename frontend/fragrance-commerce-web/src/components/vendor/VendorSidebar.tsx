@@ -102,7 +102,7 @@ export default function VendorSidebar() {
     );
 
     const sidebarContent = (
-        <nav className="flex flex-1 flex-col gap-1 px-3 py-2">
+        <nav className="flex flex-1 flex-col gap-1 px-3 pt-4 pb-2">
             {navItems.map((item) => {
                 const active = isActive(item.href, item.exact);
                 return (
