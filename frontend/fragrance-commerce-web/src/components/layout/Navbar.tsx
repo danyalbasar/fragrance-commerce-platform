@@ -23,8 +23,6 @@ export default function Navbar() {
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
-    if (pathname.startsWith("/vendor")) return null;
-
     const { isLoggedIn, logoutUser, initials, email, roles } = useAuth();
 
     const [showSearch, setShowSearch] = useState(false);
@@ -401,6 +399,8 @@ export default function Navbar() {
     function isMobileGroupOpen(gender: string, group: string) {
         return openMobileGroups[`${gender}-${group}`] === true;
     }
+
+    if (pathname.startsWith("/vendor")) return null;
 
     return (
         <nav
