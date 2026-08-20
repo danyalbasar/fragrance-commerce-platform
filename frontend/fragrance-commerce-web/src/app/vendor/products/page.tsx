@@ -308,7 +308,7 @@ export default function VendorProductsPage() {
                                                         ? "bg-green-50 text-green-700"
                                                         : "bg-[var(--luxury-sand)] text-[var(--luxury-muted)]"
                                                 }`}>
-                                                    {product.isActive ? "Active" : "Draft"}
+                                                    {product.isActive ? "Active" : "Deactivated"}
                                                 </span>
                                             </td>
                                             <td className="px-5 py-4">
@@ -356,7 +356,7 @@ export default function VendorProductsPage() {
                                                     ? "bg-green-50 text-green-700"
                                                     : "bg-[var(--luxury-sand)] text-[var(--luxury-muted)]"
                                             }`}>
-                                                {product.isActive ? "Active" : "Draft"}
+                                                {product.isActive ? "Active" : "Deactivated"}
                                             </span>
                                             <span className={`text-xs font-medium ${
                                                 totalStock(product) <= 5 ? "text-[var(--luxury-gold-strong)]" : "text-[var(--luxury-muted)]"
