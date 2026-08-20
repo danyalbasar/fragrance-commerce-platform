@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { AtSign, Camera, CirclePlay, MessagesSquare } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -35,9 +36,10 @@ const helpLinks = [
 ];
 
 export default function Footer() {
+    const pathname = usePathname();
     const { roles } = useAuth();
 
-    if (roles.includes("Vendor")) {
+    if (pathname.startsWith("/vendor") || roles.includes("Vendor")) {
         return null;
     }
 

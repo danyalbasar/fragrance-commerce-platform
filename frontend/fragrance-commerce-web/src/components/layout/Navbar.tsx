@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState, useCallback, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { ChevronDown, Heart, MapPin, Menu, Minus, Plus, Search, ShoppingBag, Trash2, User, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { AnimatePresence, motion } from "framer-motion";
@@ -20,7 +20,10 @@ const subscribeToMounted = () => () => {};
 
 export default function Navbar() {
     const router = useRouter();
+    const pathname = usePathname();
     const searchParams = useSearchParams();
+
+    if (pathname.startsWith("/vendor")) return null;
 
     const { isLoggedIn, logoutUser, initials, email, roles } = useAuth();
 
