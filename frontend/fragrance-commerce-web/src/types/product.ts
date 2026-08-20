@@ -1,5 +1,7 @@
 export type ProductGender = "Men" | "Women" | "Unisex";
 
+export type ProductStatus = "Draft" | "Active" | "Deactivated";
+
 export interface ProductImage {
     id: string;
     imageUrl: string;
@@ -42,7 +44,7 @@ export interface Product {
 
     name: string;
     description?: string;
-    isActive: boolean;
+    status: ProductStatus;
 
     variants: ProductVariant[];
     images: ProductImage[];

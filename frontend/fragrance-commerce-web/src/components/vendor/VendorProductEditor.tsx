@@ -26,7 +26,7 @@ const emptyForm = {
     gender: "Unisex" as ProductGender,
     name: "",
     description: "",
-    isActive: true,
+    status: 0 as number,
 };
 
 type DraftVariant = {
@@ -131,7 +131,7 @@ export default function VendorProductEditor({
                     gender: productData.gender,
                     name: productData.name,
                     description: productData.description || "",
-                    isActive: productData.isActive,
+                    status: productData.status === "Active" ? 1 : productData.status === "Deactivated" ? 2 : 0,
                 });
                 setVariantEditForms(
                     productData.variants.reduce<Record<string, VariantEditForm>>(
@@ -211,7 +211,7 @@ export default function VendorProductEditor({
                     gender: form.gender,
                     name: form.name,
                     description: form.description,
-                    isActive: form.isActive,
+                    status: form.status,
                 };
 
                 await productService.update(productId, request);
@@ -277,6 +277,7 @@ export default function VendorProductEditor({
                     gender: form.gender,
                     name: form.name,
                     description: form.description,
+                    status: form.status,
                     images: [],
                     variants: draftVariants.map((variant) => ({
                         variantName: variant.variantName,
@@ -604,16 +605,16 @@ export default function VendorProductEditor({
                                     />
                                     <SelectField
                                         label="Status"
-                                        value={String(form.isActive)}
+                                        value={String(form.status)}
                                         onChange={(value) =>
                                             setForm((current) => ({
                                                 ...current,
-                                                isActive: value === "true",
+                                                status: Number(value),
                                             }))
                                         }
                                         options={[
-                                            { value: "true", label: "Active" },
-                                            { value: "false", label: "Inactive" },
+                                            { value: "0", label: "Draft" },
+                                            { value: "1", label: "Active" },
                                         ]}
                                     />
                                     <SelectField
@@ -948,7 +949,7 @@ export default function VendorProductEditor({
                                         <p>Brand: {product.brandName}</p>
                                         <p>Category: {product.categoryName}</p>
                                         <p>Gender: {product.gender}</p>
-                                        <p>Status: {product.isActive ? "Active" : "Inactive"}</p>
+                                        <p>Status: {product.status}</p>
                                     </div>
                                 </section>
                             )}

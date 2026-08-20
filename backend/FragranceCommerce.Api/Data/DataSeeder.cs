@@ -309,7 +309,7 @@ public static class DataSeeder
             Gender = gender,
             Name = productName,
             Description = description,
-            IsActive = true
+            Status = FragranceCommerce.Api.Enums.ProductStatus.Active
         };
 
         context.Products.Add(product);

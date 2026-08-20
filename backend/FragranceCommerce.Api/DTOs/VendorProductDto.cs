@@ -1,4 +1,5 @@
 namespace FragranceCommerce.Api.DTOs;
+using FragranceCommerce.Api.Enums;
 
 public class VendorProductDto
 {
@@ -12,7 +13,7 @@ public class VendorProductDto
     public string Gender { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
-    public bool IsActive { get; set; }
+    public ProductStatus Status { get; set; }
     public List<VendorProductVariantDto> Variants { get; set; } = new();
     public List<ProductImageDto> Images { get; set; } = new();
 }

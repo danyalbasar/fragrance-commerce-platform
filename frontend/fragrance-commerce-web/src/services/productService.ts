@@ -14,6 +14,7 @@ export interface CreateProductRequest {
     gender: "Men" | "Women" | "Unisex";
     name: string;
     description?: string;
+    status: number;
     variants: Array<{
         variantName: string;
         sku: string;
@@ -40,7 +41,7 @@ export interface UpdateProductRequest {
     gender: "Men" | "Women" | "Unisex";
     name: string;
     description?: string;
-    isActive: boolean;
+    status: number;
 }
 
 export interface UpdateProductVariantRequest {

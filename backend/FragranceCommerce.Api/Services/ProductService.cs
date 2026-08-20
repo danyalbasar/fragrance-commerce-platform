@@ -1,4 +1,5 @@
 using FragranceCommerce.Api.DTOs;
+using FragranceCommerce.Api.Enums;
 using FragranceCommerce.Api.Repositories;
 using FragranceCommerce.Api.Models;
 using FragranceCommerce.Api.Data;
@@ -87,6 +88,7 @@ public class ProductService : IProductService
             Gender = dto.Gender,
             Name = dto.Name,
             Description = dto.Description,
+            Status = dto.Status,
             Variants = dto.Variants.Select(v => new ProductVariant
             {
                 VariantName = v.VariantName,
@@ -149,7 +151,7 @@ public class ProductService : IProductService
         product.Gender = dto.Gender;
         product.Name = dto.Name;
         product.Description = dto.Description;
-        product.IsActive = dto.IsActive;
+        product.Status = dto.Status;
         product.UpdatedAt = DateTime.UtcNow;
 
         _productRepository.Update(product);
@@ -175,7 +177,7 @@ public class ProductService : IProductService
         if (product.VendorId != vendor.Id)
             throw new InvalidOperationException("You are not allowed to delete this product.");
 
-        product.IsActive = false;
+        product.Status = ProductStatus.Deactivated;
         product.UpdatedAt = DateTime.UtcNow;
 
         _productRepository.Update(product);
@@ -502,7 +504,7 @@ public class ProductService : IProductService
 
         Name = product.Name,
         Description = product.Description,
-        IsActive = product.IsActive,
+        Status = product.Status,
 
         Variants = product.Variants.Select(v => new ProductVariantDto
         {
@@ -548,7 +550,7 @@ public class ProductService : IProductService
 
         Name = product.Name,
         Description = product.Description,
-        IsActive = product.IsActive,
+        Status = product.Status,
 
         Variants = product.Variants.Select(v => new VendorProductVariantDto
         {

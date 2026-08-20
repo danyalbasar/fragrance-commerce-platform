@@ -77,8 +77,7 @@ export default function VendorProductsPage() {
             if (filters.category && product.categoryName !== filters.category) return false;
             if (filters.gender && product.gender !== filters.gender) return false;
             if (filters.status) {
-                if (filters.status === "Active" && !product.isActive) return false;
-                if (filters.status === "Inactive" && product.isActive) return false;
+                if (filters.status !== product.status) return false;
             }
             if (filters.stock === "Low" && (stock === 0 || stock > 5)) return false;
             if (filters.stock === "Out" && stock !== 0) return false;
@@ -203,13 +202,14 @@ export default function VendorProductsPage() {
                             ]}
                         />
                         <FilterSelect
-                            label="Published"
+                            label="Status"
                             value={filters.status}
                             onChange={(v) => setFilters((f) => ({ ...f, status: v }))}
                             options={[
                                 { value: "", label: "All" },
                                 { value: "Active", label: "Active" },
-                                { value: "Inactive", label: "Inactive" },
+                                { value: "Draft", label: "Draft" },
+                                { value: "Deactivated", label: "Deactivated" },
                             ]}
                         />
                         <FilterSelect
@@ -304,11 +304,13 @@ export default function VendorProductsPage() {
                                             </td>
                                             <td className="px-5 py-4">
                                                 <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                                                    product.isActive
+                                                    product.status === "Active"
                                                         ? "bg-green-50 text-green-700"
-                                                        : "bg-[var(--luxury-sand)] text-[var(--luxury-muted)]"
+                                                        : product.status === "Deactivated"
+                                                        ? "bg-red-50 text-red-700"
+                                                        : "bg-amber-50 text-amber-700"
                                                 }`}>
-                                                    {product.isActive ? "Active" : "Deactivated"}
+                                                    {product.status}
                                                 </span>
                                             </td>
                                             <td className="px-5 py-4">
@@ -352,11 +354,13 @@ export default function VendorProductsPage() {
                                         </p>
                                         <div className="mt-1 flex items-center gap-2">
                                             <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                                                product.isActive
+                                                product.status === "Active"
                                                     ? "bg-green-50 text-green-700"
-                                                    : "bg-[var(--luxury-sand)] text-[var(--luxury-muted)]"
+                                                    : product.status === "Deactivated"
+                                                    ? "bg-red-50 text-red-700"
+                                                    : "bg-amber-50 text-amber-700"
                                             }`}>
-                                                {product.isActive ? "Active" : "Deactivated"}
+                                                {product.status}
                                             </span>
                                             <span className={`text-xs font-medium ${
                                                 totalStock(product) <= 5 ? "text-[var(--luxury-gold-strong)]" : "text-[var(--luxury-muted)]"

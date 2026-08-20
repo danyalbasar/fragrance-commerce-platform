@@ -8,6 +8,7 @@ public class CreateProductDto
     public ProductGender Gender { get; set; } = ProductGender.Unisex;
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
+    public ProductStatus Status { get; set; } = ProductStatus.Draft;
     public List<CreateProductVariantDto> Variants { get; set; } = new();
     public List<CreateProductImageDto> Images { get; set; } = new();
 }

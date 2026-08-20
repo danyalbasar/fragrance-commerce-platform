@@ -109,7 +109,7 @@ public class ProductRepository : IProductRepository
             .Include(p => p.Variants)
                 .ThenInclude(v => v.Images)
             .Include(p => p.Images)
-            .Where(p => p.IsActive)
+            .Where(p => p.Status == FragranceCommerce.Api.Enums.ProductStatus.Active)
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(request.Search))
