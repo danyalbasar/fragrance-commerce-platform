@@ -56,11 +56,11 @@ export default function VendorSidebar() {
     }
 
     const profileSection = (
-        <div className="relative border-t border-[var(--luxury-line)] px-3 py-2" ref={profileMenuRef}>
+        <div className="relative border-t border-[var(--luxury-line)] px-2 py-2" ref={profileMenuRef}>
             <button
                 type="button"
                 onClick={() => setShowProfileMenu((v) => !v)}
-                className={`flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-all duration-200 hover:bg-[var(--luxury-sand)] ${collapsed ? "justify-center" : ""}`}
+                className={`flex w-full items-center gap-2 rounded-md px-2 py-2.5 text-sm font-medium transition-all duration-200 hover:bg-[var(--luxury-sand)] ${collapsed ? "justify-center" : ""}`}
             >
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--luxury-ink)] text-[11px] font-bold uppercase tracking-wider text-[var(--luxury-paper)]">
                     {initials || "?"}
