@@ -514,49 +514,15 @@ export default function VendorProductEditor({
 
                         <div className="flex flex-col gap-3 sm:flex-row">
                             {isEditing && (
-                                confirmingDeactivate ? (
-                                    <div
-                                        role="alert"
-                                        className="rounded-xl border border-red-200 bg-red-50 p-3"
-                                    >
-                                        <p className="text-sm font-semibold text-red-700">
-                                            Deactivate this product permanently?
-                                        </p>
-
-                                        <div className="mt-2 flex gap-2">
-                                            <button
-                                                type="button"
-                                                onClick={handleDeactivate}
-                                                disabled={saving}
-                                                className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-red-200 px-5 text-sm font-semibold uppercase tracking-[0.1em] text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:text-[var(--luxury-muted-strong)] sm:tracking-[0.12em]"
-                                            >
-                                                <Trash2 size={16} />
-                                                {saving ? "Deactivating..." : "Yes, Deactivate"}
-                                            </button>
-
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    setConfirmingDeactivate(false)
-                                                }
-                                                disabled={saving}
-                                                className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-[var(--luxury-line)] px-5 text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-ink)] transition hover:border-[var(--luxury-gold-strong)] disabled:cursor-not-allowed disabled:text-[var(--luxury-muted-strong)] sm:tracking-[0.12em]"
-                                            >
-                                                Keep
-                                            </button>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <button
-                                        type="button"
-                                        onClick={() => setConfirmingDeactivate(true)}
-                                        disabled={saving}
-                                        className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-red-200 px-5 text-sm font-semibold uppercase tracking-[0.1em] text-red-700 transition hover:bg-red-50 sm:tracking-[0.12em]"
-                                    >
-                                        <Trash2 size={16} />
-                                        Deactivate
-                                    </button>
-                                )
+                                <button
+                                    type="button"
+                                    onClick={() => setConfirmingDeactivate(true)}
+                                    disabled={saving}
+                                    className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-red-200 px-5 text-sm font-semibold uppercase tracking-[0.1em] text-red-700 transition hover:bg-red-50 sm:tracking-[0.12em]"
+                                >
+                                    <Trash2 size={16} />
+                                    Deactivate
+                                </button>
                             )}
                             <button
                                 type="submit"
@@ -958,6 +924,52 @@ export default function VendorProductEditor({
                     </div>
                 </div>
             </main>
+
+            {confirmingDeactivate && (
+                <div
+                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+                    onClick={() => !saving && setConfirmingDeactivate(false)}
+                >
+                    <div
+                        role="alert"
+                        className="w-full max-w-sm rounded-2xl border border-red-100 bg-white p-6 shadow-xl"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="mb-1 flex items-center gap-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-50">
+                                <Trash2 size={18} className="text-red-600" />
+                            </div>
+                            <h3 className="text-lg font-semibold text-red-700">
+                                Deactivate Product?
+                            </h3>
+                        </div>
+
+                        <p className="ml-[52px] text-sm leading-relaxed text-[var(--luxury-muted)]">
+                            This will remove the product from your active listings. You can reactivate it later.
+                        </p>
+
+                        <div className="mt-5 flex justify-end gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setConfirmingDeactivate(false)}
+                                disabled={saving}
+                                className="inline-flex h-10 items-center justify-center rounded-full border border-[var(--luxury-line)] px-5 text-sm font-semibold uppercase tracking-wider text-[var(--luxury-ink)] transition hover:border-[var(--luxury-gold-strong)] disabled:opacity-50"
+                            >
+                                Keep
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleDeactivate}
+                                disabled={saving}
+                                className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-red-600 px-5 text-sm font-semibold uppercase tracking-wider text-white transition hover:bg-red-700 disabled:opacity-50"
+                            >
+                                <Trash2 size={15} />
+                                {saving ? "Deactivating..." : "Deactivate"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </VendorRoute>
     );
 }
