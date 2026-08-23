@@ -80,8 +80,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setEmailVerifiedState(verified);
     }
 
-    function logoutUser() {
-        logoutRequest().catch(() => {});
+    async function logoutUser() {
+        try {
+            await logoutRequest();
+        } catch {
+            // proceed with local cleanup even if server call fails
+        }
 
         localStorage.removeItem("email");
         clearUserCache();
