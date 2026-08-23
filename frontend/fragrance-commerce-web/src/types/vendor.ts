@@ -18,6 +18,7 @@ export interface TopSellingProduct {
     productName: string;
     quantitySold: number;
     revenue: number;
+    primaryImageUrl?: string | null;
 }
 
 export interface VendorDashboard {

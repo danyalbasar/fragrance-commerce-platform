@@ -63,6 +63,18 @@ public class VendorDashboardService : IVendorDashboardService
             .Take(5)
             .ToListAsync();
 
+        var topProductIds = topSellingProducts.Select(p => p.ProductId).ToList();
+        var productPrimaryImages = await _context.ProductImages
+            .Where(i => topProductIds.Contains(i.ProductId) && i.IsPrimary)
+            .Select(i => new { i.ProductId, i.ImageUrl })
+            .ToListAsync();
+
+        foreach (var product in topSellingProducts)
+        {
+            product.PrimaryImageUrl = productPrimaryImages
+                .FirstOrDefault(i => i.ProductId == product.ProductId)?.ImageUrl;
+        }
+
         return new VendorDashboardDto
         {
             TotalSalesAmount = totalSalesAmount,

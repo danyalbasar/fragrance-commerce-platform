@@ -194,12 +194,25 @@ export default function VendorDashboardPage() {
                             dashboard.topSellingProducts.map((p) => (
                                 <div
                                     key={p.productId}
-                                    className="border-b border-[#d8c8ad] pb-3 last:border-0 last:pb-0"
+                                    className="flex items-center gap-4 border-b border-[#d8c8ad] pb-3 last:border-0 last:pb-0"
                                 >
-                                    <p className="font-semibold">{p.productName}</p>
-                                    <p className="mt-1 text-sm text-[var(--luxury-muted)]">
-                                        {p.quantitySold} sold / {currency(p.revenue)}
-                                    </p>
+                                    {p.primaryImageUrl ? (
+                                        <img
+                                            src={p.primaryImageUrl}
+                                            alt={p.productName}
+                                            className="h-12 w-12 shrink-0 rounded object-cover"
+                                        />
+                                    ) : (
+                                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded bg-[var(--luxury-sand)] text-[var(--luxury-muted)]">
+                                            <TrendingUp size={18} />
+                                        </div>
+                                    )}
+                                    <div>
+                                        <p className="font-semibold">{p.productName}</p>
+                                        <p className="mt-1 text-sm text-[var(--luxury-muted)]">
+                                            {p.quantitySold} sold / {currency(p.revenue)}
+                                        </p>
+                                    </div>
                                 </div>
                             ))
                         )}
