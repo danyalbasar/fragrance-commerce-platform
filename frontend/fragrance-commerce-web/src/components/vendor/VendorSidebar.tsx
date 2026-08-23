@@ -92,7 +92,7 @@ export default function VendorSidebar({ mobileOpen, setMobileOpen }: { mobileOpe
 
             {/* Mobile sidebar */}
             <aside
-                className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-[var(--luxury-line)] bg-[var(--luxury-paper)] transition-transform duration-200 lg:hidden ${
+                className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col overflow-visible border-r border-[var(--luxury-line)] bg-[var(--luxury-paper)] transition-transform duration-200 lg:hidden ${
                     mobileOpen ? "translate-x-0" : "-translate-x-full"
                 }`}
             >
@@ -110,10 +110,10 @@ export default function VendorSidebar({ mobileOpen, setMobileOpen }: { mobileOpe
                     </button>
                 </div>
 
-                <nav className="flex flex-1 flex-col gap-1 px-3 pt-4 pb-2">
+                <nav className="flex flex-1 flex-col gap-1 overflow-visible px-3 pt-4 pb-2">
                     {renderNavItems()}
 
-                    <div className="mt-auto">
+                    <div className="relative mt-auto">
                         <button
                             type="button"
                             onClick={() => setShowProfileMenu((v) => !v)}
@@ -131,7 +131,7 @@ export default function VendorSidebar({ mobileOpen, setMobileOpen }: { mobileOpe
                             />
                         </button>
                         {showProfileMenu && (
-                            <div className="mt-1 border-t border-[var(--luxury-line)]">
+                            <div className="absolute bottom-full mb-2 left-0 right-0 z-50 border border-[var(--luxury-line)] bg-[var(--luxury-paper)] py-1 shadow-lg">
                                 {profileDropdownItems}
                             </div>
                         )}
