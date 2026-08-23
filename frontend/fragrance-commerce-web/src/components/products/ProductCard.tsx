@@ -19,13 +19,13 @@ import { useAuth } from "@/contexts/AuthContext";
 interface ProductCardProps {
     product: Product;
     compactMobile?: boolean;
-    onMobileQuickAdd?: (product: Product) => void;
+    onQuickAdd?: (product: Product) => void;
 }
 
 const ProductCard = memo(function ProductCard({
     product,
     compactMobile = false,
-    onMobileQuickAdd,
+    onQuickAdd,
 }: ProductCardProps) {
     const router = useRouter();
     const { isLoggedIn } = useAuth();
@@ -78,8 +78,8 @@ const ProductCard = memo(function ProductCard({
         e.preventDefault();
         e.stopPropagation();
 
-        if (onMobileQuickAdd) {
-            onMobileQuickAdd(product);
+        if (onQuickAdd) {
+            onQuickAdd(product);
             return;
         }
 

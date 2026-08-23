@@ -6,7 +6,7 @@ import { Suspense, useEffect, useId, useRef, useState, type ReactNode } from "re
 import { useSearchParams } from "next/navigation";
 import { SlidersHorizontal, X, SearchX } from "lucide-react";
 import ProductCard from "@/components/products/ProductCard";
-import MobileQuickAddBar from "@/components/products/MobileQuickAddBar";
+import QuickAddBar from "@/components/products/QuickAddBar";
 import { EmptyState } from "@/components/common/EmptyState";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
@@ -835,7 +835,7 @@ function ProductsContent() {
                                                 key={product.id}
                                                 product={product}
                                                 compactMobile
-                                                onMobileQuickAdd={setQuickAddProduct}
+                                                onQuickAdd={setQuickAddProduct}
                                             />
                                         ))}
                                     </div>
@@ -962,7 +962,7 @@ function ProductsContent() {
                 </div>
             )}
 
-            <MobileQuickAddBar
+            <QuickAddBar
                 product={quickAddProduct}
                 onClose={() => setQuickAddProduct(null)}
             />
