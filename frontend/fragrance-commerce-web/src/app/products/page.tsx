@@ -6,6 +6,7 @@ import { Suspense, useEffect, useId, useRef, useState, type ReactNode } from "re
 import { useSearchParams } from "next/navigation";
 import { SlidersHorizontal, X, SearchX } from "lucide-react";
 import ProductCard from "@/components/products/ProductCard";
+import MobileQuickAddBar from "@/components/products/MobileQuickAddBar";
 import { EmptyState } from "@/components/common/EmptyState";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
@@ -56,6 +57,7 @@ function ProductsContent() {
     const [totalPages, setTotalPages] = useState(1);
     const [loading, setLoading] = useState(true);
     const [showMobileFilters, setShowMobileFilters] = useState(false);
+    const [quickAddProduct, setQuickAddProduct] = useState<Product | null>(null);
 
     const mobileFiltersRef = useRef<HTMLElement>(null);
     useFocusTrap(mobileFiltersRef, showMobileFilters, () => setShowMobileFilters(false));
@@ -833,6 +835,7 @@ function ProductsContent() {
                                                 key={product.id}
                                                 product={product}
                                                 compactMobile
+                                                onMobileQuickAdd={setQuickAddProduct}
                                             />
                                         ))}
                                     </div>
@@ -958,6 +961,11 @@ function ProductsContent() {
                     </aside>
                 </div>
             )}
+
+            <MobileQuickAddBar
+                product={quickAddProduct}
+                onClose={() => setQuickAddProduct(null)}
+            />
         </main>
     );
 }

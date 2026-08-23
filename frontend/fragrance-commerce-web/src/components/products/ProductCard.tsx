@@ -19,11 +19,13 @@ import { useAuth } from "@/contexts/AuthContext";
 interface ProductCardProps {
     product: Product;
     compactMobile?: boolean;
+    onMobileQuickAdd?: (product: Product) => void;
 }
 
 const ProductCard = memo(function ProductCard({
     product,
     compactMobile = false,
+    onMobileQuickAdd,
 }: ProductCardProps) {
     const router = useRouter();
     const { isLoggedIn } = useAuth();
@@ -75,6 +77,11 @@ const ProductCard = memo(function ProductCard({
     async function handleQuickAdd(e: React.MouseEvent<HTMLButtonElement>) {
         e.preventDefault();
         e.stopPropagation();
+
+        if (onMobileQuickAdd) {
+            onMobileQuickAdd(product);
+            return;
+        }
 
         if (!isLoggedIn) {
             router.push("/login");
