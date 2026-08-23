@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
     BarChart3,
     Boxes,
@@ -13,7 +13,7 @@ import {
     Settings,
     X,
 } from "lucide-react";
-import { useRef, useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
@@ -24,25 +24,9 @@ const navItems = [
 
 export default function VendorSidebar({ mobileOpen, setMobileOpen }: { mobileOpen: boolean; setMobileOpen: (v: boolean) => void }) {
     const pathname = usePathname();
-    const router = useRouter();
     const { logoutUser, initials, email } = useAuth();
     const [collapsed, setCollapsed] = useState(false);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
-    const profileMenuRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        function handleClickOutside(e: MouseEvent) {
-            if (profileMenuRef.current && !profileMenuRef.current.contains(e.target as Node)) {
-                setShowProfileMenu(false);
-            }
-        }
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
-
-    function handleLogout() {
-        logoutUser();
-    }
 
     function isActive(href: string, exact?: boolean) {
         return exact ? pathname === href : pathname.startsWith(href);
@@ -53,79 +37,48 @@ export default function VendorSidebar({ mobileOpen, setMobileOpen }: { mobileOpe
         setMobileOpen(false);
     }
 
-    const profileSection = (
-        <div className="relative border-t border-[var(--luxury-line)] px-1 py-2" ref={profileMenuRef}>
+    const profileDropdownItems = (
+        <>
+            <Link
+                href="/vendor/settings"
+                onClick={closeAll}
+                className="flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--luxury-ink)] hover:bg-[var(--luxury-sand)]"
+            >
+                <Settings size={16} />
+                Settings
+            </Link>
             <button
                 type="button"
-                onClick={() => setShowProfileMenu((v) => !v)}
-                className={`flex w-full items-center gap-2 rounded-md px-1 py-2.5 text-sm font-medium transition-all duration-200 hover:bg-[var(--luxury-sand)] ${collapsed ? "justify-center" : ""}`}
+                onClick={() => { logoutUser(); closeAll(); }}
+                className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-red-700 hover:bg-red-50"
             >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--luxury-ink)] text-[11px] font-bold uppercase tracking-wider text-[var(--luxury-paper)]">
-                    {initials || "?"}
-                </div>
-                {!collapsed && (
-                    <>
-                        <span className="min-w-0 flex-1 truncate text-left text-[var(--luxury-ink)]">
-                            {email || "Vendor"}
-                        </span>
-                        <ChevronDown
-                            size={14}
-                            className={`shrink-0 text-[var(--luxury-muted)] transition-transform duration-200 ${showProfileMenu ? "rotate-180" : ""}`}
-                        />
-                    </>
-                )}
+                <LogOut size={16} />
+                Log Out
             </button>
-
-            {showProfileMenu && (
-                <div className={`absolute bottom-full ${collapsed ? "left-2 w-48" : "left-3 right-3"} mb-1 border border-[var(--luxury-line)] bg-[var(--luxury-paper)] py-1 shadow-lg`}>
-                    <Link
-                        href="/vendor/settings"
-                        onClick={closeAll}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--luxury-ink)] hover:bg-[var(--luxury-sand)]"
-                    >
-                        <Settings size={16} />
-                        Settings
-                    </Link>
-                    <button
-                        type="button"
-                        onClick={() => { handleLogout(); closeAll(); }}
-                        className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-red-700 hover:bg-red-50"
-                    >
-                        <LogOut size={16} />
-                        Log Out
-                    </button>
-                </div>
-            )}
-        </div>
+        </>
     );
 
-    const sidebarContent = (
-        <nav className="flex flex-1 flex-col gap-1 px-3 pt-4 pb-2">
-            {navItems.map((item) => {
-                const active = isActive(item.href, item.exact);
-                return (
-                    <Link
-                        key={item.href}
-                        href={item.href}
-                        onClick={() => setMobileOpen(false)}
-                        className={`flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
-                            active
-                                ? "bg-[var(--luxury-ink)] text-[var(--luxury-paper)]"
-                                : "text-[var(--luxury-muted)] hover:bg-[var(--luxury-sand)] hover:text-[var(--luxury-ink)]"
-                        } ${collapsed ? "justify-center" : ""}`}
-                        title={item.label}
-                    >
-                        <item.icon size={18} strokeWidth={active ? 2 : 1.5} />
-                        {!collapsed && <span>{item.label}</span>}
-                    </Link>
-                );
-            })}
-
-            <div className="mt-auto">
-                {profileSection}
-            </div>
-        </nav>
-    );
+    function renderNavItems() {
+        return navItems.map((item) => {
+            const active = isActive(item.href, item.exact);
+            return (
+                <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={`flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
+                        active
+                            ? "bg-[var(--luxury-ink)] text-[var(--luxury-paper)]"
+                            : "text-[var(--luxury-muted)] hover:bg-[var(--luxury-sand)] hover:text-[var(--luxury-ink)]"
+                    } ${collapsed ? "justify-center" : ""}`}
+                    title={item.label}
+                >
+                    <item.icon size={18} strokeWidth={active ? 2 : 1.5} />
+                    {!collapsed && <span>{item.label}</span>}
+                </Link>
+            );
+        });
+    }
 
     return (
         <>
@@ -156,7 +109,34 @@ export default function VendorSidebar({ mobileOpen, setMobileOpen }: { mobileOpe
                         <X size={18} />
                     </button>
                 </div>
-                {sidebarContent}
+
+                <nav className="flex flex-1 flex-col gap-1 px-3 pt-4 pb-2">
+                    {renderNavItems()}
+
+                    <div className="mt-auto">
+                        <button
+                            type="button"
+                            onClick={() => setShowProfileMenu((v) => !v)}
+                            className="flex w-full items-center gap-2 rounded-md px-1 py-2.5 text-sm font-medium transition-all duration-200 hover:bg-[var(--luxury-sand)]"
+                        >
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--luxury-ink)] text-[11px] font-bold uppercase tracking-wider text-[var(--luxury-paper)]">
+                                {initials || "?"}
+                            </div>
+                            <span className="min-w-0 flex-1 truncate text-left text-[var(--luxury-ink)]">
+                                {email || "Vendor"}
+                            </span>
+                            <ChevronDown
+                                size={14}
+                                className={`shrink-0 text-[var(--luxury-muted)] transition-transform duration-200 ${showProfileMenu ? "rotate-180" : ""}`}
+                            />
+                        </button>
+                        {showProfileMenu && (
+                            <div className="mt-1 border-t border-[var(--luxury-line)]">
+                                {profileDropdownItems}
+                            </div>
+                        )}
+                    </div>
+                </nav>
             </aside>
 
             {/* Desktop sidebar */}
@@ -180,7 +160,40 @@ export default function VendorSidebar({ mobileOpen, setMobileOpen }: { mobileOpe
                         {collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
                     </button>
                 </div>
-                {sidebarContent}
+
+                <nav className="flex flex-1 flex-col gap-1 px-3 pt-4 pb-2">
+                    {renderNavItems()}
+
+                    <div className="relative mt-auto">
+                        <button
+                            type="button"
+                            onClick={() => setShowProfileMenu((v) => !v)}
+                            className={`flex w-full items-center gap-2 rounded-md px-1 py-2.5 text-sm font-medium transition-all duration-200 hover:bg-[var(--luxury-sand)] ${collapsed ? "justify-center" : ""}`}
+                        >
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--luxury-ink)] text-[11px] font-bold uppercase tracking-wider text-[var(--luxury-paper)]">
+                                {initials || "?"}
+                            </div>
+                            {!collapsed && (
+                                <>
+                                    <span className="min-w-0 flex-1 truncate text-left text-[var(--luxury-ink)]">
+                                        {email || "Vendor"}
+                                    </span>
+                                    <ChevronDown
+                                        size={14}
+                                        className={`shrink-0 text-[var(--luxury-muted)] transition-transform duration-200 ${showProfileMenu ? "rotate-180" : ""}`}
+                                    />
+                                </>
+                            )}
+                        </button>
+                        {showProfileMenu && (
+                            <div
+                                className={`absolute bottom-full mb-2 z-50 border border-[var(--luxury-line)] bg-[var(--luxury-paper)] py-1 shadow-lg ${collapsed ? "left-2 w-48" : "left-0 right-0"}`}
+                            >
+                                {profileDropdownItems}
+                            </div>
+                        )}
+                    </div>
+                </nav>
             </aside>
         </>
     );
