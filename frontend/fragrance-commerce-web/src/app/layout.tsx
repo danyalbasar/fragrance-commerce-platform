@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
-import { Suspense } from "react";
 import "./globals.css";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
 import { AuthProvider } from "@/contexts/AuthContext";
 import MotionProvider from "@/components/common/MotionProvider";
+import PublicLayout from "@/components/layout/PublicLayout";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { siteConfig } from "@/config/site";
 
@@ -113,22 +111,7 @@ export default function RootLayout({
               Skip to main content
             </a>
 
-            <Suspense
-              fallback={
-                <div
-                  aria-hidden="true"
-                  className="h-[65px] md:h-[73px]"
-                />
-              }
-            >
-              <Navbar />
-            </Suspense>
-
-            <div id="main-content" tabIndex={-1} className="flex-1 focus:outline-none">
-              {children}
-            </div>
-
-            <Footer />
+            <PublicLayout>{children}</PublicLayout>
           </AuthProvider>
         </MotionProvider>
       </body>
