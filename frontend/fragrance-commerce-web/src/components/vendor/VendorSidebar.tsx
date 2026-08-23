@@ -8,7 +8,6 @@ import {
     ChevronDown,
     ClipboardList,
     LogOut,
-    Menu,
     PanelLeftClose,
     PanelLeftOpen,
     Settings,
@@ -23,12 +22,11 @@ const navItems = [
     { href: "/vendor/orders", label: "Orders", icon: ClipboardList },
 ];
 
-export default function VendorSidebar() {
+export default function VendorSidebar({ mobileOpen, setMobileOpen }: { mobileOpen: boolean; setMobileOpen: (v: boolean) => void }) {
     const pathname = usePathname();
     const router = useRouter();
     const { logoutUser, initials, email } = useAuth();
     const [collapsed, setCollapsed] = useState(false);
-    const [mobileOpen, setMobileOpen] = useState(false);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const profileMenuRef = useRef<HTMLDivElement>(null);
 
@@ -131,16 +129,6 @@ export default function VendorSidebar() {
 
     return (
         <>
-            {/* Mobile hamburger */}
-            <button
-                type="button"
-                onClick={() => setMobileOpen(true)}
-                className="fixed left-4 top-20 z-40 flex h-10 w-10 items-center justify-center rounded-full border border-[#d8c8ad] bg-[var(--luxury-paper)] text-[var(--luxury-ink)] shadow-sm lg:hidden"
-                aria-label="Open menu"
-            >
-                <Menu size={18} />
-            </button>
-
             {/* Mobile overlay */}
             {mobileOpen && (
                 <div

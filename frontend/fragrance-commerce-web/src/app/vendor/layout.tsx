@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { buildMetadata } from "@/config/site";
 import VendorRoute from "@/components/common/VendorRoute";
-import VendorSidebar from "@/components/vendor/VendorSidebar";
+import VendorShell from "@/components/vendor/VendorShell";
 
 export const metadata: Metadata = buildMetadata({
     title: "Vendor Studio",
@@ -16,14 +16,7 @@ export default function VendorLayout({
 }: Readonly<{ children: React.ReactNode }>) {
     return (
         <VendorRoute>
-            <div className="flex min-h-screen bg-[var(--luxury-ivory)] text-[var(--luxury-ink)]">
-                <VendorSidebar />
-                <main className="flex-1 min-w-0 overflow-x-hidden">
-                    <div className="mx-auto max-w-6xl px-2 py-8 sm:px-4 lg:px-6 lg:py-10">
-                        {children}
-                    </div>
-                </main>
-            </div>
+            <VendorShell>{children}</VendorShell>
         </VendorRoute>
     );
 }
