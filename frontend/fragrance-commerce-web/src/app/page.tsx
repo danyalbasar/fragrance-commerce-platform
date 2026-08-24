@@ -8,6 +8,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Mail } from "lucide-react";
 import VendorHomeRedirect from "@/components/vendor/VendorHomeRedirect";
 import ProductCard from "@/components/products/ProductCard";
+import QuickAddBar from "@/components/products/QuickAddBar";
 import { productService } from "@/services/productService";
 import { getPublicSettings } from "@/services/siteSettingsService";
 import type { Product } from "@/types/product";
@@ -74,6 +75,7 @@ export default function Home() {
   const [newArrivals, setNewArrivals] = useState<Product[]>([]);
   const [brands, setBrands] = useState<string[]>(defaultHouseBrands);
   const [loaded, setLoaded] = useState(false);
+  const [quickAddProduct, setQuickAddProduct] = useState<Product | null>(null);
 
   const [hero, setHero] = useState({
     title: "Scent, skincare, and ritual objects for a polished life.",
@@ -378,7 +380,7 @@ export default function Home() {
           </Reveal>
 
           <Reveal>
-            <ProductGrid products={bestSellers} loading={!loaded} />
+            <ProductGrid products={bestSellers} loading={!loaded} onQuickAdd={setQuickAddProduct} />
           </Reveal>
         </div>
       </section>
@@ -403,7 +405,7 @@ export default function Home() {
           </Reveal>
 
           <Reveal>
-            <ProductGrid products={newArrivals} loading={!loaded} />
+            <ProductGrid products={newArrivals} loading={!loaded} onQuickAdd={setQuickAddProduct} />
           </Reveal>
         </div>
       </section>
@@ -546,6 +548,8 @@ export default function Home() {
           </Link>
         </Reveal>
       </section>
+
+      <QuickAddBar product={quickAddProduct} onClose={() => setQuickAddProduct(null)} />
     </main>
   );
 }
@@ -575,9 +579,11 @@ function Reveal({
 function ProductGrid({
   products,
   loading,
+  onQuickAdd,
 }: {
   products: Product[];
   loading: boolean;
+  onQuickAdd?: (product: Product) => void;
 }) {
   if (loading) {
     return (
@@ -601,11 +607,11 @@ function ProductGrid({
   }
 
   return (
-    <ProductGridScroller products={products} />
+    <ProductGridScroller products={products} onQuickAdd={onQuickAdd} />
   );
 }
 
-function ProductGridScroller({ products }: { products: Product[] }) {
+function ProductGridScroller({ products, onQuickAdd }: { products: Product[]; onQuickAdd?: (product: Product) => void }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -682,7 +688,7 @@ function ProductGridScroller({ products }: { products: Product[] }) {
             key={product.id}
             className="min-w-[70%] max-w-[70%] basis-[70%] shrink-0 snap-start md:min-w-0 md:max-w-none md:basis-auto md:shrink"
           >
-            <ProductCard product={product} compactMobile />
+            <ProductCard product={product} compactMobile onQuickAdd={onQuickAdd} />
           </div>
         ))}
       </div>
