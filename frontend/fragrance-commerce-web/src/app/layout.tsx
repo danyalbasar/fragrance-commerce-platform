@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import MotionProvider from "@/components/common/MotionProvider";
 import PublicLayout from "@/components/layout/PublicLayout";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -104,6 +105,7 @@ export default function RootLayout({
         />
         <MotionProvider>
           <AuthProvider>
+            <ThemeProvider>
             <a
               href="#main-content"
               className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-full focus:bg-[var(--luxury-ink)] focus:px-6 focus:py-3 focus:text-sm focus:font-semibold focus:text-[var(--luxury-paper)]"
@@ -112,6 +114,7 @@ export default function RootLayout({
             </a>
 
             <PublicLayout>{children}</PublicLayout>
+            </ThemeProvider>
           </AuthProvider>
         </MotionProvider>
       </body>

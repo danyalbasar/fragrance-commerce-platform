@@ -1,5 +1,6 @@
 using FragranceCommerce.Api.DTOs;
 using FragranceCommerce.Api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FragranceCommerce.Api.Controllers;
@@ -16,6 +17,7 @@ public class BrandsController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<ActionResult<List<BrandDto>>> GetBrands()
     {
         var brands = await _brandService.GetAllAsync();
@@ -23,6 +25,7 @@ public class BrandsController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [AllowAnonymous]
     public async Task<ActionResult<BrandDto>> GetBrand(Guid id)
     {
         var brand = await _brandService.GetByIdAsync(id);
@@ -34,6 +37,7 @@ public class BrandsController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin,SuperAdmin")]
     public async Task<ActionResult<BrandDto>> CreateBrand(CreateBrandDto dto)
     {
         try
@@ -48,6 +52,7 @@ public class BrandsController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Roles = "Admin,SuperAdmin")]
     public async Task<IActionResult> UpdateBrand(Guid id, UpdateBrandDto dto)
     {
         var updated = await _brandService.UpdateAsync(id, dto);
@@ -59,6 +64,7 @@ public class BrandsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin,SuperAdmin")]
     public async Task<IActionResult> DeleteBrand(Guid id)
     {
         var deleted = await _brandService.DeleteAsync(id);

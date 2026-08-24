@@ -14,6 +14,7 @@ import { useScrollLock } from "@/hooks/useScrollLock";
 import { productService } from "@/services/productService";
 import { getBrands } from "@/services/brandService";
 import { getCategories } from "@/services/categoryService";
+import { getPublicSettings } from "@/services/siteSettingsService";
 import { siteConfig } from "@/config/site";
 import type { Product, ProductGender } from "@/types/product";
 import type { Brand } from "@/types/brand";
@@ -38,6 +39,7 @@ function ProductsContent() {
     const [products, setProducts] = useState<Product[]>([]);
     const [brands, setBrands] = useState<Brand[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
+    const [genders, setGenders] = useState<ProductGender[]>(["Men", "Women", "Unisex"]);
 
     const [gender, setGender] = useState<ProductGender | undefined>();
     const [brandId, setBrandId] = useState("");
@@ -97,13 +99,21 @@ function ProductsContent() {
     }
 
     async function loadMasterData() {
-        const [brandData, categoryData] = await Promise.all([
+        const [brandData, categoryData, siteSettings] = await Promise.all([
             getBrands(),
             getCategories(),
+            getPublicSettings().catch(() => ({} as Record<string, string>)),
         ]);
 
         setBrands(brandData);
         setCategories(categoryData);
+
+        try {
+            const parsedGenders = JSON.parse(siteSettings.available_genders || "[]");
+            if (Array.isArray(parsedGenders) && parsedGenders.length > 0) {
+                setGenders(parsedGenders as ProductGender[]);
+            }
+        } catch { /* keep defaults */ }
     }
 
     async function loadProducts() {
@@ -304,7 +314,7 @@ function ProductsContent() {
                 </div>
 
                 <FilterSection title="Gender" count={gender ? 1 : 0}>
-                    {(["Men", "Women", "Unisex"] as ProductGender[]).map(
+                    {genders.map(
                         (item) => (
                             <label
                                 key={item}
@@ -613,7 +623,7 @@ function ProductsContent() {
                             </div>
 
                             <FilterSection title="Gender" count={gender ? 1 : 0}>
-                                {(["Men", "Women", "Unisex"] as ProductGender[]).map(
+                                {genders.map(
                                     (item) => (
                                         <label
                                             key={item}

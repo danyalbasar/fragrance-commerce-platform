@@ -32,6 +32,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<OrderAddress> OrderAddresses => Set<OrderAddress>();
     public DbSet<Payment> Payments => Set<Payment>();
     public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
+    public DbSet<SiteSetting> SiteSettings => Set<SiteSetting>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -189,6 +190,21 @@ public class ApplicationDbContext : DbContext
 
             entity.HasIndex(m => m.Email);
             entity.HasIndex(m => m.CreatedAt);
+        });
+
+        modelBuilder.Entity<SiteSetting>(entity =>
+        {
+            entity.HasIndex(s => s.Key).IsUnique();
+
+            entity.Property(s => s.Key)
+                .HasMaxLength(100)
+                .IsRequired();
+
+            entity.Property(s => s.Value)
+                .IsRequired();
+
+            entity.Property(s => s.Description)
+                .HasMaxLength(500);
         });
     }
 }

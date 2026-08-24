@@ -1,5 +1,6 @@
 using FragranceCommerce.Api.Enums;
 using FragranceCommerce.Api.Models;
+using FragranceCommerce.Api.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace FragranceCommerce.Api.Data;
@@ -9,7 +10,8 @@ public static class DataSeeder
     public static async Task SeedAsync(
         ApplicationDbContext context,
         IImageUploadService imageUploadService,
-        IWebHostEnvironment env)
+        IWebHostEnvironment env,
+        ISiteSettingsService? siteSettingsService = null)
     {
         await SeedRolesAsync(context);
         await SeedBrandsAsync(context);
@@ -17,6 +19,9 @@ public static class DataSeeder
         await SeedCouponsAsync(context);
         await SeedDemoUsersAsync(context);
         await SeedDemoProductsAsync(context, imageUploadService, env);
+
+        if (siteSettingsService != null)
+            await siteSettingsService.SeedDefaultsAsync();
     }
 
     private static async Task SeedRolesAsync(ApplicationDbContext context)

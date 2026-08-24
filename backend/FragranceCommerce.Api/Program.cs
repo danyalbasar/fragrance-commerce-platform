@@ -117,6 +117,8 @@ builder.Services.AddScoped<IBrandService, BrandService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 
+builder.Services.AddScoped<ISiteSettingsService, SiteSettingsService>();
+
 builder.Services.AddScoped<IVendorRepository, VendorRepository>();
 builder.Services.AddScoped<IVendorService, VendorService>();
 
@@ -256,12 +258,16 @@ using (var scope = app.Services.CreateScope())
     var env = scope.ServiceProvider
         .GetRequiredService<IWebHostEnvironment>();
 
+    var siteSettingsService = scope.ServiceProvider
+        .GetService<ISiteSettingsService>();
+
     await context.Database.MigrateAsync();
 
     await DataSeeder.SeedAsync(
         context,
         imageUploadService,
-        env);
+        env,
+        siteSettingsService);
 }
 
 app.Run();

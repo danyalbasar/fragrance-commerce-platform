@@ -1,5 +1,6 @@
 using FragranceCommerce.Api.DTOs;
 using FragranceCommerce.Api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FragranceCommerce.Api.Controllers;
@@ -16,6 +17,7 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<ActionResult<List<CategoryDto>>> GetCategories()
     {
         var categories = await _categoryService.GetAllAsync();
@@ -23,6 +25,7 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [AllowAnonymous]
     public async Task<ActionResult<CategoryDto>> GetCategory(Guid id)
     {
         var category = await _categoryService.GetByIdAsync(id);
@@ -34,6 +37,7 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin,SuperAdmin")]
     public async Task<ActionResult<CategoryDto>> CreateCategory(CreateCategoryDto dto)
     {
         try
@@ -48,6 +52,7 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Roles = "Admin,SuperAdmin")]
     public async Task<IActionResult> UpdateCategory(Guid id, UpdateCategoryDto dto)
     {
         var updated = await _categoryService.UpdateAsync(id, dto);
@@ -59,6 +64,7 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin,SuperAdmin")]
     public async Task<IActionResult> DeleteCategory(Guid id)
     {
         var deleted = await _categoryService.DeleteAsync(id);

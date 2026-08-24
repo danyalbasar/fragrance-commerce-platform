@@ -9,6 +9,7 @@ import { ChevronLeft, ChevronRight, Mail } from "lucide-react";
 import VendorHomeRedirect from "@/components/vendor/VendorHomeRedirect";
 import ProductCard from "@/components/products/ProductCard";
 import { productService } from "@/services/productService";
+import { getPublicSettings } from "@/services/siteSettingsService";
 import type { Product } from "@/types/product";
 
 const FeaturedProductScroller = dynamic(
@@ -45,7 +46,7 @@ const featuredProducts = [
   },
 ];
 
-const houseBrands = [
+const defaultHouseBrands = [
   "Aurelian Atelier",
   "Nocturne Vale",
   "Mira Solace",
@@ -71,8 +72,77 @@ const heroItem: Variants = {
 export default function Home() {
   const [bestSellers, setBestSellers] = useState<Product[]>([]);
   const [newArrivals, setNewArrivals] = useState<Product[]>([]);
-  const [brands, setBrands] = useState<string[]>(houseBrands);
+  const [brands, setBrands] = useState<string[]>(defaultHouseBrands);
   const [loaded, setLoaded] = useState(false);
+
+  const [hero, setHero] = useState({
+    title: "Scent, skincare, and ritual objects for a polished life.",
+    subtitle:
+      "Explore private house labels, expressive perfumes, quiet skincare, and daily essentials staged for discovery.",
+    ctaText: "Shop Collection",
+    ctaLink: "/products",
+    secondaryCtaText: "Discover Scents",
+    secondaryCtaLink: "/products?category=Perfume",
+  });
+
+  const [panels, setPanels] = useState([
+    {
+      image: "/home/home-fragrance.jpg",
+      eyebrow: "Fragrance Wardrobe",
+      title: "Perfumes, attars, and customised blends",
+      text: "From saffroned warmth to smoky cedar, build a scent wardrobe for workdays, evenings, and close rituals.",
+      link: "/products?category=Perfume",
+      cta: "Shop Fragrance",
+    },
+    {
+      image: "/home/home-skincare.jpg",
+      eyebrow: "Skin Rituals",
+      title: "Cleansers, creams, and polished care",
+      text: "Soft-focus skincare essentials designed to sit beautifully beside your fragrance collection.",
+      link: "/products?category=Face%20Wash",
+      cta: "Shop Skincare",
+    },
+  ]);
+
+  const [houseBrands, setHouseBrands] = useState<string[]>(defaultHouseBrands);
+
+  useEffect(() => {
+    getPublicSettings().then((settings) => {
+      setHero({
+        title: settings.hero_title || "Scent, skincare, and ritual objects for a polished life.",
+        subtitle: settings.hero_subtitle || "Explore private house labels, expressive perfumes, quiet skincare, and daily essentials staged for discovery.",
+        ctaText: settings.hero_cta_text || "Shop Collection",
+        ctaLink: settings.hero_cta_link || "/products",
+        secondaryCtaText: settings.hero_secondary_cta_text || "Discover Scents",
+        secondaryCtaLink: settings.hero_secondary_cta_link || "/products?category=Perfume",
+      });
+
+      setPanels([
+        {
+          image: settings.category_panel_1_image || "/home/home-fragrance.jpg",
+          eyebrow: settings.category_panel_1_eyebrow || "Fragrance Wardrobe",
+          title: settings.category_panel_1_title || "Perfumes, attars, and customised blends",
+          text: settings.category_panel_1_text || "From saffroned warmth to smoky cedar, build a scent wardrobe for workdays, evenings, and close rituals.",
+          link: settings.category_panel_1_link || "/products?category=Perfume",
+          cta: settings.category_panel_1_cta || "Shop Fragrance",
+        },
+        {
+          image: settings.category_panel_2_image || "/home/home-skincare.jpg",
+          eyebrow: settings.category_panel_2_eyebrow || "Skin Rituals",
+          title: settings.category_panel_2_title || "Cleansers, creams, and polished care",
+          text: settings.category_panel_2_text || "Soft-focus skincare essentials designed to sit beautifully beside your fragrance collection.",
+          link: settings.category_panel_2_link || "/products?category=Face%20Wash",
+          cta: settings.category_panel_2_cta || "Shop Skincare",
+        },
+      ]);
+
+      try {
+        setHouseBrands(JSON.parse(settings.house_brands || "[]"));
+      } catch {
+        /* keep default */
+      }
+    }).catch(() => { /* keep defaults */ });
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -182,14 +252,13 @@ export default function Home() {
               variants={heroItem}
               className="mt-5 text-4xl font-normal leading-[1.02] [font-family:var(--font-serif)] sm:text-5xl md:text-7xl"
             >
-              Scent, skincare, and ritual objects for a polished life.
+              {hero.title}
             </motion.h1>
             <motion.p
               variants={heroItem}
               className="mt-6 max-w-xl text-base leading-8 text-white/78 md:text-lg"
             >
-              Explore private house labels, expressive perfumes, quiet
-              skincare, and daily essentials staged for discovery.
+              {hero.subtitle}
             </motion.p>
 
             <motion.div
@@ -197,13 +266,13 @@ export default function Home() {
               className="mt-10 flex flex-col gap-4 sm:flex-row"
             >
               <Link
-                href="/products"
+                href={hero.ctaLink}
                 className="inline-flex justify-center rounded-full bg-[var(--luxury-gold)] px-6 py-3 text-center text-sm font-semibold uppercase tracking-[0.12em] text-[var(--luxury-ink)] transition hover:bg-[#d1ab67] sm:px-8 sm:tracking-[0.18em]"
               >
-                Shop Collection
+                {hero.ctaText}
               </Link>
               <Link
-                href="/products?category=Perfume"
+                href={hero.secondaryCtaLink}
                 className="inline-flex justify-center rounded-full border border-white/45 px-6 py-3 text-center text-sm font-semibold uppercase tracking-[0.12em] text-white transition hover:border-[var(--luxury-gold)] hover:text-[var(--luxury-gold)] sm:px-8 sm:tracking-[0.18em]"
               >
                 Discover Scents
@@ -244,22 +313,22 @@ export default function Home() {
           <div className="grid gap-6 lg:grid-cols-2">
             <Reveal>
               <CategoryPanel
-                image="/home/home-fragrance.jpg"
-                eyebrow="Fragrance Wardrobe"
-                title="                Perfumes, attars, and customised blends"
-                text="From saffroned warmth to smoky cedar, build a scent wardrobe for workdays, evenings, and close rituals."
-                href="/products?category=Perfume"
-                cta="Shop Fragrance"
+                image={panels[0].image}
+                eyebrow={panels[0].eyebrow}
+                title={panels[0].title}
+                text={panels[0].text}
+                href={panels[0].link}
+                cta={panels[0].cta}
               />
             </Reveal>
             <Reveal delay={0.12}>
               <CategoryPanel
-                image="/home/home-skincare.jpg"
-                eyebrow="Skin Rituals"
-                title="Cleansers, creams, and polished care"
-                text="Soft-focus skincare essentials designed to sit beautifully beside your fragrance collection."
-                href="/products?category=Face%20Wash"
-                cta="Shop Skincare"
+                image={panels[1].image}
+                eyebrow={panels[1].eyebrow}
+                title={panels[1].title}
+                text={panels[1].text}
+                href={panels[1].link}
+                cta={panels[1].cta}
               />
             </Reveal>
           </div>

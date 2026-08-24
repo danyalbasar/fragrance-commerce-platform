@@ -73,6 +73,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             return;
         }
 
+        if (userRoles.includes("Admin") || userRoles.includes("SuperAdmin")) {
+            router.replace("/admin");
+            return;
+        }
+
         router.replace(userRoles.includes("Vendor") ? "/vendor" : "/");
     }
 

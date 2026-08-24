@@ -18,8 +18,9 @@ import type { Brand } from "@/types/brand";
 import type { Category } from "@/types/category";
 import type { Product, ProductGender } from "@/types/product";
 import { useScrollLock } from "@/hooks/useScrollLock";
+import { getPublicSettings } from "@/services/siteSettingsService";
 
-const genders: ProductGender[] = ["Men", "Women", "Unisex"];
+const defaultGenders: ProductGender[] = ["Men", "Women", "Unisex"];
 
 const emptyForm = {
     brandId: "",
@@ -82,6 +83,7 @@ export default function VendorProductEditor({
 
     const [brands, setBrands] = useState<Brand[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
+    const [genders, setGenders] = useState<ProductGender[]>(defaultGenders);
     const [product, setProduct] = useState<Product | null>(null);
     const [form, setForm] = useState(emptyForm);
     const [draftVariants, setDraftVariants] = useState<DraftVariant[]>([
@@ -116,13 +118,21 @@ export default function VendorProductEditor({
             setLoading(true);
             setError("");
 
-            const [brandData, categoryData] = await Promise.all([
+            const [brandData, categoryData, siteSettings] = await Promise.all([
                 getBrands(),
                 getCategories(),
+                getPublicSettings().catch(() => ({} as Record<string, string>)),
             ]);
 
             setBrands(brandData);
             setCategories(categoryData);
+
+            try {
+                const parsedGenders = JSON.parse(siteSettings.available_genders || "[]");
+                if (Array.isArray(parsedGenders) && parsedGenders.length > 0) {
+                    setGenders(parsedGenders);
+                }
+            } catch { /* keep defaults */ }
 
             if (productId) {
                 const productData = await productService.getById(productId);
