@@ -12,11 +12,12 @@ import {
     Save,
     Type,
     X,
+    ImageIcon,
 } from "lucide-react";
 import { getSiteSettings, updateSiteSetting } from "@/services/siteSettingsService";
 import ImageUploadField from "@/components/common/ImageUploadField";
 
-type SectionId = "hero" | "panels" | "panel1" | "panel2";
+type SectionId = "hero" | "panels" | "panel1" | "panel2" | "banner";
 
 interface SectionDef {
     id: SectionId;
@@ -71,6 +72,16 @@ const sections: SectionDef[] = [
             { key: "category_panel_2_text", label: "Text", type: "textarea" },
             { key: "category_panel_2_link", label: "Link" },
             { key: "category_panel_2_cta", label: "CTA Text" },
+        ],
+    },
+    {
+        id: "banner",
+        label: "Product Banner",
+        icon: <ImageIcon size={16} />,
+        fields: [
+            { key: "product_banner_image", label: "Image", type: "image" },
+            { key: "product_banner_title", label: "Title" },
+            { key: "product_banner_text", label: "Text", type: "textarea" },
         ],
     },
 ];
@@ -338,6 +349,14 @@ export default function HomepageEditorPage() {
                                 onSelect={(id) => setActiveSection(id)}
                                 onHover={(h) => setHoveredSection(h)}
                             />
+                            <PreviewBanner
+                                values={values}
+                                get={get}
+                                isActive={activeSection === "banner"}
+                                isHovered={hoveredSection === "banner"}
+                                onSelect={() => setActiveSection("banner")}
+                                onHover={(h) => setHoveredSection(h ? "banner" : null)}
+                            />
                             <PreviewRestSections />
                         </div>
                     </div>
@@ -580,6 +599,64 @@ function PreviewCategoryCard({
     );
 }
 
+function PreviewBanner({
+    values,
+    get,
+    isActive,
+    isHovered,
+    onSelect,
+    onHover,
+}: {
+    values: Record<string, string>;
+    get: (key: string, fallback?: string) => string;
+    isActive: boolean;
+    isHovered: boolean;
+    onSelect: () => void;
+    onHover: (hovered: boolean) => void;
+}) {
+    return (
+        <SectionOverlay
+            label="Product Banner"
+            isActive={isActive}
+            isHovered={isHovered}
+            onSelect={onSelect}
+            onHover={onHover}
+        >
+            <section className="px-8 py-20">
+                <div className="mx-auto grid max-w-[1800px] gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+                    <div className="relative aspect-[3/2] overflow-hidden bg-[#efe0ca]">
+                        {get("product_banner_image") ? (
+                            <Image
+                                src={get("product_banner_image")}
+                                alt={get("product_banner_title", "Banner")}
+                                fill
+                                sizes="720px"
+                                className="object-cover"
+                                unoptimized
+                            />
+                        ) : (
+                            <div className="flex h-full items-center justify-center text-sm text-[var(--luxury-muted)]">
+                                No banner image
+                            </div>
+                        )}
+                    </div>
+                    <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">
+                            Maison Notes
+                        </p>
+                        <h2 className="mt-3 text-6xl font-normal leading-tight [font-family:var(--font-serif)]">
+                            {get("product_banner_title", "A storefront for house labels that still feels tactile.")}
+                        </h2>
+                        <p className="mt-6 max-w-2xl text-base leading-8 text-[var(--luxury-muted)]">
+                            {get("product_banner_text", "The collection is staged like a real luxury catalogue.")}
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </SectionOverlay>
+    );
+}
+
 function PreviewRestSections() {
     return (
         <>
@@ -704,46 +781,6 @@ function PreviewRestSections() {
                     <p className="mt-8 text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold)]">
                         The House Motto
                     </p>
-                </div>
-            </section>
-
-            <section className="px-8 py-20">
-                <div className="mx-auto grid max-w-[1800px] gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-                    <div className="relative aspect-[3/2] overflow-hidden bg-[#efe0ca]">
-                        <Image
-                            src="/home/home-ritual.jpg"
-                            alt="Fragrance and skincare ritual objects"
-                            fill
-                            sizes="720px"
-                            className="object-cover"
-                            unoptimized
-                        />
-                    </div>
-                    <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">
-                            Maison Notes
-                        </p>
-                        <h2 className="mt-3 text-6xl font-normal leading-tight [font-family:var(--font-serif)]">
-                            A storefront for house labels that still feels tactile.
-                        </h2>
-                        <p className="mt-6 max-w-2xl text-base leading-8 text-[var(--luxury-muted)]">
-                            The collection is staged like a real luxury catalogue: restrained
-                            navigation, visual hierarchy, product-led imagery, and clear
-                            paths into fragrance or skincare.
-                        </p>
-                        <div className="mt-8 grid gap-3 sm:grid-cols-2">
-                            {["Aurelian Atelier", "Nocturne Vale", "Mira Solace", "Vellum & Dew"].map(
-                                (house) => (
-                                    <span
-                                        key={house}
-                                        className="border-b border-[#d8c8ad] py-4 text-lg [font-family:var(--font-serif)]"
-                                    >
-                                        {house}
-                                    </span>
-                                )
-                            )}
-                        </div>
-                    </div>
                 </div>
             </section>
         </>

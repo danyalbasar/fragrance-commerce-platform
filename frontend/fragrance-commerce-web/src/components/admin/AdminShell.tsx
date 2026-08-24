@@ -12,7 +12,6 @@ const navItems = [
     { href: "/admin/brands", label: "Brands", icon: Tag },
     { href: "/admin/genders", label: "Genders", icon: Tag },
     { href: "/admin/homepage", label: "Homepage", icon: Image },
-    { href: "/admin/banners", label: "Banners", icon: Image },
     { href: "/admin/themes", label: "Themes", icon: Palette },
 ];
 
