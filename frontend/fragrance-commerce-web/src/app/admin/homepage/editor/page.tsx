@@ -146,16 +146,16 @@ export default function HomepageEditorPage() {
 
     if (loading) {
         return (
-            <div className="flex h-[calc(100vh-65px)] items-center justify-center bg-[var(--luxury-ivory)]">
-                <div className="text-sm uppercase tracking-[0.24em] text-[var(--luxury-muted)]">
+            <div className="flex h-full items-center justify-center bg-[#1a1a1a]">
+                <p className="text-sm uppercase tracking-[0.24em] text-white/40">
                     Loading editor...
-                </div>
+                </p>
             </div>
         );
     }
 
     return (
-        <div className="flex h-[calc(100vh-65px)] overflow-hidden bg-[#1a1a1a]">
+        <div className="flex h-full overflow-hidden bg-[#1a1a1a]">
             {/* Left: Section selector + Editor */}
             <div className="flex w-[380px] min-w-[380px] flex-col border-r border-[#2a2a2a] bg-[#111]">
                 {/* Header */}
@@ -292,6 +292,7 @@ export default function HomepageEditorPage() {
             <div
                 ref={previewContainerRef}
                 className="relative flex-1 overflow-auto bg-[#222]"
+                style={{ height: "100%" }}
             >
                 {/* Preview chrome */}
                 <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-[#333] bg-[#1a1a1a] px-4 py-2">

@@ -100,17 +100,21 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
             {/* Main content */}
             <main className="flex-1 min-w-0 overflow-x-hidden">
-                <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-                    <button
-                        type="button"
-                        onClick={() => setMobileOpen(true)}
-                        className="mb-4 flex h-10 w-10 items-center justify-center rounded-full border border-[#d8c8ad] bg-[var(--luxury-paper)] text-[var(--luxury-ink)] shadow-sm lg:hidden"
-                        aria-label="Open menu"
-                    >
-                        <Menu size={18} />
-                    </button>
-                    {children}
-                </div>
+                {pathname === "/admin/homepage/editor" ? (
+                    <div className="h-screen overflow-hidden">{children}</div>
+                ) : (
+                    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+                        <button
+                            type="button"
+                            onClick={() => setMobileOpen(true)}
+                            className="mb-4 flex h-10 w-10 items-center justify-center rounded-full border border-[#d8c8ad] bg-[var(--luxury-paper)] text-[var(--luxury-ink)] shadow-sm lg:hidden"
+                            aria-label="Open menu"
+                        >
+                            <Menu size={18} />
+                        </button>
+                        {children}
+                    </div>
+                )}
             </main>
         </div>
     );
