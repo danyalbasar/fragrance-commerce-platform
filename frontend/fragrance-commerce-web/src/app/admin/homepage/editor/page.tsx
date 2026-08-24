@@ -349,15 +349,14 @@ export default function HomepageEditorPage() {
                                 onSelect={(id) => setActiveSection(id)}
                                 onHover={(h) => setHoveredSection(h)}
                             />
-                            <PreviewBanner
+                            <PreviewRestSections
                                 values={values}
                                 get={get}
-                                isActive={activeSection === "banner"}
-                                isHovered={hoveredSection === "banner"}
-                                onSelect={() => setActiveSection("banner")}
-                                onHover={(h) => setHoveredSection(h ? "banner" : null)}
+                                activeSection={activeSection}
+                                hoveredSection={hoveredSection}
+                                onSelect={(id) => setActiveSection(id)}
+                                onHover={(h) => setHoveredSection(h)}
                             />
-                            <PreviewRestSections />
                         </div>
                     </div>
                 </div>
@@ -657,7 +656,21 @@ function PreviewBanner({
     );
 }
 
-function PreviewRestSections() {
+function PreviewRestSections({
+    values,
+    get,
+    activeSection,
+    hoveredSection,
+    onSelect,
+    onHover,
+}: {
+    values: Record<string, string>;
+    get: (key: string, fallback?: string) => string;
+    activeSection: SectionId;
+    hoveredSection: SectionId | null;
+    onSelect: (id: SectionId) => void;
+    onHover: (id: SectionId | null) => void;
+}) {
     return (
         <>
             <section className="bg-[#efe3d0] px-8 py-20">
@@ -783,6 +796,15 @@ function PreviewRestSections() {
                     </p>
                 </div>
             </section>
+
+            <PreviewBanner
+                values={values}
+                get={get}
+                isActive={activeSection === "banner"}
+                isHovered={hoveredSection === "banner"}
+                onSelect={() => onSelect("banner")}
+                onHover={(h) => onHover(h ? "banner" : null)}
+            />
         </>
     );
 }
