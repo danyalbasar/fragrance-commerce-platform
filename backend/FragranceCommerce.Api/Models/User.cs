@@ -11,6 +11,8 @@ public class User : BaseEntity
     public bool EmailVerified { get; set; }
     public string? EmailVerificationToken { get; set; }
     public DateTime? EmailVerificationTokenExpiresAt { get; set; }
+    public string? PasswordResetToken { get; set; }
+    public DateTime? PasswordResetTokenExpiresAt { get; set; }
     public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
     public ICollection<WishlistItem> WishlistItems { get; set; } = new List<WishlistItem>();
     public ICollection<Address> Addresses { get; set; } = new List<Address>();

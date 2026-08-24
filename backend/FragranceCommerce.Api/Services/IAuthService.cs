@@ -9,5 +9,7 @@ public interface IAuthService
     Task<AuthResponseDto> LoginAsync(LoginDto dto);
     Task<AuthResponseDto> VerifyEmailAsync(string token);
     Task ResendVerificationAsync(string email);
+    Task ForgotPasswordAsync(string email);
+    Task ResetPasswordAsync(string token, string newPassword);
     Task<User?> GetUserByIdAsync(Guid userId);
 }

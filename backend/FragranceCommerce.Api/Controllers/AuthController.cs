@@ -87,6 +87,36 @@ public class AuthController : ControllerBase
         }
     }
 
+    [HttpPost("forgot-password")]
+    [EnableRateLimiting("AuthPerIp")]
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordDto dto)
+    {
+        try
+        {
+            await _authService.ForgotPasswordAsync(dto.Email);
+            return Ok();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpPost("reset-password")]
+    [EnableRateLimiting("AuthPerIp")]
+    public async Task<IActionResult> ResetPassword(ResetPasswordDto dto)
+    {
+        try
+        {
+            await _authService.ResetPasswordAsync(dto.Token, dto.NewPassword);
+            return Ok();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
     [HttpPost("logout")]
     public IActionResult Logout()
     {

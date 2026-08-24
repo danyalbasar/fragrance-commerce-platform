@@ -1,9 +1,11 @@
 import { api } from "./api";
 import type {
     AuthResponse,
+    ForgotPasswordRequest,
     LoginRequest,
     RegisterRequest,
     ResendVerificationRequest,
+    ResetPasswordRequest,
     VerifyEmailRequest,
 } from "@/types/auth";
 
@@ -54,4 +56,16 @@ export async function me(): Promise<AuthResponse> {
 
 export async function logout(): Promise<void> {
     await api.post("/Auth/logout");
+}
+
+export async function forgotPassword(
+    request: ForgotPasswordRequest
+): Promise<void> {
+    await api.post("/Auth/forgot-password", request);
+}
+
+export async function resetPassword(
+    request: ResetPasswordRequest
+): Promise<void> {
+    await api.post("/Auth/reset-password", request);
 }

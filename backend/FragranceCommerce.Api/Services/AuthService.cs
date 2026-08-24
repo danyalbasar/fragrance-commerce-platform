@@ -207,6 +207,61 @@ public class AuthService : IAuthService
             .FirstOrDefaultAsync(u => u.Id == userId);
     }
 
+    public async Task ForgotPasswordAsync(string email)
+    {
+        var normalizedEmail = email.Trim().ToLowerInvariant();
+
+        var user = await _context.Users
+            .FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail);
+
+        if (user == null || !user.EmailVerified)
+            return;
+
+        var (token, tokenHash) = GenerateVerificationToken();
+        user.PasswordResetToken = tokenHash;
+        user.PasswordResetTokenExpiresAt = DateTime.UtcNow.AddHours(1);
+        user.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        await _emailService.SendPasswordResetAsync(user, token);
+    }
+
+    public async Task ResetPasswordAsync(string token, string newPassword)
+    {
+        if (string.IsNullOrWhiteSpace(newPassword) || newPassword.Length < 8)
+            throw new InvalidOperationException("Password must be at least 8 characters long.");
+
+        if (!newPassword.Any(char.IsUpper) ||
+            !newPassword.Any(char.IsLower) ||
+            !newPassword.Any(char.IsDigit))
+        {
+            throw new InvalidOperationException(
+                "Password must contain at least one uppercase letter, one lowercase letter, and one digit.");
+        }
+
+        var tokenHash = HashToken(token);
+
+        var user = await _context.Users
+            .FirstOrDefaultAsync(u => u.PasswordResetToken == tokenHash);
+
+        if (user == null)
+            throw new InvalidOperationException("This reset link is invalid.");
+
+        if (user.PasswordResetTokenExpiresAt == null ||
+            user.PasswordResetTokenExpiresAt < DateTime.UtcNow)
+        {
+            throw new InvalidOperationException("This reset link has expired.");
+        }
+
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        user.PasswordResetToken = null;
+        user.PasswordResetTokenExpiresAt = null;
+        user.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+    }
+
     private static (string Token, string Hash) GenerateVerificationToken()
     {
         var bytes = RandomNumberGenerator.GetBytes(32);
