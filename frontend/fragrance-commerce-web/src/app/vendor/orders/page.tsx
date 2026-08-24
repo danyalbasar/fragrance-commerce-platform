@@ -6,6 +6,7 @@ import { ClipboardList } from "lucide-react";
 import { getVendorOrders, updateOrderStatus } from "@/services/orderService";
 import { getApiResponse } from "@/services/api";
 import { EmptyState } from "@/components/common/EmptyState";
+import { VendorOrdersSkeleton } from "@/components/common/VendorSkeletons";
 import type { Order } from "@/types/order";
 import { getStatusClasses } from "@/utils/orderStatus";
 import { readCache, writeCache } from "@/utils/swrCache";
@@ -124,9 +125,7 @@ export default function VendorOrdersPage() {
             {/* Orders list */}
             <div className="space-y-4">
                 {loading && orders.length === 0 ? (
-                    <div className="border border-[#d8c8ad] bg-[var(--luxury-paper)] p-10 text-center text-[var(--luxury-muted)] shadow-[0_18px_50px_rgba(22,18,13,0.08)]">
-                        Loading orders...
-                    </div>
+                    <VendorOrdersSkeleton />
                 ) : sortedOrders.length === 0 ? (
                     <div className="border border-[#d8c8ad] bg-[var(--luxury-paper)] p-10 shadow-[0_18px_50px_rgba(22,18,13,0.08)]">
                         <EmptyState

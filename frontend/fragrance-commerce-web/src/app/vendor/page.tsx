@@ -14,7 +14,7 @@ import {
 import { getVendorDashboard } from "@/services/vendorService";
 import { productService } from "@/services/productService";
 import { getVendorOrders } from "@/services/orderService";
-import { VendorDashboardSkeleton } from "@/components/common/VendorDashboardSkeleton";
+import { VendorDashboardSkeleton } from "@/components/common/VendorSkeletons";
 import { EmptyState } from "@/components/common/EmptyState";
 import type { VendorDashboard } from "@/types/vendor";
 import type { Product } from "@/types/product";

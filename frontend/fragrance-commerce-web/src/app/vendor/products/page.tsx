@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Boxes, PackagePlus, SlidersHorizontal, X } from "lucide-react";
 import { productService } from "@/services/productService";
 import { EmptyState } from "@/components/common/EmptyState";
+import { VendorProductsSkeleton } from "@/components/common/VendorSkeletons";
 import type { Product } from "@/types/product";
 import { readCache, writeCache } from "@/utils/swrCache";
 
@@ -229,7 +230,9 @@ export default function VendorProductsPage() {
             {/* Product table */}
             <div className="border border-[#d8c8ad] bg-[var(--luxury-paper)] shadow-[0_18px_50px_rgba(22,18,13,0.08)]">
                 {loading && products.length === 0 ? (
-                    <div className="p-10 text-center text-[var(--luxury-muted)]">Loading products...</div>
+                    <div className="p-6">
+                        <VendorProductsSkeleton />
+                    </div>
                 ) : filtered.length === 0 ? (
                     <div className="p-10">
                         <EmptyState

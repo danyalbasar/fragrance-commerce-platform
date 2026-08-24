@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Store } from "lucide-react";
 import { createVendor } from "@/services/vendorService";
 import { getApiResponse } from "@/services/api";
+import { VendorSettingsSkeleton } from "@/components/common/VendorSkeletons";
 
 export default function VendorSettingsPage() {
     const [form, setForm] = useState({
@@ -45,9 +46,7 @@ export default function VendorSettingsPage() {
     }
 
     if (loading) {
-        return (
-            <div className="py-20 text-center text-[var(--luxury-muted)]">Loading...</div>
-        );
+        return <VendorSettingsSkeleton />;
     }
 
     return (

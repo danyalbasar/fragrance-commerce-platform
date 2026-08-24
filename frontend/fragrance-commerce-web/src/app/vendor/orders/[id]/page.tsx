@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { getVendorOrders } from "@/services/orderService";
 import { EmptyState } from "@/components/common/EmptyState";
+import { VendorOrderDetailSkeleton } from "@/components/common/VendorSkeletons";
 import type { Order } from "@/types/order";
 import { getStatusClasses } from "@/utils/orderStatus";
 import { readCache, writeCache } from "@/utils/swrCache";
@@ -52,13 +53,7 @@ export default function VendorOrderDetailPage() {
     }, [orderId]);
 
     if (loading && !order) {
-        return (
-            <div className="space-y-6">
-                <div className="h-4 w-32 animate-pulse rounded bg-[#e5d9c4]" />
-                <div className="h-10 w-48 animate-pulse rounded bg-[#e5d9c4]" />
-                <div className="h-64 border border-[#d8c8ad] bg-[var(--luxury-paper)] animate-pulse" />
-            </div>
-        );
+        return <VendorOrderDetailSkeleton />;
     }
 
     if (!order) {
