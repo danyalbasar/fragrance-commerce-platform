@@ -20,7 +20,16 @@ const FeaturedProductScroller = dynamic(
   }
 );
 
-const featuredProducts = [
+type FeaturedProduct = {
+  brand: string;
+  name: string;
+  category: string;
+  price: string;
+  image: string;
+  href: string;
+};
+
+const defaultFeaturedProducts: FeaturedProduct[] = [
   {
     brand: "Aurelian Atelier",
     name: "Velvet Saffron",
@@ -108,6 +117,42 @@ export default function Home() {
 
   const [houseBrands, setHouseBrands] = useState<string[]>(defaultHouseBrands);
 
+  const [valueBarItems, setValueBarItems] = useState<string[]>([
+    "Cloud-like skincare",
+    "Amber-rich attars",
+    "Genderless signatures",
+    "Private house labels",
+  ]);
+
+  const [quoteText, setQuoteText] = useState(
+    "A fragrance should be worn like a signature \u2014 quietly, deliberately, and entirely your own."
+  );
+  const [quoteAttribution, setQuoteAttribution] = useState("The House Motto");
+
+  const [featured, setFeatured] = useState<FeaturedProduct[]>(defaultFeaturedProducts);
+  const [featuredTitle, setFeaturedTitle] = useState("Objects of desire.");
+  const [featuredSubtitle, setFeaturedSubtitle] = useState(
+    "A focused selection from the private labels now available in the store."
+  );
+
+  const [housePromises, setHousePromises] = useState([
+    { title: "Curated Discovery", text: "Shop by gender, category, or house without losing the boutique feel." },
+    { title: "Quiet Product Detail", text: "Large visuals, variant choices, wishlist controls, and cart previews keep the flow focused." },
+    { title: "Ritual Ready", text: "Fragrance and skincare now share one polished visual language across the store." },
+  ]);
+
+  const [newsletterTitle, setNewsletterTitle] = useState("Letters from the house.");
+  const [newsletterSubtitle, setNewsletterSubtitle] = useState(
+    "New releases, private previews, and quiet notes on the collection \u2014 sent only when there is something worth saying."
+  );
+
+  const [ctaTitle, setCtaTitle] = useState("Find the next signature.");
+  const [ctaSubtitle, setCtaSubtitle] = useState(
+    "Browse perfumes, attars, customised blends, face washes, creams, and nail care from the new house catalogue."
+  );
+  const [ctaButtonText, setCtaButtonText] = useState("Shop the Archive");
+  const [ctaButtonLink, setCtaButtonLink] = useState("/products");
+
   useEffect(() => {
     getPublicSettings().then((settings) => {
       setHero({
@@ -143,6 +188,52 @@ export default function Home() {
       } catch {
         /* keep default */
       }
+
+      try {
+        const parsed = JSON.parse(settings.value_bar_items || "[]");
+        if (Array.isArray(parsed) && parsed.length > 0) setValueBarItems(parsed);
+      } catch { /* keep default */ }
+
+      if (settings.quote_text) setQuoteText(settings.quote_text);
+      if (settings.quote_attribution) setQuoteAttribution(settings.quote_attribution);
+
+      if (settings.featured_section_title) setFeaturedTitle(settings.featured_section_title);
+      if (settings.featured_section_subtitle) setFeaturedSubtitle(settings.featured_section_subtitle);
+
+      try {
+        const parsed = JSON.parse(settings.featured_product_ids || "[]");
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          Promise.all(parsed.map((id: string) => productService.getById(id)))
+            .then((products) => {
+              const mapped: FeaturedProduct[] = products.map((p) => {
+                const variant = p.variants[0];
+                return {
+                  brand: p.brandName || "",
+                  name: p.name,
+                  category: variant?.variantName || p.categoryName || "",
+                  price: variant?.sellingPrice ? `\u20B9${variant.sellingPrice.toLocaleString("en-IN")}` : "",
+                  image: p.images[0]?.imageUrl || "",
+                  href: `/products/${p.id}`,
+                };
+              }).filter((fp) => fp.image);
+              if (mapped.length > 0) setFeatured(mapped);
+            })
+            .catch(() => { /* keep default */ });
+        }
+      } catch { /* keep default */ }
+
+      try {
+        const parsed = JSON.parse(settings.house_promises || "[]");
+        if (Array.isArray(parsed) && parsed.length > 0) setHousePromises(parsed);
+      } catch { /* keep default */ }
+
+      if (settings.newsletter_title) setNewsletterTitle(settings.newsletter_title);
+      if (settings.newsletter_subtitle) setNewsletterSubtitle(settings.newsletter_subtitle);
+
+      if (settings.cta_title) setCtaTitle(settings.cta_title);
+      if (settings.cta_subtitle) setCtaSubtitle(settings.cta_subtitle);
+      if (settings.cta_button_text) setCtaButtonText(settings.cta_button_text);
+      if (settings.cta_button_link) setCtaButtonLink(settings.cta_button_link);
     }).catch(() => { /* keep defaults */ });
   }, []);
 
@@ -277,7 +368,7 @@ export default function Home() {
                 href={hero.secondaryCtaLink}
                 className="inline-flex justify-center rounded-full border border-white/45 px-6 py-3 text-center text-sm font-semibold uppercase tracking-[0.12em] text-white transition hover:border-[var(--luxury-gold)] hover:text-[var(--luxury-gold)] sm:px-8 sm:tracking-[0.18em]"
               >
-                Discover Scents
+                {hero.secondaryCtaText}
               </Link>
             </motion.div>
           </motion.div>
@@ -286,10 +377,9 @@ export default function Home() {
 
       <section className="border-y border-[#d8c8ad] bg-[rgba(255,250,242,0.72)] px-4 py-5 backdrop-blur-xl sm:px-6">
         <Reveal className="mx-auto grid max-w-[1800px] gap-4 text-center text-xs font-semibold uppercase tracking-[0.16em] text-[var(--luxury-muted)] sm:tracking-[0.28em] md:grid-cols-4">
-          <span>Cloud-like skincare</span>
-          <span>Amber-rich attars</span>
-          <span>Genderless signatures</span>
-          <span>Private house labels</span>
+          {valueBarItems.map((item, i) => (
+            <span key={i}>{item}</span>
+          ))}
         </Reveal>
       </section>
 
@@ -345,17 +435,16 @@ export default function Home() {
                 Featured Collection
               </p>
               <h2 className="mt-3 text-3xl font-normal [font-family:var(--font-serif)] sm:text-4xl md:text-5xl">
-                Objects of desire.
+                {featuredTitle}
               </h2>
             </div>
             <p className="max-w-md text-sm leading-7 text-[var(--luxury-muted)]">
-              A focused selection from the private labels now available in the
-              store.
+              {featuredSubtitle}
             </p>
           </Reveal>
 
           <Reveal>
-            <FeaturedProductScroller products={featuredProducts} />
+            <FeaturedProductScroller products={featured} />
           </Reveal>
         </div>
       </section>
@@ -439,11 +528,10 @@ export default function Home() {
             &ldquo;
           </span>
           <blockquote className="mt-4 text-2xl font-normal leading-relaxed [font-family:var(--font-serif)] sm:text-3xl md:text-4xl">
-            A fragrance should be worn like a signature &mdash; quietly,
-            deliberately, and entirely your own.
+            {quoteText}
           </blockquote>
           <p className="mt-8 text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold)]">
-            The House Motto
+            {quoteAttribution}
           </p>
         </Reveal>
       </section>
@@ -490,24 +578,14 @@ export default function Home() {
 
       <section className="border-y border-[#d8c8ad] bg-[var(--luxury-paper)] px-4 py-14 sm:px-6 md:px-8 md:py-24 xl:px-12">
         <div className="mx-auto grid max-w-[1800px] gap-8 md:grid-cols-3">
-          <Reveal>
-            <HousePromise
-              title="Curated Discovery"
-              text="Shop by gender, category, or house without losing the boutique feel."
-            />
-          </Reveal>
-          <Reveal delay={0.1}>
-            <HousePromise
-              title="Quiet Product Detail"
-              text="Large visuals, variant choices, wishlist controls, and cart previews keep the flow focused."
-            />
-          </Reveal>
-          <Reveal delay={0.2}>
-            <HousePromise
-              title="Ritual Ready"
-              text="Fragrance and skincare now share one polished visual language across the store."
-            />
-          </Reveal>
+          {housePromises.map((promise, i) => (
+            <Reveal key={i} delay={i * 0.1}>
+              <HousePromise
+                title={promise.title}
+                text={promise.text}
+              />
+            </Reveal>
+          ))}
         </div>
       </section>
 
@@ -517,11 +595,10 @@ export default function Home() {
             The List
           </p>
           <h2 className="mt-3 text-3xl font-normal [font-family:var(--font-serif)] sm:text-4xl md:text-5xl">
-            Letters from the house.
+            {newsletterTitle}
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-[var(--luxury-muted)]">
-            New releases, private previews, and quiet notes on the collection
-            &mdash; sent only when there is something worth saying.
+            {newsletterSubtitle}
           </p>
 
           <NewsletterSection />
@@ -534,17 +611,16 @@ export default function Home() {
             Begin Again
           </p>
           <h2 className="mt-3 text-3xl font-normal [font-family:var(--font-serif)] sm:text-4xl md:text-6xl">
-            Find the next signature.
+            {ctaTitle}
           </h2>
           <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-[var(--luxury-muted)]">
-            Browse perfumes, attars, customised blends, face washes, creams, and
-            nail care from the new house catalogue.
+            {ctaSubtitle}
           </p>
           <Link
-            href="/products"
+            href={ctaButtonLink}
             className="mt-8 inline-flex rounded-full bg-[var(--luxury-ink)] px-8 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-paper)] transition hover:bg-[var(--luxury-moss)]"
           >
-            Shop the Archive
+            {ctaButtonText}
           </Link>
         </Reveal>
       </section>

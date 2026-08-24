@@ -45,7 +45,11 @@ public class SiteSettingsController : ControllerBase
             "category_panel_2_image", "category_panel_2_eyebrow", "category_panel_2_title",
             "category_panel_2_text", "category_panel_2_link", "category_panel_2_cta",
             "product_banner_image", "product_banner_title", "product_banner_text",
-            "available_genders", "house_brands"
+            "available_genders", "house_brands",
+            "value_bar_items", "quote_text", "quote_attribution",
+            "featured_product_ids", "featured_section_title", "featured_section_subtitle",
+            "house_promises", "newsletter_title", "newsletter_subtitle",
+            "cta_title", "cta_subtitle", "cta_button_text", "cta_button_link"
         };
 
         var settings = await _settingsService.GetSettingsAsync(keys);

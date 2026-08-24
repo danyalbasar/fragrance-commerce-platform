@@ -105,7 +105,20 @@ public class SiteSettingsService : ISiteSettingsService
             ["product_banner_title"] = ("A storefront for house labels that still feels tactile.", "Product page banner title"),
             ["product_banner_text"] = ("The collection is staged like a real luxury catalogue: restrained navigation, visual hierarchy, product-led imagery, and clear paths into fragrance or skincare.", "Product page banner text"),
             ["available_genders"] = (JsonSerializer.Serialize(new[] { "Men", "Women", "Unisex" }), "Available gender options (JSON array)"),
-            ["house_brands"] = (JsonSerializer.Serialize(new[] { "Aurelian Atelier", "Nocturne Vale", "Mira Solace", "Vellum & Dew" }), "House brands shown on homepage (JSON array)")
+            ["house_brands"] = (JsonSerializer.Serialize(new[] { "Aurelian Atelier", "Nocturne Vale", "Mira Solace", "Vellum & Dew" }), "House brands shown on homepage (JSON array)"),
+            ["value_bar_items"] = (JsonSerializer.Serialize(new[] { "Cloud-like skincare", "Amber-rich attars", "Genderless signatures", "Private house labels" }), "Value proposition bar items (JSON array)"),
+            ["quote_text"] = ("A fragrance should be worn like a signature — quietly, deliberately, and entirely your own.", "Quote block text"),
+            ["quote_attribution"] = ("The House Motto", "Quote block attribution"),
+            ["featured_product_ids"] = ("[]", "Featured product IDs to show on homepage (JSON array of GUIDs, empty = auto)"),
+            ["featured_section_title"] = ("Objects of desire.", "Featured collection section title"),
+            ["featured_section_subtitle"] = ("A focused selection from the private labels now available in the store.", "Featured collection section subtitle"),
+            ["house_promises"] = (JsonSerializer.Serialize(new[] { new { title = "Curated Discovery", text = "Shop by gender, category, or house without losing the boutique feel." }, new { title = "Quiet Product Detail", text = "Large visuals, variant choices, wishlist controls, and cart previews keep the flow focused." }, new { title = "Ritual Ready", text = "Fragrance and skincare now share one polished visual language across the store." } }), "House promises (JSON array of objects with title+text)"),
+            ["newsletter_title"] = ("Letters from the house.", "Newsletter section title"),
+            ["newsletter_subtitle"] = ("New releases, private previews, and quiet notes on the collection — sent only when there is something worth saying.", "Newsletter section subtitle"),
+            ["cta_title"] = ("Find the next signature.", "Bottom CTA section title"),
+            ["cta_subtitle"] = ("Browse perfumes, attars, customised blends, face washes, creams, and nail care from the new house catalogue.", "Bottom CTA section subtitle"),
+            ["cta_button_text"] = ("Shop the Archive", "Bottom CTA button text"),
+            ["cta_button_link"] = ("/products", "Bottom CTA button link")
         };
 
         foreach (var (key, (value, description)) in defaults)
