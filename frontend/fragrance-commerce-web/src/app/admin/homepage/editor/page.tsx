@@ -82,12 +82,32 @@ export default function HomepageEditorPage() {
     const [error, setError] = useState("");
     const [activeSection, setActiveSection] = useState<SectionId>("hero");
     const [hoveredSection, setHoveredSection] = useState<SectionId | null>(null);
+    const [previewScale, setPreviewScale] = useState(1);
     const previewContainerRef = useRef<HTMLDivElement>(null);
+    const previewInnerRef = useRef<HTMLDivElement>(null);
 
     const currentSection = sections.find((s) => s.id === activeSection)!;
 
     useEffect(() => {
         loadSettings();
+    }, []);
+
+    useEffect(() => {
+        const container = previewContainerRef.current;
+        const inner = previewInnerRef.current;
+        if (!container || !inner) return;
+
+        function updateScale() {
+            const containerWidth = container!.clientWidth;
+            const contentWidth = 1440;
+            const scale = Math.min(containerWidth / contentWidth, 1);
+            setPreviewScale(scale);
+        }
+
+        updateScale();
+        const ro = new ResizeObserver(updateScale);
+        ro.observe(container);
+        return () => ro.disconnect();
     }, []);
 
     async function loadSettings() {
@@ -290,8 +310,22 @@ export default function HomepageEditorPage() {
                 </div>
 
                 {/* Full-width preview */}
-                <div className="min-w-[1440px]">
-                    <PreviewHero
+                <div className="w-full overflow-hidden">
+                    <div
+                        ref={previewInnerRef}
+                        style={{
+                            width: `${1440 * previewScale}px`,
+                            height: `${6000 * previewScale}px`,
+                        }}
+                    >
+                        <div
+                            style={{
+                                width: 1440,
+                                transform: `scale(${previewScale})`,
+                                transformOrigin: "top left",
+                            }}
+                        >
+                            <PreviewHero
                         values={values}
                         get={get}
                         isActive={activeSection === "hero"}
@@ -309,6 +343,8 @@ export default function HomepageEditorPage() {
                         onHover={(h) => setHoveredSection(h)}
                     />
                     <PreviewRestSections />
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
