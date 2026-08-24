@@ -82,25 +82,12 @@ export default function HomepageEditorPage() {
     const [error, setError] = useState("");
     const [activeSection, setActiveSection] = useState<SectionId>("hero");
     const [hoveredSection, setHoveredSection] = useState<SectionId | null>(null);
-    const [previewScale, setPreviewScale] = useState(0.5);
     const previewContainerRef = useRef<HTMLDivElement>(null);
 
     const currentSection = sections.find((s) => s.id === activeSection)!;
 
     useEffect(() => {
         loadSettings();
-    }, []);
-
-    useEffect(() => {
-        function handleResize() {
-            if (!previewContainerRef.current) return;
-            const width = previewContainerRef.current.clientWidth;
-            const scale = Math.min((width - 40) / 1440, 0.65);
-            setPreviewScale(Math.max(scale, 0.25));
-        }
-        handleResize();
-        window.addEventListener("resize", handleResize);
-        return () => window.removeEventListener("resize", handleResize);
     }, []);
 
     async function loadSettings() {
@@ -300,40 +287,28 @@ export default function HomepageEditorPage() {
                     <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">
                         Live Preview
                     </span>
-                    <span className="ml-auto text-[10px] text-white/25">
-                        {Math.round(previewScale * 100)}%
-                    </span>
                 </div>
 
-                {/* Scaled preview */}
-                <div className="flex justify-center py-6">
-                    <div
-                        className="origin-top rounded-lg shadow-2xl ring-1 ring-white/10"
-                        style={{
-                            width: 1440,
-                            transform: `scale(${previewScale})`,
-                            transformOrigin: "top center",
-                        }}
-                    >
-                        <PreviewHero
-                            values={values}
-                            get={get}
-                            isActive={activeSection === "hero"}
-                            isHovered={hoveredSection === "hero"}
-                            onSelect={() => setActiveSection("hero")}
-                            onHover={(h) => setHoveredSection(h ? "hero" : null)}
-                        />
-                        <PreviewValueBar />
-                        <PreviewCategoryPanels
-                            values={values}
-                            get={get}
-                            activeSection={activeSection}
-                            hoveredSection={hoveredSection}
-                            onSelect={(id) => setActiveSection(id)}
-                            onHover={(h) => setHoveredSection(h)}
-                        />
-                        <PreviewRestSections />
-                    </div>
+                {/* Full-width preview */}
+                <div className="min-w-[1440px]">
+                    <PreviewHero
+                        values={values}
+                        get={get}
+                        isActive={activeSection === "hero"}
+                        isHovered={hoveredSection === "hero"}
+                        onSelect={() => setActiveSection("hero")}
+                        onHover={(h) => setHoveredSection(h ? "hero" : null)}
+                    />
+                    <PreviewValueBar />
+                    <PreviewCategoryPanels
+                        values={values}
+                        get={get}
+                        activeSection={activeSection}
+                        hoveredSection={hoveredSection}
+                        onSelect={(id) => setActiveSection(id)}
+                        onHover={(h) => setHoveredSection(h)}
+                    />
+                    <PreviewRestSections />
                 </div>
             </div>
         </div>
