@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Save } from "lucide-react";
 import { getSiteSettings, updateSiteSetting } from "@/services/siteSettingsService";
@@ -7,11 +8,11 @@ import { getSiteSettings, updateSiteSetting } from "@/services/siteSettingsServi
 interface Field {
     key: string;
     label: string;
-    type?: "text" | "textarea" | "url";
+    type?: "text" | "textarea" | "url" | "image";
 }
 
 const heroFields: Field[] = [
-    { key: "hero_image_url", label: "Hero Image URL", type: "url" },
+    { key: "hero_image_url", label: "Hero Image", type: "image" },
     { key: "hero_title", label: "Hero Title" },
     { key: "hero_subtitle", label: "Hero Subtitle", type: "textarea" },
     { key: "hero_cta_text", label: "Primary CTA Text" },
@@ -21,7 +22,7 @@ const heroFields: Field[] = [
 ];
 
 const panel1Fields: Field[] = [
-    { key: "category_panel_1_image", label: "Panel 1 Image URL", type: "url" },
+    { key: "category_panel_1_image", label: "Panel 1 Image", type: "image" },
     { key: "category_panel_1_eyebrow", label: "Panel 1 Eyebrow" },
     { key: "category_panel_1_title", label: "Panel 1 Title" },
     { key: "category_panel_1_text", label: "Panel 1 Text", type: "textarea" },
@@ -30,13 +31,30 @@ const panel1Fields: Field[] = [
 ];
 
 const panel2Fields: Field[] = [
-    { key: "category_panel_2_image", label: "Panel 2 Image URL", type: "url" },
+    { key: "category_panel_2_image", label: "Panel 2 Image", type: "image" },
     { key: "category_panel_2_eyebrow", label: "Panel 2 Eyebrow" },
     { key: "category_panel_2_title", label: "Panel 2 Title" },
     { key: "category_panel_2_text", label: "Panel 2 Text", type: "textarea" },
     { key: "category_panel_2_link", label: "Panel 2 Link" },
     { key: "category_panel_2_cta", label: "Panel 2 CTA" },
 ];
+
+function ImagePreview({ src }: { src: string }) {
+    if (!src) return null;
+
+    return (
+        <div className="mt-3 relative aspect-video w-full overflow-hidden rounded border border-[#d8c8ad] bg-[#efe3d0]">
+            <Image
+                src={src}
+                alt="Preview"
+                fill
+                sizes="(min-width: 640px) 50vw, 100vw"
+                className="object-cover"
+                unoptimized
+            />
+        </div>
+    );
+}
 
 export default function AdminHomepagePage() {
     const [values, setValues] = useState<Record<string, string>>({});
@@ -101,9 +119,20 @@ export default function AdminHomepagePage() {
                                     rows={3}
                                     className="mt-2 w-full resize-none border border-[#d8c8ad] bg-[var(--luxury-input)] px-3 py-3 text-sm outline-none transition focus:border-[var(--luxury-gold)]"
                                 />
+                            ) : field.type === "image" ? (
+                                <>
+                                    <input
+                                        type="url"
+                                        value={values[field.key] || ""}
+                                        onChange={(e) => update(field.key, e.target.value)}
+                                        placeholder="/home/your-image.jpg"
+                                        className="mt-2 h-11 w-full border border-[#d8c8ad] bg-[var(--luxury-input)] px-3 text-sm outline-none transition focus:border-[var(--luxury-gold)]"
+                                    />
+                                    <ImagePreview src={values[field.key] || ""} />
+                                </>
                             ) : (
                                 <input
-                                    type={field.type === "url" ? "url" : "text"}
+                                    type="text"
                                     value={values[field.key] || ""}
                                     onChange={(e) => update(field.key, e.target.value)}
                                     className="mt-2 h-11 w-full border border-[#d8c8ad] bg-[var(--luxury-input)] px-3 text-sm outline-none transition focus:border-[var(--luxury-gold)]"
