@@ -8,10 +8,11 @@ import Footer from "./Footer";
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const isVendor = pathname.startsWith("/vendor");
+    const isAdmin = pathname.startsWith("/admin");
 
     return (
         <>
-            {!isVendor && (
+            {!isVendor && !isAdmin && (
                 <Suspense
                     fallback={
                         <div
@@ -26,7 +27,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
             <div id="main-content" tabIndex={-1} className="flex-1 focus:outline-none">
                 {children}
             </div>
-            {!isVendor && <Footer />}
+            {!isVendor && !isAdmin && <Footer />}
         </>
     );
 }
