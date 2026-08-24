@@ -12,4 +12,6 @@ public class WishlistItemDto
     public string VariantName { get; set; } = string.Empty;
     public decimal SellingPrice { get; set; }
     public int StockQuantity { get; set; }
+    public int VariantCount { get; set; }
+    public decimal LowestPrice { get; set; }
 }

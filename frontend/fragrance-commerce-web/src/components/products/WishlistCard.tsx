@@ -139,7 +139,10 @@ export default function WishlistCard({
                 <div className="mt-auto pt-5">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                         <span className={compactMobile ? "text-base font-semibold sm:text-2xl" : "text-2xl font-semibold"}>
-                            {formatPrice(item.sellingPrice)}
+                            {item.variantCount > 1 && (
+                                <span className="text-[0.65em] font-normal text-[var(--luxury-muted)]">From </span>
+                            )}
+                            {formatPrice(item.variantCount > 1 ? item.lowestPrice : item.sellingPrice)}
                         </span>
 
                         {lowStock && (

@@ -16,6 +16,8 @@ export interface WishlistItem {
 
     sellingPrice: number;
     stockQuantity: number;
+    variantCount: number;
+    lowestPrice: number;
 }
 
 export interface Wishlist {

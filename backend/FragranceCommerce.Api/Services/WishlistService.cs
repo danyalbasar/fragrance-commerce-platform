@@ -48,7 +48,12 @@ public class WishlistService : IWishlistService
                     VariantId = variant?.Id ?? Guid.Empty,
                     VariantName = variant?.VariantName ?? string.Empty,
                     SellingPrice = variant?.SellingPrice ?? 0,
-                    StockQuantity = variant?.StockQuantity ?? 0
+                    StockQuantity = variant?.StockQuantity ?? 0,
+                    VariantCount = w.Product.Variants.Count,
+                    LowestPrice = w.Product.Variants
+                        .Select(v => v.SellingPrice)
+                        .DefaultIfEmpty(0)
+                        .Min()
                 };
             }).ToList()
         };
