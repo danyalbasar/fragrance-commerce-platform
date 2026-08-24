@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { addToCart } from "@/services/cartService";
 import { formatPrice } from "@/utils/format";
 import { useAuth } from "@/contexts/AuthContext";
+import { useScrollLock } from "@/hooks/useScrollLock";
 import type { Product, ProductVariant } from "@/types/product";
 
 interface QuickAddBarProps {
@@ -52,6 +53,8 @@ export default function QuickAddBar({ product, onClose }: QuickAddBarProps) {
     }
 
     const inStock = product?.variants.some((v) => v.stockQuantity > 0);
+
+    useScrollLock(!!product);
 
     return (
         <AnimatePresence>
@@ -213,7 +216,7 @@ function BarContent({
                 type="button"
                 onClick={handleAddToCart}
                 disabled={loading || !inStock}
-                className="mt-5 flex h-13 w-full items-center justify-center gap-2.5 rounded-full bg-[var(--luxury-ink)] text-sm font-semibold uppercase tracking-[0.14em] text-[var(--luxury-paper)] shadow-[0_14px_30px_rgba(22,18,13,0.12)] transition hover:bg-[var(--luxury-moss)] active:scale-[0.98] disabled:opacity-40"
+                className="mt-5 flex h-11 w-full items-center justify-center gap-2.5 rounded-full bg-[var(--luxury-ink)] text-sm font-semibold uppercase tracking-[0.14em] text-[var(--luxury-paper)] shadow-[0_14px_30px_rgba(22,18,13,0.12)] transition hover:bg-[var(--luxury-moss)] active:scale-[0.98] disabled:opacity-40"
             >
                 <ShoppingBag size={18} />
                 {loading

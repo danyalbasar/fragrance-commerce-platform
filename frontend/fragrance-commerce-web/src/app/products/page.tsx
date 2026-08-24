@@ -10,6 +10,7 @@ import QuickAddBar from "@/components/products/QuickAddBar";
 import { EmptyState } from "@/components/common/EmptyState";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { useScrollLock } from "@/hooks/useScrollLock";
 import { productService } from "@/services/productService";
 import { getBrands } from "@/services/brandService";
 import { getCategories } from "@/services/categoryService";
@@ -61,6 +62,7 @@ function ProductsContent() {
 
     const mobileFiltersRef = useRef<HTMLElement>(null);
     useFocusTrap(mobileFiltersRef, showMobileFilters, () => setShowMobileFilters(false));
+    useScrollLock(showMobileFilters);
 
     const selectedCategory = categories.find((c) => c.id === categoryId);
     const selectedBrand = brands.find((b) => b.id === brandId);
@@ -185,32 +187,6 @@ function ProductsContent() {
         sortDirection,
         pageNumber,
     ]);
-
-    useEffect(() => {
-        if (!showMobileFilters) return;
-
-        const scrollY = window.scrollY;
-        const originalOverflow = document.body.style.overflow;
-        const originalPosition = document.body.style.position;
-        const originalTop = document.body.style.top;
-        const originalWidth = document.body.style.width;
-        const originalHtmlOverflow = document.documentElement.style.overflow;
-
-        document.documentElement.style.overflow = "hidden";
-        document.body.style.overflow = "hidden";
-        document.body.style.position = "fixed";
-        document.body.style.top = `-${scrollY}px`;
-        document.body.style.width = "100%";
-
-        return () => {
-            document.documentElement.style.overflow = originalHtmlOverflow;
-            document.body.style.overflow = originalOverflow;
-            document.body.style.position = originalPosition;
-            document.body.style.top = originalTop;
-            document.body.style.width = originalWidth;
-            window.scrollTo(0, scrollY);
-        };
-    }, [showMobileFilters]);
 
     function resetFilters() {
         setSearch("");

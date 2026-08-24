@@ -17,6 +17,7 @@ import {
 import type { Brand } from "@/types/brand";
 import type { Category } from "@/types/category";
 import type { Product, ProductGender } from "@/types/product";
+import { useScrollLock } from "@/hooks/useScrollLock";
 
 const genders: ProductGender[] = ["Men", "Women", "Unisex"];
 
@@ -94,6 +95,8 @@ export default function VendorProductEditor({
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [confirmingDeactivate, setConfirmingDeactivate] = useState(false);
+
+    useScrollLock(confirmingDeactivate);
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
 

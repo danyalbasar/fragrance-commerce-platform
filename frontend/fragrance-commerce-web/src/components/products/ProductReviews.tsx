@@ -18,6 +18,7 @@ import {
 import type { Review, ReviewImage } from "@/types/review";
 import { createProductReview } from "@/services/reviewService";
 import { EmptyState } from "@/components/common/EmptyState";
+import { useScrollLock } from "@/hooks/useScrollLock";
 
 const REVIEWS_PER_PAGE = 4;
 
@@ -64,6 +65,8 @@ export default function ProductReviews({
     const [page, setPage] = useState(1);
     const [lightbox, setLightbox] = useState<LightboxState | null>(null);
     const reviewModalRef = useRef<HTMLDivElement>(null);
+
+    useScrollLock(showModal || !!lightbox);
 
     const averageRating =
         reviews.length === 0
@@ -130,19 +133,7 @@ export default function ProductReviews({
     useEffect(() => {
         if (!showModal) return;
 
-        const scrollY = window.scrollY;
-        const originalOverflow = document.body.style.overflow;
-        const originalPosition = document.body.style.position;
-        const originalTop = document.body.style.top;
-        const originalWidth = document.body.style.width;
-        const originalHtmlOverflow = document.documentElement.style.overflow;
         const previouslyFocused = document.activeElement as HTMLElement | null;
-
-        document.documentElement.style.overflow = "hidden";
-        document.body.style.overflow = "hidden";
-        document.body.style.position = "fixed";
-        document.body.style.top = `-${scrollY}px`;
-        document.body.style.width = "100%";
 
         const modal = reviewModalRef.current;
         modal?.focus();
@@ -177,42 +168,10 @@ export default function ProductReviews({
         document.addEventListener("keydown", onKey);
 
         return () => {
-            document.documentElement.style.overflow = originalHtmlOverflow;
-            document.body.style.overflow = originalOverflow;
-            document.body.style.position = originalPosition;
-            document.body.style.top = originalTop;
-            document.body.style.width = originalWidth;
-            window.scrollTo(0, scrollY);
             document.removeEventListener("keydown", onKey);
             previouslyFocused?.focus();
         };
     }, [showModal]);
-
-    useEffect(() => {
-        if (!lightbox) return;
-
-        const scrollY = window.scrollY;
-        const originalOverflow = document.body.style.overflow;
-        const originalPosition = document.body.style.position;
-        const originalTop = document.body.style.top;
-        const originalWidth = document.body.style.width;
-        const originalHtmlOverflow = document.documentElement.style.overflow;
-
-        document.documentElement.style.overflow = "hidden";
-        document.body.style.overflow = "hidden";
-        document.body.style.position = "fixed";
-        document.body.style.top = `-${scrollY}px`;
-        document.body.style.width = "100%";
-
-        return () => {
-            document.documentElement.style.overflow = originalHtmlOverflow;
-            document.body.style.overflow = originalOverflow;
-            document.body.style.position = originalPosition;
-            document.body.style.top = originalTop;
-            document.body.style.width = originalWidth;
-            window.scrollTo(0, scrollY);
-        };
-    }, [lightbox]);
 
     useEffect(() => {
         if (!lightbox) return;

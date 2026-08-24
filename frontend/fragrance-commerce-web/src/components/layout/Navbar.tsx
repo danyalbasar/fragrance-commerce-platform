@@ -12,6 +12,7 @@ import { getCart, removeCartItem, updateCartItem } from "@/services/cartService"
 import { getWishlist } from "@/services/wishlistService";
 import { productService } from "@/services/productService";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { useScrollLock } from "@/hooks/useScrollLock";
 import type { Cart } from "@/types/cart";
 import type { Product } from "@/types/product";
 import { EmptyState } from "@/components/common/EmptyState";
@@ -49,6 +50,8 @@ export default function Navbar() {
         () => false
     );
     const [scrolled, setScrolled] = useState(false);
+
+    useScrollLock(showMobileMenu || showCartPreview);
 
     const searchPanelRef = useRef<HTMLDivElement>(null);
     const searchButtonRef = useRef<HTMLButtonElement>(null);
@@ -143,32 +146,6 @@ export default function Navbar() {
             document.removeEventListener("keydown", handleEscape);
         };
     }, []);
-
-    useEffect(() => {
-        if (!showMobileMenu) return;
-
-        const scrollY = window.scrollY;
-        const originalOverflow = document.body.style.overflow;
-        const originalPosition = document.body.style.position;
-        const originalTop = document.body.style.top;
-        const originalWidth = document.body.style.width;
-        const originalHtmlOverflow = document.documentElement.style.overflow;
-
-        document.documentElement.style.overflow = "hidden";
-        document.body.style.overflow = "hidden";
-        document.body.style.position = "fixed";
-        document.body.style.top = `-${scrollY}px`;
-        document.body.style.width = "100%";
-
-        return () => {
-            document.documentElement.style.overflow = originalHtmlOverflow;
-            document.body.style.overflow = originalOverflow;
-            document.body.style.position = originalPosition;
-            document.body.style.top = originalTop;
-            document.body.style.width = originalWidth;
-            window.scrollTo(0, scrollY);
-        };
-    }, [showMobileMenu]);
 
     useEffect(() => {
         const handleClick = () => {
