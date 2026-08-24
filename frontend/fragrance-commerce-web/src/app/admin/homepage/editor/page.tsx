@@ -83,8 +83,9 @@ export default function HomepageEditorPage() {
     const [activeSection, setActiveSection] = useState<SectionId>("hero");
     const [hoveredSection, setHoveredSection] = useState<SectionId | null>(null);
     const [previewScale, setPreviewScale] = useState(1);
+    const [contentHeight, setContentHeight] = useState(6000);
     const previewContainerRef = useRef<HTMLDivElement>(null);
-    const previewInnerRef = useRef<HTMLDivElement>(null);
+    const previewContentRef = useRef<HTMLDivElement>(null);
 
     const currentSection = sections.find((s) => s.id === activeSection)!;
 
@@ -94,21 +95,33 @@ export default function HomepageEditorPage() {
 
     useEffect(() => {
         const container = previewContainerRef.current;
-        const inner = previewInnerRef.current;
-        if (!container || !inner) return;
+        const content = previewContentRef.current;
+        if (!container) return;
 
         function updateScale() {
             const containerWidth = container!.clientWidth;
-            const contentWidth = 1440;
-            const scale = Math.min(containerWidth / contentWidth, 1);
+            const scale = Math.min(containerWidth / 1440, 1);
             setPreviewScale(scale);
         }
 
+        function updateHeight() {
+            if (content) {
+                setContentHeight(content.scrollHeight);
+            }
+        }
+
         updateScale();
-        const ro = new ResizeObserver(updateScale);
+        updateHeight();
+
+        const ro = new ResizeObserver(() => {
+            updateScale();
+            updateHeight();
+        });
         ro.observe(container);
+        if (content) ro.observe(content);
+
         return () => ro.disconnect();
-    }, []);
+    }, [values]);
 
     async function loadSettings() {
         try {
@@ -312,13 +325,13 @@ export default function HomepageEditorPage() {
                 {/* Full-width preview */}
                 <div className="w-full overflow-hidden">
                     <div
-                        ref={previewInnerRef}
                         style={{
                             width: `${1440 * previewScale}px`,
-                            height: `${6000 * previewScale}px`,
+                            height: `${contentHeight * previewScale}px`,
                         }}
                     >
                         <div
+                            ref={previewContentRef}
                             style={{
                                 width: 1440,
                                 transform: `scale(${previewScale})`,
@@ -326,23 +339,23 @@ export default function HomepageEditorPage() {
                             }}
                         >
                             <PreviewHero
-                        values={values}
-                        get={get}
-                        isActive={activeSection === "hero"}
-                        isHovered={hoveredSection === "hero"}
-                        onSelect={() => setActiveSection("hero")}
-                        onHover={(h) => setHoveredSection(h ? "hero" : null)}
-                    />
-                    <PreviewValueBar />
-                    <PreviewCategoryPanels
-                        values={values}
-                        get={get}
-                        activeSection={activeSection}
-                        hoveredSection={hoveredSection}
-                        onSelect={(id) => setActiveSection(id)}
-                        onHover={(h) => setHoveredSection(h)}
-                    />
-                    <PreviewRestSections />
+                                values={values}
+                                get={get}
+                                isActive={activeSection === "hero"}
+                                isHovered={hoveredSection === "hero"}
+                                onSelect={() => setActiveSection("hero")}
+                                onHover={(h) => setHoveredSection(h ? "hero" : null)}
+                            />
+                            <PreviewValueBar />
+                            <PreviewCategoryPanels
+                                values={values}
+                                get={get}
+                                activeSection={activeSection}
+                                hoveredSection={hoveredSection}
+                                onSelect={(id) => setActiveSection(id)}
+                                onHover={(h) => setHoveredSection(h)}
+                            />
+                            <PreviewRestSections />
                         </div>
                     </div>
                 </div>
