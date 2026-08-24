@@ -220,7 +220,7 @@ const ProductCard = memo(function ProductCard({
                     <div className="flex flex-wrap items-center justify-between gap-2">
                         <span className={compactMobile ? "text-base font-semibold sm:text-2xl" : "text-xl font-semibold sm:text-2xl"}>
                             {product.variants.length > 1 && (
-                                <span className="text-[0.65em] font-normal text-[var(--luxury-muted)]">from </span>
+                                <span className="text-[0.65em] font-normal text-[var(--luxury-muted)]">From </span>
                             )}
                             {formatPrice(lowestPrice)}
                         </span>
