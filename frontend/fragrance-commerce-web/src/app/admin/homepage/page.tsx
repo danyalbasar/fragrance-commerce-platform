@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Save } from "lucide-react";
+import { Eye, Save } from "lucide-react";
 import { getSiteSettings, updateSiteSetting } from "@/services/siteSettingsService";
 
 interface Field {
@@ -165,6 +166,13 @@ export default function AdminHomepagePage() {
                     <Save size={14} />
                     {saving ? "Saving..." : "Save All"}
                 </button>
+                <Link
+                    href="/admin/homepage/editor"
+                    className="inline-flex h-11 items-center gap-2 rounded-full border border-[var(--luxury-gold)] px-5 text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-gold-strong)] transition hover:bg-[var(--luxury-gold)] hover:text-[var(--luxury-ink)]"
+                >
+                    <Eye size={14} />
+                    Visual Editor
+                </Link>
             </div>
 
             {message && <div className="border border-[#b9c8a8] bg-[#f6fbef] p-4 text-sm text-[#455c2b]">{message}</div>}
