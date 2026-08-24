@@ -43,6 +43,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 setEmailVerifiedState(data.emailVerified);
                 setIsLoggedIn(true);
                 localStorage.setItem("email", data.email);
+
+                if (!data.emailVerified) {
+                    router.replace("/verify-email");
+                } else if (data.roles.includes("Admin") || data.roles.includes("SuperAdmin")) {
+                    router.replace("/admin");
+                } else if (data.roles.includes("Vendor")) {
+                    router.replace("/vendor");
+                }
             })
             .catch(() => {
                 if (cancelled) return;
