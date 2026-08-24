@@ -40,6 +40,10 @@ const ProductCard = memo(function ProductCard({
         product.variants[0]?.images[0]?.imageUrl;
 
     const firstVariant = product.variants[0];
+    const lowestPrice = product.variants.reduce(
+        (min, v) => (v.sellingPrice < min ? v.sellingPrice : min),
+        firstVariant?.sellingPrice ?? 0
+    );
     const lowStock =
         firstVariant &&
         firstVariant.stockQuantity > 0 &&
@@ -215,7 +219,10 @@ const ProductCard = memo(function ProductCard({
                 <div className="mt-auto pt-5">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                         <span className={compactMobile ? "text-base font-semibold sm:text-2xl" : "text-xl font-semibold sm:text-2xl"}>
-                            {formatPrice(firstVariant?.sellingPrice)}
+                            {product.variants.length > 1 && (
+                                <span className="text-[0.65em] font-normal text-[var(--luxury-muted)]">from </span>
+                            )}
+                            {formatPrice(lowestPrice)}
                         </span>
 
                         {lowStock && (
