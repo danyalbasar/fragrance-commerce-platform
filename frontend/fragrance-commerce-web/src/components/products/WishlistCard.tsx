@@ -3,85 +3,42 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { WishlistItem } from "@/types/wishlist";
+import type { Product } from "@/types/product";
 import { formatPrice } from "@/utils/format";
-import {
-    addToCart,
-    getCart,
-    updateCartItem,
-} from "@/services/cartService";
+import { productService } from "@/services/productService";
 
 interface WishlistCardProps {
     item: WishlistItem;
     onRemove: (productId: string) => Promise<void>;
+    onQuickAdd?: (product: Product) => void;
     compactMobile?: boolean;
 }
 
 export default function WishlistCard({
     item,
     onRemove,
+    onQuickAdd,
     compactMobile = false,
 }: WishlistCardProps) {
-    const [quantity, setQuantity] = useState(0);
-    const [cartItemId, setCartItemId] = useState<string | null>(null);
-    const [loading, setLoading] = useState(false);
     const [removing, setRemoving] = useState(false);
+    const [loading, setLoading] = useState(false);
     const lowStock = item.stockQuantity > 0 && item.stockQuantity <= 2;
-
-    async function loadCartItem() {
-        try {
-            const cart = await getCart();
-
-            const existingItem = cart.items.find(
-                (cartItem) => cartItem.productVariantId === item.variantId
-            );
-
-            if (existingItem) {
-                setQuantity(existingItem.quantity);
-                setCartItemId(existingItem.id);
-            } else {
-                setQuantity(0);
-                setCartItemId(null);
-            }
-        } catch {
-            setQuantity(0);
-            setCartItemId(null);
-        }
-    }
-
-    useEffect(() => {
-        const timer = window.setTimeout(loadCartItem, 0);
-
-        window.addEventListener("cartUpdated", loadCartItem);
-
-        return () => {
-            window.clearTimeout(timer);
-            window.removeEventListener("cartUpdated", loadCartItem);
-        };
-    }, [item.variantId]);
 
     async function handleQuickAdd(e: React.MouseEvent<HTMLButtonElement>) {
         e.preventDefault();
         e.stopPropagation();
 
-        if (!item.variantId || item.stockQuantity <= 0) return;
-        if (quantity >= item.stockQuantity) return;
-
-        try {
-            setLoading(true);
-
-            if (cartItemId) {
-                await updateCartItem(cartItemId, quantity + 1);
-            } else {
-                await addToCart(item.variantId, 1);
+        if (onQuickAdd) {
+            try {
+                setLoading(true);
+                const fullProduct = await productService.getById(item.productId);
+                onQuickAdd(fullProduct);
+            } finally {
+                setLoading(false);
             }
-
-            await onRemove(item.productId);
-            window.dispatchEvent(new Event("cartUpdated"));
-            window.dispatchEvent(new Event("wishlistUpdated"));
-        } finally {
-            setLoading(false);
+            return;
         }
     }
 

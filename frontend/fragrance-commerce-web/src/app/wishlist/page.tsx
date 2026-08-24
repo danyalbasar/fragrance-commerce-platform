@@ -6,7 +6,9 @@ import ProtectedRoute from "@/components/common/ProtectedRoute";
 import { WishlistPageSkeleton } from "@/components/common/WishlistPageSkeleton";
 import { EmptyState } from "@/components/common/EmptyState";
 import WishlistCard from "@/components/products/WishlistCard";
+import QuickAddBar from "@/components/products/QuickAddBar";
 import type { Wishlist } from "@/types/wishlist";
+import type { Product } from "@/types/product";
 import {
     getWishlist,
     removeFromWishlist,
@@ -18,6 +20,7 @@ export default function WishlistPage() {
         readCache<Wishlist>("wishlist")
     );
     const [loading, setLoading] = useState(wishlist === null);
+    const [quickAddProduct, setQuickAddProduct] = useState<Product | null>(null);
 
     async function loadWishlist() {
         try {
@@ -82,6 +85,7 @@ export default function WishlistPage() {
                                     key={item.id}
                                     item={item}
                                     onRemove={handleRemove}
+                                    onQuickAdd={setQuickAddProduct}
                                     compactMobile
                                 />
                             ))}
@@ -89,6 +93,11 @@ export default function WishlistPage() {
                     )}
                 </div>
             </main>
+
+            <QuickAddBar
+                product={quickAddProduct}
+                onClose={() => setQuickAddProduct(null)}
+            />
         </ProtectedRoute>
     );
 }

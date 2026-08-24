@@ -77,7 +77,7 @@ export default function QuickAddBar({ product, onClose }: QuickAddBarProps) {
                         transition={{ type: "spring", damping: 30, stiffness: 350 }}
                         className="fixed inset-x-0 bottom-0 z-[95] md:hidden"
                     >
-                        <div className="mx-auto flex max-w-lg flex-col rounded-t-2xl border-t border-[var(--luxury-line)] bg-[var(--luxury-paper)] px-5 pb-8 pt-4 shadow-[0_-20px_60px_rgba(22,18,13,0.18)]">
+                        <div className="mx-auto flex max-w-lg flex-col rounded-t-2xl border-t border-[var(--luxury-line)] bg-[var(--luxury-paper)] px-6 pb-8 pt-5 shadow-[0_-20px_60px_rgba(22,18,13,0.18)]">
                             <BarContent
                                 product={product}
                                 selectedVariant={selectedVariant}
@@ -100,7 +100,7 @@ export default function QuickAddBar({ product, onClose }: QuickAddBarProps) {
                         transition={{ type: "spring", damping: 30, stiffness: 350 }}
                         className="fixed left-1/2 top-1/2 z-[95] hidden w-full max-w-md -translate-x-1/2 -translate-y-1/2 md:block"
                     >
-                        <div className="mx-6 flex flex-col rounded-2xl border border-[var(--luxury-line)] bg-[var(--luxury-paper)] p-6 shadow-[0_30px_80px_rgba(22,18,13,0.28)]">
+                        <div className="mx-6 flex flex-col rounded-2xl border border-[var(--luxury-line)] bg-[var(--luxury-paper)] p-7 shadow-[0_30px_80px_rgba(22,18,13,0.28)]">
                             <BarContent
                                 product={product}
                                 selectedVariant={selectedVariant}
@@ -155,37 +155,37 @@ function BarContent({
                 </button>
             </div>
 
-            <div className="flex gap-4">
-                <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-[var(--luxury-line)] bg-[var(--luxury-sand)]">
+            <div className="flex gap-5">
+                <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg border border-[var(--luxury-line)] bg-[var(--luxury-sand)]">
                     {primaryImage && (
                         <Image
                             src={primaryImage}
                             alt={product.name}
                             fill
-                            sizes="80px"
+                            sizes="96px"
                             className="object-cover"
                         />
                     )}
                 </div>
 
                 <div className="min-w-0 flex-1">
-                    <p className="text-[10px] uppercase tracking-[0.12em] text-[var(--luxury-gold-strong)]">
+                    <p className="text-xs uppercase tracking-[0.12em] text-[var(--luxury-gold-strong)]">
                         {product.brandName}
                     </p>
 
-                    <h3 className="mt-0.5 line-clamp-1 text-sm font-normal [font-family:var(--font-serif)]">
+                    <h3 className="mt-1 line-clamp-1 text-base font-normal [font-family:var(--font-serif)]">
                         {product.name}
                     </h3>
 
-                    <p className="mt-1 text-sm font-semibold">
+                    <p className="mt-1.5 text-base font-semibold">
                         {formatPrice(selectedVariant?.sellingPrice)}
                     </p>
                 </div>
             </div>
 
             {product.variants.length > 1 && (
-                <div className="mt-4">
-                    <label className="mb-1.5 block text-[10px] uppercase tracking-[0.14em] text-[var(--luxury-muted)]">
+                <div className="mt-5">
+                    <label className="mb-2 block text-[11px] uppercase tracking-[0.14em] text-[var(--luxury-muted)]">
                         Variant
                     </label>
 
@@ -196,7 +196,7 @@ function BarContent({
                                 type="button"
                                 onClick={() => setSelectedVariant(variant)}
                                 disabled={variant.stockQuantity <= 0}
-                                className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-all duration-150 ${
+                                className={`rounded-full border px-4 py-2 text-sm font-medium transition-all duration-150 ${
                                     selectedVariant?.id === variant.id
                                         ? "border-[var(--luxury-ink)] bg-[var(--luxury-ink)] text-[var(--luxury-paper)]"
                                         : "border-[#d8c8ad] text-[var(--luxury-ink)] hover:border-[var(--luxury-gold)]"
@@ -213,9 +213,9 @@ function BarContent({
                 type="button"
                 onClick={handleAddToCart}
                 disabled={loading || !inStock}
-                className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--luxury-ink)] text-sm font-semibold uppercase tracking-[0.14em] text-[var(--luxury-paper)] shadow-[0_14px_30px_rgba(22,18,13,0.12)] transition hover:bg-[var(--luxury-moss)] active:scale-[0.98] disabled:opacity-40"
+                className="mt-5 flex h-13 w-full items-center justify-center gap-2.5 rounded-full bg-[var(--luxury-ink)] text-sm font-semibold uppercase tracking-[0.14em] text-[var(--luxury-paper)] shadow-[0_14px_30px_rgba(22,18,13,0.12)] transition hover:bg-[var(--luxury-moss)] active:scale-[0.98] disabled:opacity-40"
             >
-                <ShoppingBag size={16} />
+                <ShoppingBag size={18} />
                 {loading
                     ? "Adding..."
                     : !inStock

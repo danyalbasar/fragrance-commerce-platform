@@ -31,6 +31,7 @@ import {
 } from "@/services/wishlistService";
 import type { Product } from "@/types/product";
 import ProductCard from "@/components/products/ProductCard";
+import QuickAddBar from "@/components/products/QuickAddBar";
 import { PageSkeleton } from "@/components/common/PageSkeleton";
 import { ProductReviewsSkeleton } from "@/components/common/ProductReviewsSkeleton";
 import { EmptyState } from "@/components/common/EmptyState";
@@ -79,6 +80,7 @@ function ProductDetailsContent() {
   const [canScrollSimilarLeft, setCanScrollSimilarLeft] = useState(false);
   const [canScrollSimilarRight, setCanScrollSimilarRight] = useState(false);
   const similarScrollerRef = useRef<HTMLDivElement>(null);
+  const [quickAddProduct, setQuickAddProduct] = useState<Product | null>(null);
 
   const searchParams = useSearchParams();
   const openReviewModal = searchParams.get("review") === "true";
@@ -860,7 +862,7 @@ function ProductDetailsContent() {
                   key={item.id}
                   className="min-w-[70%] snap-start md:min-w-0"
                 >
-                  <ProductCard product={item} compactMobile />
+                  <ProductCard product={item} compactMobile onQuickAdd={setQuickAddProduct} />
                 </div>
               ))}
             </div>
@@ -886,6 +888,11 @@ function ProductDetailsContent() {
           />
         )}
       </section>
+
+      <QuickAddBar
+        product={quickAddProduct}
+        onClose={() => setQuickAddProduct(null)}
+      />
     </main>
   );
 }
