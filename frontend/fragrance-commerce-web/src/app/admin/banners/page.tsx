@@ -1,32 +1,15 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Save } from "lucide-react";
 import { getSiteSettings, updateSiteSetting } from "@/services/siteSettingsService";
+import ImageUploadField from "@/components/common/ImageUploadField";
 
 const bannerFields = [
     { key: "product_banner_image", label: "Banner Image", type: "image" as const },
     { key: "product_banner_title", label: "Banner Title" },
     { key: "product_banner_text", label: "Banner Text", type: "textarea" as const },
 ];
-
-function ImagePreview({ src }: { src: string }) {
-    if (!src) return null;
-
-    return (
-        <div className="mt-3 relative aspect-video w-full overflow-hidden rounded border border-[#d8c8ad] bg-[#efe3d0]">
-            <Image
-                src={src}
-                alt="Preview"
-                fill
-                sizes="(min-width: 640px) 50vw, 100vw"
-                className="object-cover"
-                unoptimized
-            />
-        </div>
-    );
-}
 
 export default function AdminBannersPage() {
     const [values, setValues] = useState<Record<string, string>>({});
@@ -119,16 +102,11 @@ export default function AdminBannersPage() {
                                         className="mt-2 w-full resize-none border border-[#d8c8ad] bg-[var(--luxury-input)] px-3 py-3 text-sm outline-none transition focus:border-[var(--luxury-gold)]"
                                     />
                                 ) : field.type === "image" ? (
-                                    <>
-                                        <input
-                                            type="url"
-                                            value={values[field.key] || ""}
-                                            onChange={(e) => update(field.key, e.target.value)}
-                                            placeholder="/home/your-image.jpg"
-                                            className="mt-2 h-11 w-full border border-[#d8c8ad] bg-[var(--luxury-input)] px-3 text-sm outline-none transition focus:border-[var(--luxury-gold)]"
-                                        />
-                                        <ImagePreview src={values[field.key] || ""} />
-                                    </>
+                                    <ImageUploadField
+                                        value={values[field.key] || ""}
+                                        onChange={(url) => update(field.key, url)}
+                                        className="mt-2"
+                                    />
                                 ) : (
                                     <input
                                         type="text"

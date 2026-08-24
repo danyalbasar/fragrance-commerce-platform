@@ -14,6 +14,7 @@ import {
     X,
 } from "lucide-react";
 import { getSiteSettings, updateSiteSetting } from "@/services/siteSettingsService";
+import ImageUploadField from "@/components/common/ImageUploadField";
 
 type SectionId = "hero" | "panels" | "panel1" | "panel2";
 
@@ -269,29 +270,11 @@ export default function HomepageEditorPage() {
                                         className="mt-1.5 w-full resize-none rounded-lg border border-[#333] bg-[#1a1a1a] px-3 py-2.5 text-sm text-white outline-none transition focus:border-[var(--luxury-gold)]"
                                     />
                                 ) : field.type === "image" ? (
-                                    <>
-                                        <input
-                                            type="url"
-                                            value={get(field.key)}
-                                            onChange={(e) =>
-                                                update(field.key, e.target.value)
-                                            }
-                                            placeholder="/home/your-image.jpg"
-                                            className="mt-1.5 h-10 w-full rounded-lg border border-[#333] bg-[#1a1a1a] px-3 text-sm text-white outline-none transition focus:border-[var(--luxury-gold)]"
-                                        />
-                                        {get(field.key) && (
-                                            <div className="relative mt-2 aspect-video w-full overflow-hidden rounded-lg border border-[#333]">
-                                                <Image
-                                                    src={get(field.key)}
-                                                    alt={field.label}
-                                                    fill
-                                                    sizes="340px"
-                                                    className="object-cover"
-                                                    unoptimized
-                                                />
-                                            </div>
-                                        )}
-                                    </>
+                                    <ImageUploadField
+                                        value={get(field.key)}
+                                        onChange={(url) => update(field.key, url)}
+                                        className="mt-1.5"
+                                    />
                                 ) : (
                                     <input
                                         type="text"
