@@ -40,7 +40,7 @@ import type { Product } from "@/types/product";
 
 /* ── Types ────────────────────────────────────────────────────────── */
 
-type TemplateId = "homepage" | "products";
+type TemplateId = "homepage" | "products" | "product-detail";
 
 type HomepageSectionId =
   | "hero"
@@ -54,9 +54,11 @@ type HomepageSectionId =
   | "cta"
   | "banner";
 
-type ProductsSectionId = "products_banner" | "product_trust" | "product_shipping";
+type ProductsSectionId = "products_banner";
 
-type SectionId = HomepageSectionId | ProductsSectionId;
+type ProductDetailSectionId = "pdp_trust" | "pdp_shipping";
+
+type SectionId = HomepageSectionId | ProductsSectionId | ProductDetailSectionId;
 
 type FieldType =
   | "text"
@@ -203,14 +205,17 @@ const productsSections: SectionDef[] = [
       { key: "products_page_subtitle", label: "Subtitle", type: "textarea" },
     ],
   },
+];
+
+const productDetailSections: SectionDef[] = [
   {
-    id: "product_trust",
+    id: "pdp_trust",
     label: "Trust Badges",
     icon: <Shield size={15} />,
     fields: [{ key: "product_trust_badges", label: "Badges", type: "list" }],
   },
   {
-    id: "product_shipping",
+    id: "pdp_shipping",
     label: "Shipping & Returns",
     icon: <Truck size={15} />,
     fields: [{ key: "product_shipping_text", label: "Text", type: "textarea" }],
@@ -220,6 +225,7 @@ const productsSections: SectionDef[] = [
 const templates: TemplateDef[] = [
   { id: "homepage", label: "Homepage", sections: homepageSections },
   { id: "products", label: "Products Page", sections: productsSections },
+  { id: "product-detail", label: "Product Detail", sections: productDetailSections },
 ];
 
 /* ── Main editor ──────────────────────────────────────────────────── */
@@ -367,9 +373,92 @@ export default function HomepageEditorPage() {
     return (
       <div className="flex h-screen items-center justify-center bg-[#111]">
         <p className="text-sm uppercase tracking-[0.24em] text-white/40">Loading editor...</p>
-      </div>
-    );
-  }
+    </div>
+  );
+}
+
+function ProductDetailPreview({
+  get,
+  values,
+  activeSection,
+  hoveredSection,
+  onSelect,
+  onHover,
+}: {
+  get: (key: string, fallback?: string) => string;
+  values: Record<string, string>;
+  activeSection: ProductDetailSectionId;
+  hoveredSection: SectionId | null;
+  onSelect: (id: SectionId) => void;
+  onHover: (id: SectionId | null) => void;
+}) {
+  let trustBadges: string[] = [];
+  try { trustBadges = JSON.parse(values["product_trust_badges"] || "[]"); } catch { /* */ }
+  if (trustBadges.length === 0) trustBadges = ["100% authentic products", "Free shipping on eligible orders", "Secure payments", "Easy returns and support"];
+
+  const shippingText = get("product_shipping_text", "Orders are packed carefully and shipped securely. Return and exchange rules can be added here later.");
+  const trustIcons = [Shield, Truck, Lock, RotateCcw];
+
+  return (
+    <div className="bg-[var(--luxury-ivory)]">
+      {/* Mock product detail hero */}
+      <section className="flex gap-10 bg-white px-12 py-10">
+        <div className="h-[420px] w-[400px] shrink-0 animate-pulse bg-[#efe3d0]" />
+        <div className="flex flex-1 flex-col justify-center gap-4">
+          <div className="h-4 w-24 animate-pulse rounded bg-[#e5d9c4]" />
+          <div className="h-8 w-72 animate-pulse rounded bg-[#e5d9c4]" />
+          <div className="h-5 w-20 animate-pulse rounded bg-[#e5d9c4]" />
+          <div className="h-4 w-96 animate-pulse rounded bg-[#e5d9c4]" />
+          <div className="mt-4 h-12 w-48 rounded-full bg-[var(--luxury-gold)]/20" />
+        </div>
+      </section>
+
+      {/* Trust badges */}
+      <SectionOverlay
+        label="Trust Badges"
+        isActive={activeSection === "pdp_trust"}
+        isHovered={hoveredSection === "pdp_trust"}
+        onSelect={() => onSelect("pdp_trust")}
+        onHover={(h) => onHover(h ? "pdp_trust" : null)}
+      >
+        <section className="border-t border-[#d8c8ad] bg-[var(--luxury-paper)] px-8 py-8">
+          <div className="mx-auto grid max-w-[1440px] gap-4 sm:grid-cols-2 md:grid-cols-4">
+            {trustBadges.map((badge, i) => {
+              const Icon = trustIcons[i % trustIcons.length];
+              return (
+                <div key={i} className="flex items-center gap-3 text-sm text-[var(--luxury-muted)]">
+                  <Icon size={18} />
+                  <span>{badge}</span>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      </SectionOverlay>
+
+      {/* Shipping & Returns */}
+      <SectionOverlay
+        label="Shipping & Returns"
+        isActive={activeSection === "pdp_shipping"}
+        isHovered={hoveredSection === "pdp_shipping"}
+        onSelect={() => onSelect("pdp_shipping")}
+        onHover={(h) => onHover(h ? "pdp_shipping" : null)}
+      >
+        <section className="border-t border-[#d8c8ad] px-8 py-8">
+          <div className="mx-auto max-w-[1440px]">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold uppercase tracking-[0.18em]">Shipping & Returns</span>
+              <ChevronDown size={18} className="text-[var(--luxury-muted)]" />
+            </div>
+            <div className="mt-3 text-sm leading-7 text-[var(--luxury-muted)]">
+              {shippingText}
+            </div>
+          </div>
+        </section>
+      </SectionOverlay>
+    </div>
+  );
+}
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-[#111]">
@@ -603,11 +692,20 @@ export default function HomepageEditorPage() {
                     onSelect={(id) => setActiveSection(id)}
                     onHover={setHoveredSection}
                   />
-                ) : (
+                ) : activeTemplate === "products" ? (
                   <ProductsPagePreview
                     get={get}
                     values={values}
                     activeSection={activeSection as ProductsSectionId}
+                    hoveredSection={hoveredSection}
+                    onSelect={(id) => setActiveSection(id)}
+                    onHover={setHoveredSection}
+                  />
+                ) : (
+                  <ProductDetailPreview
+                    get={get}
+                    values={values}
+                    activeSection={activeSection as ProductDetailSectionId}
                     hoveredSection={hoveredSection}
                     onSelect={(id) => setActiveSection(id)}
                     onHover={setHoveredSection}
@@ -1183,7 +1281,6 @@ function PreviewCategoryCard({ image, eyebrow, title, text, cta }: { image: stri
 
 function ProductsPagePreview({
   get,
-  values,
   activeSection,
   hoveredSection,
   onSelect,
@@ -1196,13 +1293,6 @@ function ProductsPagePreview({
   onSelect: (id: SectionId) => void;
   onHover: (id: SectionId | null) => void;
 }) {
-  let trustBadges: string[] = [];
-  try { trustBadges = JSON.parse(values["product_trust_badges"] || "[]"); } catch { /* */ }
-  if (trustBadges.length === 0) trustBadges = ["100% authentic products", "Free shipping on eligible orders", "Secure payments", "Easy returns and support"];
-
-  const shippingText = get("product_shipping_text", "Orders are packed carefully and shipped securely. Return and exchange rules can be added here later.");
-  const trustIcons = [Shield, Truck, Lock, RotateCcw];
-
   return (
     <div className="bg-[var(--luxury-ivory)]">
       {/* Page banner - editable */}
@@ -1272,50 +1362,6 @@ function ProductsPagePreview({
           </div>
         </div>
       </section>
-
-      {/* Trust badges - shared with product detail */}
-      <SectionOverlay
-        label="Trust Badges"
-        isActive={activeSection === "product_trust"}
-        isHovered={hoveredSection === "product_trust"}
-        onSelect={() => onSelect("product_trust")}
-        onHover={(h) => onHover(h ? "product_trust" : null)}
-      >
-        <section className="border-t border-[#d8c8ad] bg-[var(--luxury-paper)] px-8 py-8">
-          <div className="mx-auto grid max-w-[1800px] gap-4 sm:grid-cols-2 md:grid-cols-4">
-            {trustBadges.map((badge, i) => {
-              const Icon = trustIcons[i % trustIcons.length];
-              return (
-                <div key={i} className="flex items-center gap-3 text-sm text-[var(--luxury-muted)]">
-                  <Icon size={18} />
-                  <span>{badge}</span>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      </SectionOverlay>
-
-      {/* Shipping - shared with product detail */}
-      <SectionOverlay
-        label="Shipping & Returns"
-        isActive={activeSection === "product_shipping"}
-        isHovered={hoveredSection === "product_shipping"}
-        onSelect={() => onSelect("product_shipping")}
-        onHover={(h) => onHover(h ? "product_shipping" : null)}
-      >
-        <section className="border-t border-[#d8c8ad] px-8 py-8">
-          <div className="mx-auto max-w-[1800px]">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold uppercase tracking-[0.18em]">Shipping & Returns</span>
-              <ChevronDown size={18} className="text-[var(--luxury-muted)]" />
-            </div>
-            <div className="mt-3 text-sm leading-7 text-[var(--luxury-muted)]">
-              {shippingText}
-            </div>
-          </div>
-        </section>
-      </SectionOverlay>
     </div>
   );
 }
