@@ -8,7 +8,6 @@ const cards = [
     { href: "/admin/brands", label: "Brands", icon: Tag, description: "Manage brand listings and logos" },
     { href: "/admin/genders", label: "Genders", icon: Tag, description: "Manage available gender options" },
     { href: "/admin/homepage", label: "Online Store", icon: Image, description: "Edit homepage, product pages, and storefront content" },
-    { href: "/admin/banners", label: "Banners", icon: Image, description: "Manage product page banners" },
     { href: "/admin/themes", label: "Themes", icon: Palette, description: "Switch site theme and preview colors" },
 ];
 
