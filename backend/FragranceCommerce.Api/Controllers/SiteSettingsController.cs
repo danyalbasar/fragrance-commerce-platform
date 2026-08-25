@@ -49,7 +49,9 @@ public class SiteSettingsController : ControllerBase
             "value_bar_items", "quote_text", "quote_attribution",
             "featured_product_ids", "featured_section_title", "featured_section_subtitle",
             "house_promises", "newsletter_title", "newsletter_subtitle",
-            "cta_title", "cta_subtitle", "cta_button_text", "cta_button_link"
+            "cta_title", "cta_subtitle", "cta_button_text", "cta_button_link",
+            "product_trust_badges", "product_shipping_text",
+            "pdp_banner_image", "pdp_banner_title", "pdp_banner_subtitle"
         };
 
         var settings = await _settingsService.GetSettingsAsync(keys);

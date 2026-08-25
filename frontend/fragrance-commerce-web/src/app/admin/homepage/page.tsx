@@ -13,7 +13,7 @@ export default function AdminHomepagePage() {
     return (
         <div className="flex h-[calc(100vh-65px)] items-center justify-center bg-[var(--luxury-ivory)]">
             <p className="text-sm uppercase tracking-[0.24em] text-[var(--luxury-muted)]">
-                Opening visual editor...
+                Opening Online Store editor...
             </p>
         </div>
     );

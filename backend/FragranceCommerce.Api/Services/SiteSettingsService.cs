@@ -118,7 +118,12 @@ public class SiteSettingsService : ISiteSettingsService
             ["cta_title"] = ("Find the next signature.", "Bottom CTA section title"),
             ["cta_subtitle"] = ("Browse perfumes, attars, customised blends, face washes, creams, and nail care from the new house catalogue.", "Bottom CTA section subtitle"),
             ["cta_button_text"] = ("Shop the Archive", "Bottom CTA button text"),
-            ["cta_button_link"] = ("/products", "Bottom CTA button link")
+            ["cta_button_link"] = ("/products", "Bottom CTA button link"),
+            ["product_trust_badges"] = (JsonSerializer.Serialize(new[] { "100% authentic products", "Free shipping on eligible orders", "Secure payments", "Easy returns and support" }), "Product page trust badge texts (JSON array)"),
+            ["product_shipping_text"] = ("Orders are packed carefully and shipped securely. Return and exchange rules can be added here later.", "Product page shipping & returns text"),
+            ["pdp_banner_image"] = ("/home/home-ritual.jpg", "Product detail page banner image"),
+            ["pdp_banner_title"] = ("A storefront for house labels that still feels tactile.", "Product detail page banner title"),
+            ["pdp_banner_subtitle"] = ("The collection is staged like a real luxury catalogue: restrained navigation, visual hierarchy, product-led imagery, and clear paths into fragrance or skincare.", "Product detail page banner subtitle")
         };
 
         foreach (var (key, (value, description)) in defaults)

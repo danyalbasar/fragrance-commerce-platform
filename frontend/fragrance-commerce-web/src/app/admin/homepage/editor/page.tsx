@@ -6,7 +6,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
   Check,
-  Eye,
+  ChevronDown,
+  ChevronRight,
   LayoutTemplate,
   MousePointer2,
   Save,
@@ -23,6 +24,12 @@ import {
   Trash2,
   Search,
   GripVertical,
+  Eye,
+  EyeOff,
+  Package,
+  Truck,
+  RotateCcw,
+  Lock,
 } from "lucide-react";
 import {
   getSiteSettings,
@@ -32,7 +39,11 @@ import { productService } from "@/services/productService";
 import ImageUploadField from "@/components/common/ImageUploadField";
 import type { Product } from "@/types/product";
 
-type SectionId =
+/* ── Types ────────────────────────────────────────────────────────── */
+
+type TemplateId = "homepage" | "product";
+
+type HomepageSectionId =
   | "hero"
   | "valuebar"
   | "panel1"
@@ -43,6 +54,10 @@ type SectionId =
   | "newsletter"
   | "cta"
   | "banner";
+
+type ProductSectionId = "product_banner" | "product_trust" | "product_shipping";
+
+type SectionId = HomepageSectionId | ProductSectionId;
 
 type FieldType =
   | "text"
@@ -57,7 +72,6 @@ interface Field {
   key: string;
   label: string;
   type?: FieldType;
-  span?: boolean;
 }
 
 interface SectionDef {
@@ -67,7 +81,15 @@ interface SectionDef {
   fields: Field[];
 }
 
-const sections: SectionDef[] = [
+interface TemplateDef {
+  id: TemplateId;
+  label: string;
+  sections: SectionDef[];
+}
+
+/* ── Section definitions ──────────────────────────────────────────── */
+
+const homepageSections: SectionDef[] = [
   {
     id: "hero",
     label: "Hero",
@@ -120,16 +142,8 @@ const sections: SectionDef[] = [
     icon: <Star size={15} />,
     fields: [
       { key: "featured_section_title", label: "Section Title" },
-      {
-        key: "featured_section_subtitle",
-        label: "Section Subtitle",
-        type: "textarea",
-      },
-      {
-        key: "featured_product_ids",
-        label: "Select Products",
-        type: "product-picker",
-      },
+      { key: "featured_section_subtitle", label: "Section Subtitle", type: "textarea" },
+      { key: "featured_product_ids", label: "Select Products", type: "product-picker" },
     ],
   },
   {
@@ -145,13 +159,7 @@ const sections: SectionDef[] = [
     id: "promises",
     label: "House Promises",
     icon: <Shield size={15} />,
-    fields: [
-      {
-        key: "house_promises",
-        label: "Promises",
-        type: "object-list",
-      },
-    ],
+    fields: [{ key: "house_promises", label: "Promises", type: "object-list" }],
   },
   {
     id: "newsletter",
@@ -175,7 +183,7 @@ const sections: SectionDef[] = [
   },
   {
     id: "banner",
-    label: "Product Banner",
+    label: "Maison Notes",
     icon: <ImageIcon size={15} />,
     fields: [
       { key: "product_banner_image", label: "Image", type: "image" },
@@ -185,23 +193,69 @@ const sections: SectionDef[] = [
   },
 ];
 
+const productSections: SectionDef[] = [
+  {
+    id: "product_banner",
+    label: "Banner",
+    icon: <ImageIcon size={15} />,
+    fields: [
+      { key: "pdp_banner_image", label: "Banner Image", type: "image" },
+      { key: "pdp_banner_title", label: "Title" },
+      { key: "pdp_banner_subtitle", label: "Subtitle", type: "textarea" },
+    ],
+  },
+  {
+    id: "product_trust",
+    label: "Trust Badges",
+    icon: <Shield size={15} />,
+    fields: [{ key: "product_trust_badges", label: "Badges", type: "list" }],
+  },
+  {
+    id: "product_shipping",
+    label: "Shipping & Returns",
+    icon: <Truck size={15} />,
+    fields: [{ key: "product_shipping_text", label: "Text", type: "textarea" }],
+  },
+];
+
+const templates: TemplateDef[] = [
+  { id: "homepage", label: "Homepage", sections: homepageSections },
+  { id: "product", label: "Product Page", sections: productSections },
+];
+
+/* ── Main editor ──────────────────────────────────────────────────── */
+
 export default function HomepageEditorPage() {
   const [values, setValues] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [activeTemplate, setActiveTemplate] = useState<TemplateId>("homepage");
   const [activeSection, setActiveSection] = useState<SectionId>("hero");
   const [hoveredSection, setHoveredSection] = useState<SectionId | null>(null);
   const [previewScale, setPreviewScale] = useState(1);
   const [contentHeight, setContentHeight] = useState(6000);
+  const [templateMenuOpen, setTemplateMenuOpen] = useState(false);
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const previewContentRef = useRef<HTMLDivElement>(null);
+  const templateMenuRef = useRef<HTMLDivElement>(null);
 
-  const currentSection = sections.find((s) => s.id === activeSection)!;
+  const currentTemplate = templates.find((t) => t.id === activeTemplate)!;
+  const currentSection = currentTemplate.sections.find((s) => s.id === activeSection);
 
   useEffect(() => {
     loadSettings();
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (templateMenuRef.current && !templateMenuRef.current.contains(e.target as Node)) {
+        setTemplateMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   useEffect(() => {
@@ -216,9 +270,7 @@ export default function HomepageEditorPage() {
     }
 
     function updateHeight() {
-      if (content) {
-        setContentHeight(content.scrollHeight);
-      }
+      if (content) setContentHeight(content.scrollHeight);
     }
 
     updateScale();
@@ -232,7 +284,14 @@ export default function HomepageEditorPage() {
     if (content) ro.observe(content);
 
     return () => ro.disconnect();
-  }, [values]);
+  }, [values, activeTemplate]);
+
+  useEffect(() => {
+    const firstSection = currentTemplate.sections[0];
+    if (firstSection && !currentTemplate.sections.find((s) => s.id === activeSection)) {
+      setActiveSection(firstSection.id);
+    }
+  }, [activeTemplate, currentTemplate, activeSection]);
 
   async function loadSettings() {
     try {
@@ -259,15 +318,15 @@ export default function HomepageEditorPage() {
     setError("");
     try {
       const allKeys = new Set<string>();
-      for (const section of sections) {
-        for (const field of section.fields) {
-          allKeys.add(field.key);
+      for (const template of templates) {
+        for (const section of template.sections) {
+          for (const field of section.fields) {
+            allKeys.add(field.key);
+          }
         }
       }
       await Promise.all(
-        Array.from(allKeys).map((key) =>
-          updateSiteSetting(key, values[key] || "")
-        )
+        Array.from(allKeys).map((key) => updateSiteSetting(key, values[key] || ""))
       );
       setMessage("All changes saved.");
     } catch {
@@ -284,252 +343,243 @@ export default function HomepageEditorPage() {
 
   if (loading) {
     return (
-      <div className="flex h-full items-center justify-center bg-[#1a1a1a]">
-        <p className="text-sm uppercase tracking-[0.24em] text-white/40">
-          Loading editor...
-        </p>
+      <div className="flex h-screen items-center justify-center bg-[#111]">
+        <p className="text-sm uppercase tracking-[0.24em] text-white/40">Loading editor...</p>
       </div>
     );
   }
 
   return (
-    <div className="flex h-full overflow-hidden bg-[#1a1a1a]">
-      {/* Left: Section list + Editor */}
-      <div className="flex w-[400px] min-w-[400px] flex-col border-r border-[#2a2a2a] bg-[#111]">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#2a2a2a] px-4 py-3">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/admin/homepage"
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-white/50 transition hover:bg-white/10 hover:text-white"
+    <div className="flex h-screen flex-col overflow-hidden bg-[#111]">
+      {/* ── Top bar ─────────────────────────────────────────────── */}
+      <div className="flex h-14 shrink-0 items-center border-b border-[#2a2a2a] bg-[#111] px-4">
+        {/* Left: Back */}
+        <Link
+          href="/admin"
+          className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-white/60 transition hover:bg-white/10 hover:text-white"
+        >
+          <ArrowLeft size={16} />
+          <span className="text-xs font-semibold uppercase tracking-[0.12em]">Online Store</span>
+        </Link>
+
+        {/* Center: Template selector */}
+        <div className="flex flex-1 justify-center">
+          <div className="relative" ref={templateMenuRef}>
+            <button
+              type="button"
+              onClick={() => setTemplateMenuOpen(!templateMenuOpen)}
+              className="flex items-center gap-2 rounded-lg px-4 py-1.5 text-sm font-medium text-white transition hover:bg-white/10"
             >
-              <ArrowLeft size={16} />
-            </Link>
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--luxury-gold)]">
-                Visual Editor
-              </p>
-              <h1 className="text-sm font-semibold text-white">Homepage</h1>
-            </div>
+              {currentTemplate.label}
+              <ChevronDown size={14} className={`transition-transform ${templateMenuOpen ? "rotate-180" : ""}`} />
+            </button>
+            {templateMenuOpen && (
+              <div className="absolute left-1/2 top-full z-50 mt-1 w-48 -translate-x-1/2 rounded-lg border border-[#333] bg-[#1a1a1a] py-1 shadow-xl">
+                {templates.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => {
+                      setActiveTemplate(t.id);
+                      setActiveSection(t.sections[0].id);
+                      setTemplateMenuOpen(false);
+                    }}
+                    className={`flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm transition ${
+                      activeTemplate === t.id
+                        ? "bg-[var(--luxury-gold)]/10 text-[var(--luxury-gold)]"
+                        : "text-white/70 hover:bg-white/10 hover:text-white"
+                    }`}
+                  >
+                    {t.id === "homepage" ? <LayoutTemplate size={14} /> : <Package size={14} />}
+                    {t.label}
+                    {activeTemplate === t.id && <Check size={14} className="ml-auto" />}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
+        </div>
+
+        {/* Right: Save + status */}
+        <div className="flex items-center gap-3">
+          {message && (
+            <span className="flex items-center gap-1.5 text-xs text-emerald-400">
+              <Check size={13} /> {message}
+            </span>
+          )}
+          {error && (
+            <span className="flex items-center gap-1.5 text-xs text-red-400">
+              <X size={13} /> {error}
+            </span>
+          )}
           <button
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="inline-flex h-9 items-center gap-2 rounded-lg bg-[var(--luxury-gold)] px-4 text-xs font-semibold uppercase tracking-[0.1em] text-[var(--luxury-ink)] transition hover:brightness-110 disabled:opacity-50"
+            className="inline-flex h-8 items-center gap-2 rounded-lg bg-[var(--luxury-gold)] px-4 text-xs font-semibold uppercase tracking-[0.1em] text-[var(--luxury-ink)] transition hover:brightness-110 disabled:opacity-50"
           >
             {saving ? "Saving..." : <><Save size={13} /> Save</>}
           </button>
         </div>
+      </div>
 
-        {/* Status messages */}
-        {message && (
-          <div className="mx-4 mt-3 flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-400">
-            <Check size={13} /> {message}
+      {/* ── Body: 3-panel layout ───────────────────────────────── */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left sidebar: Section tree */}
+        <div className="flex w-[220px] shrink-0 flex-col border-r border-[#2a2a2a] bg-[#0d0d0d]">
+          <div className="border-b border-[#2a2a2a] px-4 py-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/30">
+              {currentTemplate.label}
+            </p>
           </div>
-        )}
-        {error && (
-          <div className="mx-4 mt-3 flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-400">
-            <X size={13} /> {error}
-          </div>
-        )}
-
-        {/* Vertical section list */}
-        <div className="flex-1 overflow-y-auto [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/15">
-          <div className="space-y-0.5 p-2">
-            {sections.map((section) => (
+          <div className="flex-1 overflow-y-auto p-2 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/15">
+            {currentTemplate.sections.map((section) => (
               <button
                 key={section.id}
                 type="button"
                 onClick={() => setActiveSection(section.id)}
                 onMouseEnter={() => setHoveredSection(section.id)}
                 onMouseLeave={() => setHoveredSection(null)}
-                className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-[11px] font-medium uppercase tracking-[0.1em] transition ${
+                className={`flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-[12px] font-medium transition ${
                   activeSection === section.id
                     ? "bg-[var(--luxury-gold)] text-[var(--luxury-ink)]"
-                    : "text-white/50 hover:bg-white/10 hover:text-white"
+                    : "text-white/50 hover:bg-white/8 hover:text-white"
                 }`}
               >
                 {section.icon}
-                {section.label}
+                <span className="truncate">{section.label}</span>
               </button>
             ))}
           </div>
-
-          {/* Divider */}
-          <div className="mx-3 border-t border-[#2a2a2a]" />
-
-          {/* Fields for active section */}
-          <div className="px-4 py-4">
-            <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.24em] text-white/30">
-              {currentSection.label} Settings
-            </p>
-            <div className="space-y-4">
-              {currentSection.fields.map((field) => {
-                if (field.type === "list") {
-                  return (
-                    <ListFieldEditor
-                      key={field.key}
-                      fieldKey={field.key}
-                      label={field.label}
-                      values={values}
-                      update={update}
-                    />
-                  );
-                }
-                if (field.type === "object-list") {
-                  return (
-                    <ObjectListFieldEditor
-                      key={field.key}
-                      fieldKey={field.key}
-                      label={field.label}
-                      values={values}
-                      update={update}
-                    />
-                  );
-                }
-                if (field.type === "product-picker") {
-                  return (
-                    <ProductPickerField
-                      key={field.key}
-                      fieldKey={field.key}
-                      label={field.label}
-                      values={values}
-                      update={update}
-                    />
-                  );
-                }
-                return (
-                  <label key={field.key} className="block">
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40">
-                      {field.label}
-                    </span>
-                    {field.type === "textarea" ? (
-                      <textarea
-                        value={get(field.key)}
-                        onChange={(e) => update(field.key, e.target.value)}
-                        rows={3}
-                        className="mt-1.5 w-full resize-none rounded-lg border border-[#333] bg-[#1a1a1a] px-3 py-2.5 text-sm text-white outline-none transition focus:border-[var(--luxury-gold)]"
-                      />
-                    ) : field.type === "image" ? (
-                      <ImageUploadField
-                        value={get(field.key)}
-                        onChange={(url) => update(field.key, url)}
-                        className="mt-1.5"
-                      />
-                    ) : (
-                      <input
-                        type="text"
-                        value={get(field.key)}
-                        onChange={(e) => update(field.key, e.target.value)}
-                        className="mt-1.5 h-10 w-full rounded-lg border border-[#333] bg-[#1a1a1a] px-3 text-sm text-white outline-none transition focus:border-[var(--luxury-gold)]"
-                      />
-                    )}
-                  </label>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Right: Live preview */}
-      <div
-        ref={previewContainerRef}
-        className="relative flex-1 overflow-auto bg-[#222]"
-        style={{ height: "100%" }}
-      >
-        <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-[#333] bg-[#1a1a1a] px-4 py-2">
-          <Eye size={13} className="text-white/40" />
-          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">
-            Live Preview
-          </span>
         </div>
 
-        <div className="w-full overflow-hidden">
-          <div
-            style={{
-              width: `${1440 * previewScale}px`,
-              height: `${contentHeight * previewScale}px`,
-            }}
-          >
+        {/* Middle: Preview */}
+        <div
+          ref={previewContainerRef}
+          className="relative flex-1 overflow-auto bg-[#1a1a1a]"
+        >
+          <div className="w-full overflow-hidden">
             <div
-              ref={previewContentRef}
               style={{
-                width: 1440,
-                transform: `scale(${previewScale})`,
-                transformOrigin: "top left",
+                width: `${1440 * previewScale}px`,
+                height: `${contentHeight * previewScale}px`,
               }}
             >
-              <PreviewHero
-                get={get}
-                isActive={activeSection === "hero"}
-                isHovered={hoveredSection === "hero"}
-                onSelect={() => setActiveSection("hero")}
-                onHover={(h) => setHoveredSection(h ? "hero" : null)}
-              />
-              <PreviewValueBar
-                get={get}
-                isActive={activeSection === "valuebar"}
-                isHovered={hoveredSection === "valuebar"}
-                onSelect={() => setActiveSection("valuebar")}
-                onHover={(h) => setHoveredSection(h ? "valuebar" : null)}
-              />
-              <PreviewCategoryPanels
-                get={get}
-                activeSection={activeSection}
-                hoveredSection={hoveredSection}
-                onSelect={(id) => setActiveSection(id)}
-                onHover={(h) => setHoveredSection(h)}
-              />
-              <PreviewFeaturedSection
-                get={get}
-                values={values}
-                isActive={activeSection === "featured"}
-                isHovered={hoveredSection === "featured"}
-                onSelect={() => setActiveSection("featured")}
-                onHover={(h) => setHoveredSection(h ? "featured" : null)}
-              />
-              <PreviewBestSellers />
-              <PreviewNewArrivals />
-              <PreviewQuote
-                get={get}
-                isActive={activeSection === "quote"}
-                isHovered={hoveredSection === "quote"}
-                onSelect={() => setActiveSection("quote")}
-                onHover={(h) => setHoveredSection(h ? "quote" : null)}
-              />
-              <PreviewBanner
-                get={get}
-                isActive={activeSection === "banner"}
-                isHovered={hoveredSection === "banner"}
-                onSelect={() => setActiveSection("banner")}
-                onHover={(h) => setHoveredSection(h ? "banner" : null)}
-              />
-              <PreviewHousePromises
-                get={get}
-                values={values}
-                isActive={activeSection === "promises"}
-                isHovered={hoveredSection === "promises"}
-                onSelect={() => setActiveSection("promises")}
-                onHover={(h) => setHoveredSection(h ? "promises" : null)}
-              />
-              <PreviewNewsletter
-                get={get}
-                isActive={activeSection === "newsletter"}
-                isHovered={hoveredSection === "newsletter"}
-                onSelect={() => setActiveSection("newsletter")}
-                onHover={(h) => setHoveredSection(h ? "newsletter" : null)}
-              />
-              <PreviewCTA
-                get={get}
-                isActive={activeSection === "cta"}
-                isHovered={hoveredSection === "cta"}
-                onSelect={() => setActiveSection("cta")}
-                onHover={(h) => setHoveredSection(h ? "cta" : null)}
-              />
+              <div
+                ref={previewContentRef}
+                style={{
+                  width: 1440,
+                  transform: `scale(${previewScale})`,
+                  transformOrigin: "top left",
+                }}
+              >
+                {activeTemplate === "homepage" ? (
+                  <HomepagePreview
+                    get={get}
+                    values={values}
+                    activeSection={activeSection as HomepageSectionId}
+                    hoveredSection={hoveredSection}
+                    onSelect={(id) => setActiveSection(id)}
+                    onHover={setHoveredSection}
+                  />
+                ) : (
+                  <ProductPreview
+                    get={get}
+                    values={values}
+                    activeSection={activeSection as ProductSectionId}
+                    hoveredSection={hoveredSection}
+                    onSelect={(id) => setActiveSection(id)}
+                    onHover={setHoveredSection}
+                  />
+                )}
+              </div>
             </div>
           </div>
+        </div>
+
+        {/* Right sidebar: Settings panel */}
+        <div className="flex w-[340px] shrink-0 flex-col border-l border-[#2a2a2a] bg-[#111]">
+          {currentSection ? (
+            <>
+              <div className="border-b border-[#2a2a2a] px-4 py-3">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--luxury-gold)]">
+                  {currentTemplate.label}
+                </p>
+                <p className="mt-0.5 text-sm font-semibold text-white">{currentSection.label}</p>
+              </div>
+              <div className="flex-1 overflow-y-auto px-4 py-4 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/15">
+                <div className="space-y-4">
+                  {currentSection.fields.map((field) => {
+                    if (field.type === "list") {
+                      return (
+                        <ListFieldEditor
+                          key={field.key}
+                          fieldKey={field.key}
+                          label={field.label}
+                          values={values}
+                          update={update}
+                        />
+                      );
+                    }
+                    if (field.type === "object-list") {
+                      return (
+                        <ObjectListFieldEditor
+                          key={field.key}
+                          fieldKey={field.key}
+                          label={field.label}
+                          values={values}
+                          update={update}
+                        />
+                      );
+                    }
+                    if (field.type === "product-picker") {
+                      return (
+                        <ProductPickerField
+                          key={field.key}
+                          fieldKey={field.key}
+                          label={field.label}
+                          values={values}
+                          update={update}
+                        />
+                      );
+                    }
+                    return (
+                      <label key={field.key} className="block">
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40">
+                          {field.label}
+                        </span>
+                        {field.type === "textarea" ? (
+                          <textarea
+                            value={get(field.key)}
+                            onChange={(e) => update(field.key, e.target.value)}
+                            rows={3}
+                            className="mt-1.5 w-full resize-none rounded-lg border border-[#333] bg-[#1a1a1a] px-3 py-2.5 text-sm text-white outline-none transition focus:border-[var(--luxury-gold)]"
+                          />
+                        ) : field.type === "image" ? (
+                          <ImageUploadField
+                            value={get(field.key)}
+                            onChange={(url) => update(field.key, url)}
+                            className="mt-1.5"
+                          />
+                        ) : (
+                          <input
+                            type="text"
+                            value={get(field.key)}
+                            onChange={(e) => update(field.key, e.target.value)}
+                            className="mt-1.5 h-10 w-full rounded-lg border border-[#333] bg-[#1a1a1a] px-3 text-sm text-white outline-none transition focus:border-[var(--luxury-gold)]"
+                          />
+                        )}
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-1 items-center justify-center">
+              <p className="text-xs text-white/30">Select a section to edit</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -629,10 +679,7 @@ function ObjectListFieldEditor({
       </span>
       <div className="mt-1.5 space-y-3">
         {items.map((item, i) => (
-          <div
-            key={i}
-            className="rounded-lg border border-[#333] bg-[#1a1a1a] p-3 space-y-2"
-          >
+          <div key={i} className="rounded-lg border border-[#333] bg-[#1a1a1a] p-3 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/30">
                 Item {i + 1}
@@ -740,15 +787,11 @@ function ProductPickerField({
       </span>
       {selectedIds.length > 0 && (
         <p className="mt-1 text-[10px] text-white/30">
-          {selectedIds.length} product{selectedIds.length !== 1 && "s"} selected
-          &middot; empty = auto-select
+          {selectedIds.length} product{selectedIds.length !== 1 && "s"} selected &middot; empty = auto
         </p>
       )}
       <div className="mt-1.5 relative">
-        <Search
-          size={13}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30"
-        />
+        <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
         <input
           type="text"
           placeholder="Search products..."
@@ -759,13 +802,9 @@ function ProductPickerField({
       </div>
       <div className="mt-2 max-h-[300px] space-y-1 overflow-y-auto rounded-lg border border-[#333] bg-[#1a1a1a] p-1.5 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/15">
         {loadingProducts ? (
-          <p className="py-4 text-center text-xs text-white/30">
-            Loading products...
-          </p>
+          <p className="py-4 text-center text-xs text-white/30">Loading products...</p>
         ) : filtered.length === 0 ? (
-          <p className="py-4 text-center text-xs text-white/30">
-            No products found
-          </p>
+          <p className="py-4 text-center text-xs text-white/30">No products found</p>
         ) : (
           filtered.map((product) => {
             const isSelected = selectedIds.includes(product.id);
@@ -782,25 +821,14 @@ function ProductPickerField({
               >
                 {product.images[0]?.imageUrl ? (
                   <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded bg-[#2a2a2a]">
-                    <Image
-                      src={product.images[0].imageUrl}
-                      alt=""
-                      fill
-                      sizes="32px"
-                      className="object-cover"
-                      unoptimized
-                    />
+                    <Image src={product.images[0].imageUrl} alt="" fill sizes="32px" className="object-cover" unoptimized />
                   </div>
                 ) : (
                   <div className="h-8 w-8 shrink-0 rounded bg-[#2a2a2a]" />
                 )}
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-xs text-white">
-                    {product.name}
-                  </p>
-                  <p className="truncate text-[10px] text-white/40">
-                    {product.brandName}
-                  </p>
+                  <p className="truncate text-xs text-white">{product.name}</p>
+                  <p className="truncate text-[10px] text-white/40">{product.brandName}</p>
                 </div>
                 {isSelected && <Check size={14} className="shrink-0 text-[var(--luxury-gold)]" />}
               </button>
@@ -850,8 +878,7 @@ function SectionOverlay({
               : "bg-blue-500 text-white"
           }`}
         >
-          <Type size={10} />
-          {label}
+          <Type size={10} /> {label}
         </div>
       )}
       {children}
@@ -859,600 +886,406 @@ function SectionOverlay({
   );
 }
 
-/* ── Preview sub-components ───────────────────────────────────────── */
+/* ── Homepage Preview ─────────────────────────────────────────────── */
 
-function PreviewHero({
+function HomepagePreview({
   get,
-  isActive,
-  isHovered,
-  onSelect,
-  onHover,
-}: {
-  get: (key: string, fallback?: string) => string;
-  isActive: boolean;
-  isHovered: boolean;
-  onSelect: () => void;
-  onHover: (hovered: boolean) => void;
-}) {
-  return (
-    <SectionOverlay
-      label="Hero"
-      isActive={isActive}
-      isHovered={isHovered}
-      onSelect={onSelect}
-      onHover={onHover}
-    >
-      <div className="relative h-[700px] overflow-hidden bg-[#1a1a1a]">
-        {get("hero_image_url") && (
-          <Image
-            src={get("hero_image_url")}
-            alt="Hero"
-            fill
-            sizes="1440px"
-            className="object-cover"
-            unoptimized
-          />
-        )}
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(22,18,13,0.84)_0%,rgba(22,18,13,0.56)_42%,rgba(22,18,13,0.06)_100%)]" />
-        <div className="relative flex h-full items-center px-12">
-          <div className="max-w-2xl text-white">
-            <p className="text-xs font-semibold uppercase tracking-[0.42em] text-[var(--luxury-gold)]">
-              Private Fragrance House
-            </p>
-            <h1 className="mt-5 text-7xl font-normal leading-[1.02] [font-family:var(--font-serif)]">
-              {get("hero_title", "Your hero title here")}
-            </h1>
-            <p className="mt-6 max-w-xl text-lg leading-8 text-white/78">
-              {get("hero_subtitle", "Your hero subtitle here")}
-            </p>
-            <div className="mt-10 flex gap-4">
-              <span className="inline-flex justify-center rounded-full bg-[var(--luxury-gold)] px-8 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-ink)]">
-                {get("hero_cta_text", "Shop Collection")}
-              </span>
-              <span className="inline-flex justify-center rounded-full border border-white/45 px-8 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white">
-                {get("hero_secondary_cta_text", "Discover Scents")}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </SectionOverlay>
-  );
-}
-
-function PreviewValueBar({
-  get,
-  isActive,
-  isHovered,
-  onSelect,
-  onHover,
-}: {
-  get: (key: string, fallback?: string) => string;
-  isActive: boolean;
-  isHovered: boolean;
-  onSelect: () => void;
-  onHover: (hovered: boolean) => void;
-}) {
-  let items: string[] = [];
-  try {
-    items = JSON.parse(get("value_bar_items", "[]"));
-  } catch {
-    /* empty */
-  }
-  if (items.length === 0) {
-    items = ["Cloud-like skincare", "Amber-rich attars", "Genderless signatures", "Private house labels"];
-  }
-
-  return (
-    <SectionOverlay
-      label="Value Bar"
-      isActive={isActive}
-      isHovered={isHovered}
-      onSelect={onSelect}
-      onHover={onHover}
-    >
-      <div className="border-y border-[#d8c8ad] bg-[rgba(255,250,242,0.72)] px-6 py-5 backdrop-blur-xl">
-        <div className="mx-auto grid max-w-[1800px] gap-4 text-center text-xs font-semibold uppercase tracking-[0.28em] text-[var(--luxury-muted)] md:grid-cols-4">
-          {items.map((item, i) => (
-            <span key={i}>{item}</span>
-          ))}
-        </div>
-      </div>
-    </SectionOverlay>
-  );
-}
-
-function PreviewCategoryPanels({
-  get,
+  values,
   activeSection,
   hoveredSection,
   onSelect,
   onHover,
 }: {
   get: (key: string, fallback?: string) => string;
-  activeSection: SectionId;
+  values: Record<string, string>;
+  activeSection: HomepageSectionId;
   hoveredSection: SectionId | null;
   onSelect: (id: SectionId) => void;
   onHover: (id: SectionId | null) => void;
 }) {
   return (
-    <section className="px-8 py-20">
-      <div className="mx-auto max-w-[1800px]">
-        <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">
-              Enter the House
-            </p>
-            <h2 className="mt-3 text-5xl font-normal [font-family:var(--font-serif)]">
-              Choose your ritual.
-            </h2>
+    <>
+      <SectionOverlay
+        label="Hero"
+        isActive={activeSection === "hero"}
+        isHovered={hoveredSection === "hero"}
+        onSelect={() => onSelect("hero")}
+        onHover={(h) => onHover(h ? "hero" : null)}
+      >
+        <div className="relative h-[700px] overflow-hidden bg-[#1a1a1a]">
+          {get("hero_image_url") && (
+            <Image src={get("hero_image_url")} alt="Hero" fill sizes="1440px" className="object-cover" unoptimized />
+          )}
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(22,18,13,0.84)_0%,rgba(22,18,13,0.56)_42%,rgba(22,18,13,0.06)_100%)]" />
+          <div className="relative flex h-full items-center px-12">
+            <div className="max-w-2xl text-white">
+              <p className="text-xs font-semibold uppercase tracking-[0.42em] text-[var(--luxury-gold)]">Private Fragrance House</p>
+              <h1 className="mt-5 text-7xl font-normal leading-[1.02] [font-family:var(--font-serif)]">
+                {get("hero_title", "Your hero title here")}
+              </h1>
+              <p className="mt-6 max-w-xl text-lg leading-8 text-white/78">
+                {get("hero_subtitle", "Your hero subtitle here")}
+              </p>
+              <div className="mt-10 flex gap-4">
+                <span className="inline-flex justify-center rounded-full bg-[var(--luxury-gold)] px-8 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-ink)]">
+                  {get("hero_cta_text", "Shop Collection")}
+                </span>
+                <span className="inline-flex justify-center rounded-full border border-white/45 px-8 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white">
+                  {get("hero_secondary_cta_text", "Discover Scents")}
+                </span>
+              </div>
+            </div>
           </div>
-          <span className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold-strong)]">
-            View all products
-          </span>
         </div>
-        <div className="grid gap-6 lg:grid-cols-2">
-          <SectionOverlay
-            label="Category Panel 1"
-            isActive={activeSection === "panel1"}
-            isHovered={hoveredSection === "panel1"}
-            onSelect={() => onSelect("panel1")}
-            onHover={(h) => onHover(h ? "panel1" : null)}
-          >
-            <PreviewCategoryCard
-              image={get("category_panel_1_image", "/home/home-fragrance.jpg")}
-              eyebrow={get("category_panel_1_eyebrow", "Fragrance Wardrobe")}
-              title={get(
-                "category_panel_1_title",
-                "Perfumes, attars, and customised blends"
-              )}
-              text={get(
-                "category_panel_1_text",
-                "From saffroned warmth to smoky cedar..."
-              )}
-              cta={get("category_panel_1_cta", "Shop Fragrance")}
-            />
-          </SectionOverlay>
-          <SectionOverlay
-            label="Category Panel 2"
-            isActive={activeSection === "panel2"}
-            isHovered={hoveredSection === "panel2"}
-            onSelect={() => onSelect("panel2")}
-            onHover={(h) => onHover(h ? "panel2" : null)}
-          >
-            <PreviewCategoryCard
-              image={get("category_panel_2_image", "/home/home-skincare.jpg")}
-              eyebrow={get("category_panel_2_eyebrow", "Skin Rituals")}
-              title={get(
-                "category_panel_2_title",
-                "Cleansers, creams, and polished care"
-              )}
-              text={get(
-                "category_panel_2_text",
-                "Soft-focus skincare essentials..."
-              )}
-              cta={get("category_panel_2_cta", "Shop Skincare")}
-            />
-          </SectionOverlay>
+      </SectionOverlay>
+
+      <SectionOverlay
+        label="Value Bar"
+        isActive={activeSection === "valuebar"}
+        isHovered={hoveredSection === "valuebar"}
+        onSelect={() => onSelect("valuebar")}
+        onHover={(h) => onHover(h ? "valuebar" : null)}
+      >
+        <PreviewValueBar get={get} />
+      </SectionOverlay>
+
+      <section className="px-8 py-20">
+        <div className="mx-auto max-w-[1800px]">
+          <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">Enter the House</p>
+              <h2 className="mt-3 text-5xl font-normal [font-family:var(--font-serif)]">Choose your ritual.</h2>
+            </div>
+            <span className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold-strong)]">View all products</span>
+          </div>
+          <div className="grid gap-6 lg:grid-cols-2">
+            <SectionOverlay label="Category Panel 1" isActive={activeSection === "panel1"} isHovered={hoveredSection === "panel1"} onSelect={() => onSelect("panel1")} onHover={(h) => onHover(h ? "panel1" : null)}>
+              <PreviewCategoryCard image={get("category_panel_1_image", "/home/home-fragrance.jpg")} eyebrow={get("category_panel_1_eyebrow", "Fragrance Wardrobe")} title={get("category_panel_1_title", "Perfumes, attars, and customised blends")} text={get("category_panel_1_text", "From saffroned warmth to smoky cedar...")} cta={get("category_panel_1_cta", "Shop Fragrance")} />
+            </SectionOverlay>
+            <SectionOverlay label="Category Panel 2" isActive={activeSection === "panel2"} isHovered={hoveredSection === "panel2"} onSelect={() => onSelect("panel2")} onHover={(h) => onHover(h ? "panel2" : null)}>
+              <PreviewCategoryCard image={get("category_panel_2_image", "/home/home-skincare.jpg")} eyebrow={get("category_panel_2_eyebrow", "Skin Rituals")} title={get("category_panel_2_title", "Cleansers, creams, and polished care")} text={get("category_panel_2_text", "Soft-focus skincare essentials...")} cta={get("category_panel_2_cta", "Shop Skincare")} />
+            </SectionOverlay>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      <SectionOverlay label="Featured Products" isActive={activeSection === "featured"} isHovered={hoveredSection === "featured"} onSelect={() => onSelect("featured")} onHover={(h) => onHover(h ? "featured" : null)}>
+        <section className="bg-[#efe3d0] px-8 py-20">
+          <div className="mx-auto max-w-[1800px]">
+            <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">Featured Collection</p>
+                <h2 className="mt-3 text-5xl font-normal [font-family:var(--font-serif)]">{get("featured_section_title", "Objects of desire.")}</h2>
+              </div>
+              <p className="max-w-md text-sm leading-7 text-[var(--luxury-muted)]">{get("featured_section_subtitle", "A focused selection from the private labels now available in the store.")}</p>
+            </div>
+            <div className="grid gap-6 md:grid-cols-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="border border-[#d8c8ad] bg-[var(--luxury-paper)]">
+                  <div className="aspect-[1/1.18] animate-pulse bg-[#ead9c0]" />
+                  <div className="flex flex-col gap-3 p-5">
+                    <div className="h-3 w-24 animate-pulse rounded bg-[#e5d9c4]" />
+                    <div className="h-6 w-40 animate-pulse rounded bg-[#e5d9c4]" />
+                    <div className="h-4 w-28 animate-pulse rounded bg-[#e5d9c4]" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </SectionOverlay>
+
+      <section className="px-8 py-20">
+        <div className="mx-auto max-w-[1800px]">
+          <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">Most Loved</p>
+              <h2 className="mt-3 text-5xl font-normal [font-family:var(--font-serif)]">The best sellers.</h2>
+            </div>
+            <span className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold-strong)]">View all</span>
+          </div>
+          <div className="grid gap-6 md:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="aspect-[1/1.08] animate-pulse rounded-[var(--luxury-radius)] bg-[#efe3d0]" />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-[#efe3d0] px-8 py-20">
+        <div className="mx-auto max-w-[1800px]">
+          <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">Just Arrived</p>
+              <h2 className="mt-3 text-5xl font-normal [font-family:var(--font-serif)]">New arrivals.</h2>
+            </div>
+            <span className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold-strong)]">Explore new</span>
+          </div>
+          <div className="grid gap-6 md:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="aspect-[1/1.08] animate-pulse rounded-[var(--luxury-radius)] bg-[#ead9c0]" />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <SectionOverlay label="Quote" isActive={activeSection === "quote"} isHovered={hoveredSection === "quote"} onSelect={() => onSelect("quote")} onHover={(h) => onHover(h ? "quote" : null)}>
+        <section className="relative overflow-hidden bg-[var(--luxury-ink)] px-8 py-28 text-[var(--luxury-paper)]">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(182,138,66,0.14)_0%,rgba(22,18,13,0)_68%)]" />
+          <div className="relative mx-auto max-w-4xl text-center">
+            <span aria-hidden className="block text-7xl leading-[0.6] text-[var(--luxury-gold)] [font-family:var(--font-serif)]">&ldquo;</span>
+            <blockquote className="mt-4 text-4xl font-normal leading-relaxed [font-family:var(--font-serif)]">
+              {get("quote_text", "A fragrance should be worn like a signature — quietly, deliberately, and entirely your own.")}
+            </blockquote>
+            <p className="mt-8 text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold)]">
+              {get("quote_attribution", "The House Motto")}
+            </p>
+          </div>
+        </section>
+      </SectionOverlay>
+
+      <SectionOverlay label="Maison Notes" isActive={activeSection === "banner"} isHovered={hoveredSection === "banner"} onSelect={() => onSelect("banner")} onHover={(h) => onHover(h ? "banner" : null)}>
+        <section className="px-8 py-20">
+          <div className="mx-auto grid max-w-[1800px] gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+            <div className="relative aspect-[3/2] overflow-hidden bg-[#efe0ca]">
+              {get("product_banner_image") ? (
+                <Image src={get("product_banner_image")} alt={get("product_banner_title", "Banner")} fill sizes="720px" className="object-cover" unoptimized />
+              ) : (
+                <div className="flex h-full items-center justify-center text-sm text-[var(--luxury-muted)]">No banner image</div>
+              )}
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">Maison Notes</p>
+              <h2 className="mt-3 text-6xl font-normal leading-tight [font-family:var(--font-serif)]">{get("product_banner_title", "A storefront for house labels that still feels tactile.")}</h2>
+              <p className="mt-6 max-w-2xl text-base leading-8 text-[var(--luxury-muted)]">{get("product_banner_text", "The collection is staged like a real luxury catalogue.")}</p>
+            </div>
+          </div>
+        </section>
+      </SectionOverlay>
+
+      <SectionOverlay label="House Promises" isActive={activeSection === "promises"} isHovered={hoveredSection === "promises"} onSelect={() => onSelect("promises")} onHover={(h) => onHover(h ? "promises" : null)}>
+        <section className="border-y border-[#d8c8ad] bg-[var(--luxury-paper)] px-8 py-16">
+          <div className="mx-auto grid max-w-[1800px] gap-8 md:grid-cols-3">
+            {(() => {
+              let promises: { title: string; text: string }[] = [];
+              try { promises = JSON.parse(values["house_promises"] || "[]"); } catch { /* */ }
+              if (promises.length === 0) promises = [
+                { title: "Curated Discovery", text: "Shop by gender, category, or house without losing the boutique feel." },
+                { title: "Quiet Product Detail", text: "Large visuals, variant choices, wishlist controls, and cart previews keep the flow focused." },
+                { title: "Ritual Ready", text: "Fragrance and skincare now share one polished visual language across the store." },
+              ];
+              return promises.map((p, i) => (
+                <div key={i}>
+                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--luxury-gold-strong)]">{p.title}</p>
+                  <p className="mt-3 text-sm leading-7 text-[var(--luxury-muted)]">{p.text}</p>
+                </div>
+              ));
+            })()}
+          </div>
+        </section>
+      </SectionOverlay>
+
+      <SectionOverlay label="Newsletter" isActive={activeSection === "newsletter"} isHovered={hoveredSection === "newsletter"} onSelect={() => onSelect("newsletter")} onHover={(h) => onHover(h ? "newsletter" : null)}>
+        <section className="bg-[#efe3d0] px-8 py-20">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">The List</p>
+            <h2 className="mt-3 text-5xl font-normal [font-family:var(--font-serif)]">{get("newsletter_title", "Letters from the house.")}</h2>
+            <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-[var(--luxury-muted)]">{get("newsletter_subtitle", "New releases, private previews, and quiet notes on the collection.")}</p>
+            <div className="mx-auto mt-8 flex max-w-md gap-3">
+              <div className="h-12 flex-1 rounded-full border border-[#d8c8ad] bg-[var(--luxury-input)]" />
+              <div className="h-12 w-28 rounded-full bg-[var(--luxury-ink)]" />
+            </div>
+          </div>
+        </section>
+      </SectionOverlay>
+
+      <SectionOverlay label="Bottom CTA" isActive={activeSection === "cta"} isHovered={hoveredSection === "cta"} onSelect={() => onSelect("cta")} onHover={(h) => onHover(h ? "cta" : null)}>
+        <section className="px-8 py-28 text-center">
+          <div className="mx-auto max-w-3xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">Begin Again</p>
+            <h2 className="mt-3 text-6xl font-normal [font-family:var(--font-serif)]">{get("cta_title", "Find the next signature.")}</h2>
+            <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-[var(--luxury-muted)]">{get("cta_subtitle", "Browse perfumes, attars, customised blends, face washes, creams, and nail care from the new house catalogue.")}</p>
+            <span className="mt-8 inline-flex rounded-full bg-[var(--luxury-ink)] px-8 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-paper)]">{get("cta_button_text", "Shop the Archive")}</span>
+          </div>
+        </section>
+      </SectionOverlay>
+    </>
   );
 }
 
-function PreviewCategoryCard({
-  image,
-  eyebrow,
-  title,
-  text,
-  cta,
-}: {
-  image: string;
-  eyebrow: string;
-  title: string;
-  text: string;
-  cta: string;
-}) {
+function PreviewValueBar({ get }: { get: (key: string, fallback?: string) => string }) {
+  let items: string[] = [];
+  try { items = JSON.parse(get("value_bar_items", "[]")); } catch { /* */ }
+  if (items.length === 0) items = ["Cloud-like skincare", "Amber-rich attars", "Genderless signatures", "Private house labels"];
+  return (
+    <div className="border-y border-[#d8c8ad] bg-[rgba(255,250,242,0.72)] px-6 py-5 backdrop-blur-xl">
+      <div className="mx-auto grid max-w-[1800px] gap-4 text-center text-xs font-semibold uppercase tracking-[0.28em] text-[var(--luxury-muted)] md:grid-cols-4">
+        {items.map((item, i) => <span key={i}>{item}</span>)}
+      </div>
+    </div>
+  );
+}
+
+function PreviewCategoryCard({ image, eyebrow, title, text, cta }: { image: string; eyebrow: string; title: string; text: string; cta: string }) {
   return (
     <div className="group block">
       <div className="relative min-h-[560px] overflow-hidden">
-        <Image
-          src={image}
-          alt={title}
-          fill
-          sizes="(min-width: 1024px) 50vw, 100vw"
-          className="object-cover transition duration-700 group-hover:scale-105"
-          unoptimized
-        />
+        <Image src={image} alt={title} fill sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover transition duration-700 group-hover:scale-105" unoptimized />
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(22,18,13,0.1)_0%,rgba(22,18,13,0.48)_48%,rgba(22,18,13,0.86)_100%)]" />
         <div className="absolute inset-x-0 bottom-0 p-10 text-white">
-          <p className="inline-flex bg-[rgba(22,18,13,0.58)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.32em] text-[#f1c778] shadow-[0_12px_30px_rgba(22,18,13,0.28)] backdrop-blur-sm">
-            {eyebrow}
-          </p>
-          <h3 className="mt-3 text-4xl font-normal leading-tight [font-family:var(--font-serif)]">
-            {title}
-          </h3>
-          <p className="mt-4 max-w-md text-sm leading-7 text-white/76">
-            {text}
-          </p>
-          <span className="mt-6 inline-flex text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold)]">
-            {cta}
-          </span>
+          <p className="inline-flex bg-[rgba(22,18,13,0.58)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.32em] text-[#f1c778] shadow-[0_12px_30px_rgba(22,18,13,0.28)] backdrop-blur-sm">{eyebrow}</p>
+          <h3 className="mt-3 text-4xl font-normal leading-tight [font-family:var(--font-serif)]">{title}</h3>
+          <p className="mt-4 max-w-md text-sm leading-7 text-white/76">{text}</p>
+          <span className="mt-6 inline-flex text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold)]">{cta}</span>
         </div>
       </div>
     </div>
   );
 }
 
-function PreviewFeaturedSection({
+/* ── Product Page Preview ─────────────────────────────────────────── */
+
+function ProductPreview({
   get,
   values,
-  isActive,
-  isHovered,
+  activeSection,
+  hoveredSection,
   onSelect,
   onHover,
 }: {
   get: (key: string, fallback?: string) => string;
   values: Record<string, string>;
-  isActive: boolean;
-  isHovered: boolean;
-  onSelect: () => void;
-  onHover: (hovered: boolean) => void;
+  activeSection: ProductSectionId;
+  hoveredSection: SectionId | null;
+  onSelect: (id: SectionId) => void;
+  onHover: (id: SectionId | null) => void;
 }) {
+  let trustBadges: string[] = [];
+  try { trustBadges = JSON.parse(values["product_trust_badges"] || "[]"); } catch { /* */ }
+  if (trustBadges.length === 0) trustBadges = ["100% authentic products", "Free shipping on eligible orders", "Secure payments", "Easy returns and support"];
+
+  const shippingText = get("product_shipping_text", "Orders are packed carefully and shipped securely. Return and exchange rules can be added here later.");
+
+  const trustIcons = [Shield, Truck, Lock, RotateCcw];
+
   return (
-    <SectionOverlay
-      label="Featured Products"
-      isActive={isActive}
-      isHovered={isHovered}
-      onSelect={onSelect}
-      onHover={onHover}
-    >
-      <section className="bg-[#efe3d0] px-8 py-20">
-        <div className="mx-auto max-w-[1800px]">
-          <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">
-                Featured Collection
-              </p>
-              <h2 className="mt-3 text-5xl font-normal [font-family:var(--font-serif)]">
-                {get("featured_section_title", "Objects of desire.")}
-              </h2>
+    <div className="bg-[var(--luxury-ivory)]">
+      {/* Breadcrumb */}
+      <div className="px-12 py-6">
+        <div className="mx-auto max-w-[1600px] text-xs uppercase tracking-[0.12em] text-[var(--luxury-muted)]">
+          Home / Category / Product Name
+        </div>
+      </div>
+
+      <div className="px-12 pb-20">
+        <div className="mx-auto grid max-w-[1600px] items-start gap-12 lg:grid-cols-[50%_1fr]">
+          {/* Product images */}
+          <div className="grid items-start gap-5 md:grid-cols-[90px_1fr]">
+            <div className="order-2 flex gap-3 md:order-1 md:flex-col">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-20 w-20 shrink-0 animate-pulse border border-[#d8c8ad] bg-[#efe3d0] md:h-24 md:w-24" />
+              ))}
             </div>
-            <p className="max-w-md text-sm leading-7 text-[var(--luxury-muted)]">
-              {get(
-                "featured_section_subtitle",
-                "A focused selection from the private labels now available in the store."
-              )}
-            </p>
-          </div>
-          <div className="grid gap-6 md:grid-cols-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div
-                key={i}
-                className="border border-[#d8c8ad] bg-[var(--luxury-paper)]"
-              >
-                <div className="aspect-[1/1.18] animate-pulse bg-[#ead9c0]" />
-                <div className="flex flex-col gap-3 p-5">
-                  <div className="h-3 w-24 animate-pulse rounded bg-[#e5d9c4]" />
-                  <div className="h-6 w-40 animate-pulse rounded bg-[#e5d9c4]" />
-                  <div className="h-4 w-28 animate-pulse rounded bg-[#e5d9c4]" />
+            <div className="order-1 border border-[#d8c8ad] bg-[#efe3d0] md:order-2">
+              <div className="relative h-[480px] md:h-[580px]">
+                <div className="absolute inset-0 flex items-center justify-center text-sm text-[var(--luxury-muted)]">
+                  Product images
                 </div>
               </div>
-            ))}
+            </div>
           </div>
-        </div>
-      </section>
-    </SectionOverlay>
-  );
-}
 
-function PreviewBestSellers() {
-  return (
-    <section className="px-8 py-20">
-      <div className="mx-auto max-w-[1800px]">
-        <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">
-              Most Loved
-            </p>
-            <h2 className="mt-3 text-5xl font-normal [font-family:var(--font-serif)]">
-              The best sellers.
-            </h2>
-          </div>
-          <span className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold-strong)]">
-            View all
-          </span>
-        </div>
-        <div className="grid gap-6 md:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div
-              key={i}
-              className="aspect-[1/1.08] animate-pulse rounded-[var(--luxury-radius)] bg-[#efe3d0]"
-            />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
+          {/* Product info */}
+          <div className="lg:pt-4">
+            <div className="flex items-center justify-between">
+              <p className="text-xs uppercase tracking-[0.2em] text-[var(--luxury-gold-strong)] sm:tracking-[0.34em]">Brand Name</p>
+              <Heart size={22} className="text-[var(--luxury-muted)]" />
+            </div>
+            <h1 className="mt-3 text-4xl font-normal leading-tight [font-family:var(--font-serif)] md:text-6xl">Product Name</h1>
+            <p className="mt-5 max-w-xl text-base leading-7 text-[var(--luxury-muted)]">Product description will appear here with details about the fragrance or skincare item.</p>
+            <p className="mt-5 text-3xl font-semibold [font-family:var(--font-serif)]">{"\u20B9"}4,999</p>
 
-function PreviewNewArrivals() {
-  return (
-    <section className="bg-[#efe3d0] px-8 py-20">
-      <div className="mx-auto max-w-[1800px]">
-        <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">
-              Just Arrived
-            </p>
-            <h2 className="mt-3 text-5xl font-normal [font-family:var(--font-serif)]">
-              New arrivals.
-            </h2>
-          </div>
-          <span className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold-strong)]">
-            Explore new
-          </span>
-        </div>
-        <div className="grid gap-6 md:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div
-              key={i}
-              className="aspect-[1/1.08] animate-pulse rounded-[var(--luxury-radius)] bg-[#ead9c0]"
-            />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function PreviewQuote({
-  get,
-  isActive,
-  isHovered,
-  onSelect,
-  onHover,
-}: {
-  get: (key: string, fallback?: string) => string;
-  isActive: boolean;
-  isHovered: boolean;
-  onSelect: () => void;
-  onHover: (hovered: boolean) => void;
-}) {
-  return (
-    <SectionOverlay
-      label="Quote"
-      isActive={isActive}
-      isHovered={isHovered}
-      onSelect={onSelect}
-      onHover={onHover}
-    >
-      <section className="relative overflow-hidden bg-[var(--luxury-ink)] px-8 py-28 text-[var(--luxury-paper)]">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(182,138,66,0.14)_0%,rgba(22,18,13,0)_68%)]" />
-        <div className="relative mx-auto max-w-4xl text-center">
-          <span
-            aria-hidden
-            className="block text-7xl leading-[0.6] text-[var(--luxury-gold)] [font-family:var(--font-serif)]"
-          >
-            &ldquo;
-          </span>
-          <blockquote className="mt-4 text-4xl font-normal leading-relaxed [font-family:var(--font-serif)]">
-            {get(
-              "quote_text",
-              "A fragrance should be worn like a signature — quietly, deliberately, and entirely your own."
-            )}
-          </blockquote>
-          <p className="mt-8 text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold)]">
-            {get("quote_attribution", "The House Motto")}
-          </p>
-        </div>
-      </section>
-    </SectionOverlay>
-  );
-}
-
-function PreviewBanner({
-  get,
-  isActive,
-  isHovered,
-  onSelect,
-  onHover,
-}: {
-  get: (key: string, fallback?: string) => string;
-  isActive: boolean;
-  isHovered: boolean;
-  onSelect: () => void;
-  onHover: (hovered: boolean) => void;
-}) {
-  return (
-    <SectionOverlay
-      label="Product Banner"
-      isActive={isActive}
-      isHovered={isHovered}
-      onSelect={onSelect}
-      onHover={onHover}
-    >
-      <section className="px-8 py-20">
-        <div className="mx-auto grid max-w-[1800px] gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-          <div className="relative aspect-[3/2] overflow-hidden bg-[#efe0ca]">
-            {get("product_banner_image") ? (
-              <Image
-                src={get("product_banner_image")}
-                alt={get("product_banner_title", "Banner")}
-                fill
-                sizes="720px"
-                className="object-cover"
-                unoptimized
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center text-sm text-[var(--luxury-muted)]">
-                No banner image
+            {/* Trust badges - editable section */}
+            <SectionOverlay
+              label="Trust Badges"
+              isActive={activeSection === "product_trust"}
+              isHovered={hoveredSection === "product_trust"}
+              onSelect={() => onSelect("product_trust")}
+              onHover={(h) => onHover(h ? "product_trust" : null)}
+            >
+              <div className="mt-6 grid gap-3 border border-[#d8c8ad] bg-[var(--luxury-paper)] p-5 text-sm text-[var(--luxury-muted)]">
+                {trustBadges.map((badge, i) => {
+                  const Icon = trustIcons[i % trustIcons.length];
+                  return (
+                    <div key={i} className="flex items-center gap-3">
+                      <Icon size={18} />
+                      <span>{badge}</span>
+                    </div>
+                  );
+                })}
               </div>
-            )}
-          </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">
-              Maison Notes
-            </p>
-            <h2 className="mt-3 text-6xl font-normal leading-tight [font-family:var(--font-serif)]">
-              {get(
-                "product_banner_title",
-                "A storefront for house labels that still feels tactile."
-              )}
-            </h2>
-            <p className="mt-6 max-w-2xl text-base leading-8 text-[var(--luxury-muted)]">
-              {get(
-                "product_banner_text",
-                "The collection is staged like a real luxury catalogue."
-              )}
-            </p>
+            </SectionOverlay>
+
+            {/* Shipping - editable section */}
+            <SectionOverlay
+              label="Shipping & Returns"
+              isActive={activeSection === "product_shipping"}
+              isHovered={hoveredSection === "product_shipping"}
+              onSelect={() => onSelect("product_shipping")}
+              onHover={(h) => onHover(h ? "product_shipping" : null)}
+            >
+              <div className="mt-8 border-t border-[#d8c8ad]">
+                <div className="flex items-center justify-between py-5">
+                  <span className="text-sm font-semibold uppercase tracking-[0.18em]">Shipping & Returns</span>
+                  <ChevronDown size={18} className="text-[var(--luxury-muted)]" />
+                </div>
+                <div className="pb-5 text-sm leading-7 text-[var(--luxury-muted)]">
+                  {shippingText}
+                </div>
+              </div>
+            </SectionOverlay>
           </div>
         </div>
-      </section>
-    </SectionOverlay>
-  );
-}
+      </div>
 
-function PreviewHousePromises({
-  get,
-  values,
-  isActive,
-  isHovered,
-  onSelect,
-  onHover,
-}: {
-  get: (key: string, fallback?: string) => string;
-  values: Record<string, string>;
-  isActive: boolean;
-  isHovered: boolean;
-  onSelect: () => void;
-  onHover: (hovered: boolean) => void;
-}) {
-  let promises: { title: string; text: string }[] = [];
-  try {
-    promises = JSON.parse(values["house_promises"] || "[]");
-  } catch {
-    /* empty */
-  }
-  if (promises.length === 0) {
-    promises = [
-      { title: "Curated Discovery", text: "Shop by gender, category, or house without losing the boutique feel." },
-      { title: "Quiet Product Detail", text: "Large visuals, variant choices, wishlist controls, and cart previews keep the flow focused." },
-      { title: "Ritual Ready", text: "Fragrance and skincare now share one polished visual language across the store." },
-    ];
-  }
-
-  return (
-    <SectionOverlay
-      label="House Promises"
-      isActive={isActive}
-      isHovered={isHovered}
-      onSelect={onSelect}
-      onHover={onHover}
-    >
-      <section className="border-y border-[#d8c8ad] bg-[var(--luxury-paper)] px-8 py-16">
-        <div className="mx-auto grid max-w-[1800px] gap-8 md:grid-cols-3">
-          {promises.map((promise, i) => (
-            <div key={i}>
-              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--luxury-gold-strong)]">
-                {promise.title}
-              </p>
-              <p className="mt-3 text-sm leading-7 text-[var(--luxury-muted)]">
-                {promise.text}
+      {/* Banner section at bottom */}
+      <SectionOverlay
+        label="Banner"
+        isActive={activeSection === "product_banner"}
+        isHovered={hoveredSection === "product_banner"}
+        onSelect={() => onSelect("product_banner")}
+        onHover={(h) => onHover(h ? "product_banner" : null)}
+      >
+        <section className="border-t border-[#d8c8ad] px-12 py-20">
+          <div className="mx-auto grid max-w-[1800px] gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+            <div className="relative aspect-[3/2] overflow-hidden bg-[#efe0ca]">
+              {get("pdp_banner_image") ? (
+                <Image src={get("pdp_banner_image")} alt={get("pdp_banner_title", "Banner")} fill sizes="720px" className="object-cover" unoptimized />
+              ) : (
+                <div className="flex h-full items-center justify-center text-sm text-[var(--luxury-muted)]">Add a banner image</div>
+              )}
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">Maison Notes</p>
+              <h2 className="mt-3 text-6xl font-normal leading-tight [font-family:var(--font-serif)]">
+                {get("pdp_banner_title", "A storefront for house labels that still feels tactile.")}
+              </h2>
+              <p className="mt-6 max-w-2xl text-base leading-8 text-[var(--luxury-muted)]">
+                {get("pdp_banner_subtitle", "The collection is staged like a real luxury catalogue: restrained navigation, visual hierarchy, product-led imagery, and clear paths into fragrance or skincare.")}
               </p>
             </div>
-          ))}
-        </div>
-      </section>
-    </SectionOverlay>
-  );
-}
-
-function PreviewNewsletter({
-  get,
-  isActive,
-  isHovered,
-  onSelect,
-  onHover,
-}: {
-  get: (key: string, fallback?: string) => string;
-  isActive: boolean;
-  isHovered: boolean;
-  onSelect: () => void;
-  onHover: (hovered: boolean) => void;
-}) {
-  return (
-    <SectionOverlay
-      label="Newsletter"
-      isActive={isActive}
-      isHovered={isHovered}
-      onSelect={onSelect}
-      onHover={onHover}
-    >
-      <section className="bg-[#efe3d0] px-8 py-20">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">
-            The List
-          </p>
-          <h2 className="mt-3 text-5xl font-normal [font-family:var(--font-serif)]">
-            {get("newsletter_title", "Letters from the house.")}
-          </h2>
-          <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-[var(--luxury-muted)]">
-            {get(
-              "newsletter_subtitle",
-              "New releases, private previews, and quiet notes on the collection — sent only when there is something worth saying."
-            )}
-          </p>
-          <div className="mx-auto mt-8 flex max-w-md gap-3">
-            <div className="h-12 flex-1 rounded-full border border-[#d8c8ad] bg-[var(--luxury-input)]" />
-            <div className="h-12 w-28 rounded-full bg-[var(--luxury-ink)]" />
           </div>
-        </div>
-      </section>
-    </SectionOverlay>
+        </section>
+      </SectionOverlay>
+    </div>
   );
 }
 
-function PreviewCTA({
-  get,
-  isActive,
-  isHovered,
-  onSelect,
-  onHover,
-}: {
-  get: (key: string, fallback?: string) => string;
-  isActive: boolean;
-  isHovered: boolean;
-  onSelect: () => void;
-  onHover: (hovered: boolean) => void;
-}) {
+/* ── Re-export Heart icon for preview ─────────────────────────────── */
+function Heart({ size, className }: { size: number; className?: string }) {
   return (
-    <SectionOverlay
-      label="Bottom CTA"
-      isActive={isActive}
-      isHovered={isHovered}
-      onSelect={onSelect}
-      onHover={onHover}
-    >
-      <section className="px-8 py-28 text-center">
-        <div className="mx-auto max-w-3xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">
-            Begin Again
-          </p>
-          <h2 className="mt-3 text-6xl font-normal [font-family:var(--font-serif)]">
-            {get("cta_title", "Find the next signature.")}
-          </h2>
-          <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-[var(--luxury-muted)]">
-            {get(
-              "cta_subtitle",
-              "Browse perfumes, attars, customised blends, face washes, creams, and nail care from the new house catalogue."
-            )}
-          </p>
-          <span className="mt-8 inline-flex rounded-full bg-[var(--luxury-ink)] px-8 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-paper)]">
-            {get("cta_button_text", "Shop the Archive")}
-          </span>
-        </div>
-      </section>
-    </SectionOverlay>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+    </svg>
   );
 }
