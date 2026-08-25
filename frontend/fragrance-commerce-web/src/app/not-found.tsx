@@ -1,8 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { getPublicSettings } from "@/services/siteSettingsService";
 
 export default function NotFoundPage() {
+  const [cms, setCms] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    getPublicSettings().then(setCms).catch(() => {});
+  }, []);
   return (
     <main className="min-h-screen bg-[var(--luxury-ivory)] px-4 py-14 text-[var(--luxury-ink)] md:px-10 md:py-20">
       <section className="mx-auto max-w-6xl">
@@ -37,11 +44,17 @@ export default function NotFoundPage() {
             </p>
 
             <h1 className="mt-5 text-4xl font-normal leading-[1.1] [font-family:var(--font-serif)] sm:text-6xl md:text-7xl">
-              The scent you&apos;ve <br className="hidden sm:block" /> been searching for <br /> has evaporated.
+              {cms.not_found_title ? (
+                cms.not_found_title
+              ) : (
+                <>
+                  The scent you&apos;ve <br className="hidden sm:block" /> been searching for <br /> has evaporated.
+                </>
+              )}
             </h1>
 
             <p className="mt-8 max-w-xl text-base leading-8 text-[var(--luxury-muted-strong)] md:text-lg">
-              Perhaps the fragrance house has moved to a new location, or the page has drifted into the mist. Our private collection awaits your return.
+              {cms.not_found_description || "Perhaps the fragrance house has moved to a new location, or the page has drifted into the mist. Our private collection awaits your return."}
             </p>
 
             {/* Action Buttons */}

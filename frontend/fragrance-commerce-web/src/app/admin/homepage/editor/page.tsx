@@ -29,6 +29,14 @@ import {
   Truck,
   RotateCcw,
   Lock,
+  Phone,
+  MapPin,
+  MessageSquare,
+  HelpCircle,
+  FileText,
+  KeyRound,
+  UserPlus,
+  AlertTriangle,
 } from "lucide-react";
 import {
   getSiteSettings,
@@ -40,7 +48,18 @@ import type { Product } from "@/types/product";
 
 /* ── Types ────────────────────────────────────────────────────────── */
 
-type TemplateId = "homepage" | "products" | "product-detail";
+type TemplateId =
+  | "homepage"
+  | "products"
+  | "product-detail"
+  | "contact"
+  | "faq"
+  | "privacy"
+  | "return"
+  | "terms"
+  | "login"
+  | "signup"
+  | "not-found";
 
 type HomepageSectionId =
   | "hero"
@@ -58,7 +77,22 @@ type ProductsSectionId = "products_banner";
 
 type ProductDetailSectionId = "pdp_trust" | "pdp_shipping";
 
-type SectionId = HomepageSectionId | ProductsSectionId | ProductDetailSectionId;
+type ContactSectionId = "contact_content";
+
+type InfoPageSectionId = "info_content";
+
+type AuthSectionId = "auth_brand";
+
+type NotFoundSectionId = "not_found_content";
+
+type SectionId =
+  | HomepageSectionId
+  | ProductsSectionId
+  | ProductDetailSectionId
+  | ContactSectionId
+  | InfoPageSectionId
+  | AuthSectionId
+  | NotFoundSectionId;
 
 type FieldType =
   | "text"
@@ -222,10 +256,126 @@ const productDetailSections: SectionDef[] = [
   },
 ];
 
+const contactSections: SectionDef[] = [
+  {
+    id: "contact_content",
+    label: "Contact Info",
+    icon: <Mail size={15} />,
+    fields: [
+      { key: "contact_heading", label: "Heading" },
+      { key: "contact_description", label: "Description", type: "textarea" },
+      { key: "contact_email", label: "Email" },
+      { key: "contact_phone", label: "Phone" },
+      { key: "contact_address", label: "Address" },
+      { key: "contact_response_text", label: "Response Time Text", type: "textarea" },
+    ],
+  },
+];
+
+const faqSections: SectionDef[] = [
+  {
+    id: "info_content",
+    label: "FAQ Content",
+    icon: <HelpCircle size={15} />,
+    fields: [
+      { key: "faq_eyebrow", label: "Eyebrow" },
+      { key: "faq_title", label: "Title" },
+      { key: "faq_intro", label: "Intro", type: "textarea" },
+      { key: "faq_sections", label: "Q&A Sections", type: "object-list" },
+    ],
+  },
+];
+
+const privacySections: SectionDef[] = [
+  {
+    id: "info_content",
+    label: "Privacy Content",
+    icon: <Shield size={15} />,
+    fields: [
+      { key: "privacy_eyebrow", label: "Eyebrow" },
+      { key: "privacy_title", label: "Title" },
+      { key: "privacy_intro", label: "Intro", type: "textarea" },
+      { key: "privacy_sections", label: "Sections", type: "object-list" },
+    ],
+  },
+];
+
+const returnSections: SectionDef[] = [
+  {
+    id: "info_content",
+    label: "Return Content",
+    icon: <RotateCcw size={15} />,
+    fields: [
+      { key: "return_eyebrow", label: "Eyebrow" },
+      { key: "return_title", label: "Title" },
+      { key: "return_intro", label: "Intro", type: "textarea" },
+      { key: "return_sections", label: "Sections", type: "object-list" },
+    ],
+  },
+];
+
+const termsSections: SectionDef[] = [
+  {
+    id: "info_content",
+    label: "Terms Content",
+    icon: <FileText size={15} />,
+    fields: [
+      { key: "terms_eyebrow", label: "Eyebrow" },
+      { key: "terms_title", label: "Title" },
+      { key: "terms_intro", label: "Intro", type: "textarea" },
+      { key: "terms_sections", label: "Sections", type: "object-list" },
+    ],
+  },
+];
+
+const loginSections: SectionDef[] = [
+  {
+    id: "auth_brand",
+    label: "Brand Panel",
+    icon: <KeyRound size={15} />,
+    fields: [
+      { key: "login_brand_title", label: "Title" },
+      { key: "login_brand_description", label: "Description", type: "textarea" },
+    ],
+  },
+];
+
+const signupSections: SectionDef[] = [
+  {
+    id: "auth_brand",
+    label: "Brand Panel",
+    icon: <UserPlus size={15} />,
+    fields: [
+      { key: "signup_brand_title", label: "Title" },
+      { key: "signup_brand_description", label: "Description", type: "textarea" },
+    ],
+  },
+];
+
+const notFoundSections: SectionDef[] = [
+  {
+    id: "not_found_content",
+    label: "404 Content",
+    icon: <AlertTriangle size={15} />,
+    fields: [
+      { key: "not_found_title", label: "Headline" },
+      { key: "not_found_description", label: "Description", type: "textarea" },
+    ],
+  },
+];
+
 const templates: TemplateDef[] = [
   { id: "homepage", label: "Homepage", sections: homepageSections },
   { id: "products", label: "Products Page", sections: productsSections },
   { id: "product-detail", label: "Product Detail", sections: productDetailSections },
+  { id: "contact", label: "Contact", sections: contactSections },
+  { id: "faq", label: "FAQ", sections: faqSections },
+  { id: "privacy", label: "Privacy Policy", sections: privacySections },
+  { id: "return", label: "Return Policy", sections: returnSections },
+  { id: "terms", label: "Terms & Conditions", sections: termsSections },
+  { id: "login", label: "Login", sections: loginSections },
+  { id: "signup", label: "Signup", sections: signupSections },
+  { id: "not-found", label: "404 Page", sections: notFoundSections },
 ];
 
 /* ── Main editor ──────────────────────────────────────────────────── */
@@ -701,11 +851,86 @@ function ProductDetailPreview({
                     onSelect={(id) => setActiveSection(id)}
                     onHover={setHoveredSection}
                   />
-                ) : (
+                ) : activeTemplate === "product-detail" ? (
                   <ProductDetailPreview
                     get={get}
                     values={values}
                     activeSection={activeSection as ProductDetailSectionId}
+                    hoveredSection={hoveredSection}
+                    onSelect={(id) => setActiveSection(id)}
+                    onHover={setHoveredSection}
+                  />
+                ) : activeTemplate === "contact" ? (
+                  <ContactPreview
+                    get={get}
+                    values={values}
+                    activeSection={activeSection as ContactSectionId}
+                    hoveredSection={hoveredSection}
+                    onSelect={(id) => setActiveSection(id)}
+                    onHover={setHoveredSection}
+                  />
+                ) : activeTemplate === "faq" ? (
+                  <InfoPagePreview
+                    get={get}
+                    prefix="faq"
+                    activeSection={activeSection as InfoPageSectionId}
+                    hoveredSection={hoveredSection}
+                    onSelect={(id) => setActiveSection(id)}
+                    onHover={setHoveredSection}
+                    sectionType="question"
+                  />
+                ) : activeTemplate === "privacy" ? (
+                  <InfoPagePreview
+                    get={get}
+                    prefix="privacy"
+                    activeSection={activeSection as InfoPageSectionId}
+                    hoveredSection={hoveredSection}
+                    onSelect={(id) => setActiveSection(id)}
+                    onHover={setHoveredSection}
+                    sectionType="title"
+                  />
+                ) : activeTemplate === "return" ? (
+                  <InfoPagePreview
+                    get={get}
+                    prefix="return"
+                    activeSection={activeSection as InfoPageSectionId}
+                    hoveredSection={hoveredSection}
+                    onSelect={(id) => setActiveSection(id)}
+                    onHover={setHoveredSection}
+                    sectionType="title"
+                  />
+                ) : activeTemplate === "terms" ? (
+                  <InfoPagePreview
+                    get={get}
+                    prefix="terms"
+                    activeSection={activeSection as InfoPageSectionId}
+                    hoveredSection={hoveredSection}
+                    onSelect={(id) => setActiveSection(id)}
+                    onHover={setHoveredSection}
+                    sectionType="title"
+                  />
+                ) : activeTemplate === "login" ? (
+                  <AuthPreview
+                    get={get}
+                    prefix="login"
+                    activeSection={activeSection as AuthSectionId}
+                    hoveredSection={hoveredSection}
+                    onSelect={(id) => setActiveSection(id)}
+                    onHover={setHoveredSection}
+                  />
+                ) : activeTemplate === "signup" ? (
+                  <AuthPreview
+                    get={get}
+                    prefix="signup"
+                    activeSection={activeSection as AuthSectionId}
+                    hoveredSection={hoveredSection}
+                    onSelect={(id) => setActiveSection(id)}
+                    onHover={setHoveredSection}
+                  />
+                ) : (
+                  <NotFoundPreview
+                    get={get}
+                    activeSection={activeSection as NotFoundSectionId}
                     hoveredSection={hoveredSection}
                     onSelect={(id) => setActiveSection(id)}
                     onHover={setHoveredSection}
@@ -1362,6 +1587,254 @@ function ProductsPagePreview({
           </div>
         </div>
       </section>
+    </div>
+  );
+}
+
+function ContactPreview({
+  get,
+  activeSection,
+  hoveredSection,
+  onSelect,
+  onHover,
+}: {
+  get: (key: string, fallback?: string) => string;
+  values: Record<string, string>;
+  activeSection: ContactSectionId;
+  hoveredSection: SectionId | null;
+  onSelect: (id: SectionId) => void;
+  onHover: (id: SectionId | null) => void;
+}) {
+  return (
+    <div className="bg-[var(--luxury-ivory)]">
+      <SectionOverlay
+        label="Contact Info"
+        isActive={activeSection === "contact_content"}
+        isHovered={hoveredSection === "contact_content"}
+        onSelect={() => onSelect("contact_content")}
+        onHover={(h) => onHover(h ? "contact_content" : null)}
+      >
+        <section className="px-12 py-20">
+          <div className="mx-auto grid max-w-6xl items-start gap-16 lg:grid-cols-[0.85fr_1.15fr]">
+            <div>
+              <p className="font-normal uppercase tracking-[0.24em] text-[var(--luxury-gold-strong)]">
+                {get("contact_heading", "Contact us").split(" ").length > 0 ? "Contact" : "Contact"}
+              </p>
+              <h1 className="mt-5 text-5xl font-normal leading-[1.1] [font-family:var(--font-serif)] md:text-7xl">
+                {get("contact_heading", "Contact us")}
+              </h1>
+              <p className="mt-6 max-w-xl text-base leading-8 text-[var(--luxury-muted)]">
+                {get("contact_description", "Reach out for help with orders, product selection, account questions, or delivery support.")}
+              </p>
+              <div className="mt-12 grid gap-5">
+                <div className="flex gap-4 border border-[#d8c8ad] bg-[var(--luxury-paper)] p-5">
+                  <span className="mt-1 text-[var(--luxury-gold)]"><Mail size={20} /></span>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--luxury-muted)]">Email</p>
+                    <p className="mt-2 text-base [font-family:var(--font-serif)]">{get("contact_email", "care@fragrancehouse.test")}</p>
+                  </div>
+                </div>
+                <div className="flex gap-4 border border-[#d8c8ad] bg-[var(--luxury-paper)] p-5">
+                  <span className="mt-1 text-[var(--luxury-gold)]"><Phone size={20} /></span>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--luxury-muted)]">Phone</p>
+                    <p className="mt-2 text-base [font-family:var(--font-serif)]">{get("contact_phone", "+91 98765 43210")}</p>
+                  </div>
+                </div>
+                <div className="flex gap-4 border border-[#d8c8ad] bg-[var(--luxury-paper)] p-5">
+                  <span className="mt-1 text-[var(--luxury-gold)]"><MapPin size={20} /></span>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--luxury-muted)]">Studio</p>
+                    <p className="mt-2 text-base [font-family:var(--font-serif)]">{get("contact_address", "Bandra West, Mumbai, Maharashtra")}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-12 border-t border-[#d8c8ad] pt-8">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--luxury-gold-strong)]">Response Time</p>
+                <p className="mt-3 text-base leading-7 text-[var(--luxury-muted)]">
+                  {get("contact_response_text", "Most messages are reviewed within one business day. Include your order number if your message is about a purchase.")}
+                </p>
+              </div>
+            </div>
+            <div className="self-start border border-[#d8c8ad] bg-[var(--luxury-paper)] p-6 shadow-[0_22px_70px_rgba(22,18,13,0.08)] md:p-8">
+              <div className="grid gap-5 md:grid-cols-2">
+                {[1, 2].map((i) => <div key={i} className="h-12 border border-[#d8c8ad] bg-[#fffaf2]" />)}
+              </div>
+              <div className="mt-5 h-12 border border-[#d8c8ad] bg-[#fffaf2]" />
+              <div className="mt-5 h-32 border border-[#d8c8ad] bg-[#fffaf2]" />
+              <div className="mt-6 h-12 w-full bg-[var(--luxury-ink)]" />
+            </div>
+          </div>
+        </section>
+      </SectionOverlay>
+    </div>
+  );
+}
+
+function InfoPagePreview({
+  get,
+  prefix,
+  activeSection,
+  hoveredSection,
+  onSelect,
+  onHover,
+  sectionType,
+}: {
+  get: (key: string, fallback?: string) => string;
+  prefix: string;
+  activeSection: InfoPageSectionId;
+  hoveredSection: SectionId | null;
+  onSelect: (id: SectionId) => void;
+  onHover: (id: SectionId | null) => void;
+  sectionType: "question" | "title";
+}) {
+  let sections: { [k: string]: string }[] = [];
+  try { sections = JSON.parse(get(`${prefix}_sections`, "[]")); } catch { /* */ }
+  if (sections.length === 0) {
+    sections = sectionType === "question"
+      ? [{ question: "Sample question?", answer: "Sample answer text goes here." }]
+      : [{ title: "Section Title", body: "Section body text goes here." }];
+  }
+
+  return (
+    <div className="bg-[var(--luxury-ivory)]">
+      <SectionOverlay
+        label="Page Content"
+        isActive={activeSection === "info_content"}
+        isHovered={hoveredSection === "info_content"}
+        onSelect={() => onSelect("info_content")}
+        onHover={(h) => onHover(h ? "info_content" : null)}
+      >
+        <section className="px-12 py-20">
+          <div className="mx-auto max-w-5xl">
+            <p className="font-normal uppercase tracking-[0.24em] text-[var(--luxury-gold-strong)]">
+              {get(`${prefix}_eyebrow`, "Help")}
+            </p>
+            <h1 className="mt-5 max-w-4xl text-5xl font-normal leading-[1.1] [font-family:var(--font-serif)] md:text-7xl">
+              {get(`${prefix}_title`, "Page Title")}
+            </h1>
+            <p className="mt-6 max-w-3xl text-base leading-8 text-[var(--luxury-muted)] md:text-lg">
+              {get(`${prefix}_intro`, "Page intro text goes here.")}
+            </p>
+            <div className="mt-14 border-t border-[#d8c8ad]">
+              {sections.map((s, i) => (
+                <section key={i} className="grid gap-6 py-12 md:grid-cols-[0.38fr_1fr] md:gap-10">
+                  <h2 className="text-2xl font-normal [font-family:var(--font-serif)]">
+                    {sectionType === "question" ? s.question : s.title}
+                  </h2>
+                  <p className="text-base leading-7 text-[var(--luxury-muted)]">
+                    {sectionType === "question" ? s.answer : s.body}
+                  </p>
+                </section>
+              ))}
+            </div>
+          </div>
+        </section>
+      </SectionOverlay>
+    </div>
+  );
+}
+
+function AuthPreview({
+  get,
+  prefix,
+  activeSection,
+  hoveredSection,
+  onSelect,
+  onHover,
+}: {
+  get: (key: string, fallback?: string) => string;
+  prefix: string;
+  activeSection: AuthSectionId;
+  hoveredSection: SectionId | null;
+  onSelect: (id: SectionId) => void;
+  onHover: (id: SectionId | null) => void;
+}) {
+  return (
+    <div className="bg-[var(--luxury-ivory)]">
+      <SectionOverlay
+        label="Brand Panel"
+        isActive={activeSection === "auth_brand"}
+        isHovered={hoveredSection === "auth_brand"}
+        onSelect={() => onSelect("auth_brand")}
+        onHover={(h) => onHover(h ? "auth_brand" : null)}
+      >
+        <section className="flex min-h-[600px]">
+          <div className="hidden w-[40%] bg-[var(--luxury-ink)] p-10 text-[var(--luxury-paper)] lg:flex lg:flex-col lg:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.38em] text-[var(--luxury-gold)]">
+                Fragrance Commerce
+              </p>
+              <h1 className="mt-5 text-5xl font-normal leading-tight [font-family:var(--font-serif)]">
+                {get(`${prefix}_brand_title`, prefix === "login" ? "Welcome back to your luxury fragrance account." : "Begin your fragrance ritual.")}
+              </h1>
+            </div>
+            <p className="max-w-sm text-sm leading-7 text-white/70">
+              {get(`${prefix}_brand_description`, prefix === "login" ? "Sign in to revisit your wishlist, orders, and carefully selected fragrance rituals." : "Create an account to track orders, save favourites, and discover the private house collection.")}
+            </p>
+          </div>
+          <div className="flex flex-1 items-center justify-center bg-[var(--luxury-paper)] p-10">
+            <div className="w-full max-w-md space-y-6">
+              <div className="h-4 w-24 rounded bg-[#e5d9c4]" />
+              <div className="h-8 w-40 rounded bg-[#e5d9c4]" />
+              <div className="h-12 w-full rounded border border-[#d8c8ad] bg-[#fffaf2]" />
+              <div className="h-12 w-full rounded border border-[#d8c8ad] bg-[#fffaf2]" />
+              <div className="h-12 w-full rounded-full bg-[var(--luxury-ink)]" />
+            </div>
+          </div>
+        </section>
+      </SectionOverlay>
+    </div>
+  );
+}
+
+function NotFoundPreview({
+  get,
+  activeSection,
+  hoveredSection,
+  onSelect,
+  onHover,
+}: {
+  get: (key: string, fallback?: string) => string;
+  activeSection: NotFoundSectionId;
+  hoveredSection: SectionId | null;
+  onSelect: (id: SectionId) => void;
+  onHover: (id: SectionId | null) => void;
+}) {
+  return (
+    <div className="bg-[var(--luxury-ivory)]">
+      <SectionOverlay
+        label="404 Content"
+        isActive={activeSection === "not_found_content"}
+        isHovered={hoveredSection === "not_found_content"}
+        onSelect={() => onSelect("not_found_content")}
+        onHover={(h) => onHover(h ? "not_found_content" : null)}
+      >
+        <section className="flex min-h-[600px] items-center justify-center px-12 py-20 text-center">
+          <div className="max-w-2xl">
+            <div className="mb-12 text-[200px] font-normal leading-none [font-family:var(--font-serif)] text-[var(--luxury-gold)]/20">
+              404
+            </div>
+            <p className="font-normal uppercase tracking-[0.24em] text-[var(--luxury-gold-strong)]">
+              Page Not Found
+            </p>
+            <h1 className="mt-5 text-4xl font-normal leading-[1.1] [font-family:var(--font-serif)] sm:text-6xl md:text-7xl">
+              {get("not_found_title", "The scent you've been searching for has evaporated.")}
+            </h1>
+            <p className="mt-8 max-w-xl text-base leading-8 text-[var(--luxury-muted-strong)] md:text-lg">
+              {get("not_found_description", "Perhaps the fragrance house has moved to a new location, or the page has drifted into the mist. Our private collection awaits your return.")}
+            </p>
+            <div className="mt-12 flex justify-center gap-5">
+              <div className="inline-flex rounded-full bg-[var(--luxury-ink)] px-8 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--luxury-paper)]">
+                Return Home
+              </div>
+              <div className="inline-flex rounded-full border border-[#d8c8ad] bg-[var(--luxury-paper)] px-8 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--luxury-ink)]">
+                Browse Collection
+              </div>
+            </div>
+          </div>
+        </section>
+      </SectionOverlay>
     </div>
   );
 }

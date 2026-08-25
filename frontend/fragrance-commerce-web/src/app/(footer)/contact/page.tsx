@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { createContactMessage } from "@/services/contactService";
+import { getPublicSettings } from "@/services/siteSettingsService";
 
 const initialForm = {
     fullName: "",
@@ -16,6 +17,11 @@ export default function ContactPage() {
     const [form, setForm] = useState(initialForm);
     const [submitting, setSubmitting] = useState(false);
     const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+    const [cms, setCms] = useState<Record<string, string>>({});
+
+    useEffect(() => {
+        getPublicSettings().then(setCms).catch(() => {});
+    }, []);
 
     function updateField(
         field: keyof typeof initialForm,
@@ -64,28 +70,28 @@ export default function ContactPage() {
                     </p>
 
                     <h1 className="mt-5 text-5xl font-normal leading-[1.1] [font-family:var(--font-serif)] md:text-7xl">
-                        Contact us
+                        {cms.contact_heading || "Contact us"}
                     </h1>
 
                     <p className="mt-6 max-w-xl text-base leading-8 text-[var(--luxury-muted)]">
-                        Reach out for help with orders, product selection, account questions, or delivery support.
+                        {cms.contact_description || "Reach out for help with orders, product selection, account questions, or delivery support."}
                     </p>
 
                     <div className="mt-12 grid gap-5">
                         <ContactDetail
                             icon={<Mail size={20} />}
                             label="Email"
-                            value="care@fragrancehouse.test"
+                            value={cms.contact_email || "care@fragrancehouse.test"}
                         />
                         <ContactDetail
                             icon={<Phone size={20} />}
                             label="Phone"
-                            value="+91 98765 43210"
+                            value={cms.contact_phone || "+91 98765 43210"}
                         />
                         <ContactDetail
                             icon={<MapPin size={20} />}
                             label="Studio"
-                            value="Bandra West, Mumbai, Maharashtra"
+                            value={cms.contact_address || "Bandra West, Mumbai, Maharashtra"}
                         />
                     </div>
 
@@ -94,7 +100,7 @@ export default function ContactPage() {
                             Response Time
                         </p>
                         <p className="mt-3 text-base leading-7 text-[var(--luxury-muted)]">
-                            Most messages are reviewed within one business day. Include your order number if your message is about a purchase.
+                            {cms.contact_response_text || "Most messages are reviewed within one business day. Include your order number if your message is about a purchase."}
                         </p>
                     </div>
                 </div>

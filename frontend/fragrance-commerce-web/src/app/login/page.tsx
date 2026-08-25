@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type SyntheticEvent } from "react";
+import { useEffect, useState, type SyntheticEvent } from "react";
 import { login } from "@/services/authService";
 import { useAuth } from "@/contexts/AuthContext";
 import { getApiResponse } from "@/services/api";
+import { getPublicSettings } from "@/services/siteSettingsService";
 
 const floatingLabel =
     "pointer-events-none absolute left-0 top-2 text-sm text-[var(--luxury-muted)] transition-all duration-200 " +
@@ -25,6 +26,11 @@ export default function LoginPage() {
     const [error, setError] = useState("");
     const [isEmailNotVerified, setIsEmailNotVerified] = useState(false);
     const [isLoggingIn, setIsLoggingIn] = useState(false);
+    const [cms, setCms] = useState<Record<string, string>>({});
+
+    useEffect(() => {
+        getPublicSettings().then(setCms).catch(() => {});
+    }, []);
 
     async function handleSubmit(e: SyntheticEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -68,12 +74,12 @@ export default function LoginPage() {
                         </p>
 
                         <h1 className="mt-5 text-5xl font-normal leading-tight [font-family:var(--font-serif)]">
-                            Welcome back to your luxury fragrance account.
+                            {cms.login_brand_title || "Welcome back to your luxury fragrance account."}
                         </h1>
                     </div>
 
                     <p className="max-w-sm text-sm leading-7 text-white/70">
-                        Sign in to revisit your wishlist, orders, and carefully selected fragrance rituals.
+                        {cms.login_brand_description || "Sign in to revisit your wishlist, orders, and carefully selected fragrance rituals."}
                     </p>
                 </div>
 

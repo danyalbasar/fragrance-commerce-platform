@@ -52,7 +52,16 @@ public class SiteSettingsController : ControllerBase
             "cta_title", "cta_subtitle", "cta_button_text", "cta_button_link",
             "product_trust_badges", "product_shipping_text",
             "pdp_banner_image", "pdp_banner_title", "pdp_banner_subtitle",
-            "products_page_banner_image", "products_page_title", "products_page_subtitle"
+            "products_page_banner_image", "products_page_title", "products_page_subtitle",
+            "contact_heading", "contact_description", "contact_email", "contact_phone",
+            "contact_address", "contact_response_text",
+            "faq_eyebrow", "faq_title", "faq_intro", "faq_sections",
+            "privacy_eyebrow", "privacy_title", "privacy_intro", "privacy_sections",
+            "return_eyebrow", "return_title", "return_intro", "return_sections",
+            "terms_eyebrow", "terms_title", "terms_intro", "terms_sections",
+            "login_brand_title", "login_brand_description",
+            "signup_brand_title", "signup_brand_description",
+            "not_found_title", "not_found_description"
         };
 
         var settings = await _settingsService.GetSettingsAsync(keys);

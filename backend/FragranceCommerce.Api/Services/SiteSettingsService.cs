@@ -126,7 +126,51 @@ public class SiteSettingsService : ISiteSettingsService
             ["pdp_banner_subtitle"] = ("The collection is staged like a real luxury catalogue: restrained navigation, visual hierarchy, product-led imagery, and clear paths into fragrance or skincare.", "Product detail page banner subtitle"),
             ["products_page_banner_image"] = ("/home/home-fragrance.jpg", "Products listing page banner image"),
             ["products_page_title"] = ("Discover the Collection", "Products listing page title"),
-            ["products_page_subtitle"] = ("Browse perfumes, attars, skincare, and daily essentials from the private house labels.", "Products listing page subtitle")
+            ["products_page_subtitle"] = ("Browse perfumes, attars, skincare, and daily essentials from the private house labels.", "Products listing page subtitle"),
+
+            // Contact page
+            ["contact_heading"] = ("Contact us", "Contact page heading"),
+            ["contact_description"] = ("Reach out for help with orders, product selection, account questions, or delivery support.", "Contact page description"),
+            ["contact_email"] = ("care@fragrancehouse.test", "Contact page email address"),
+            ["contact_phone"] = ("+91 98765 43210", "Contact page phone number"),
+            ["contact_address"] = ("Bandra West, Mumbai, Maharashtra", "Contact page studio address"),
+            ["contact_response_text"] = ("Most messages are reviewed within one business day. Include your order number if your message is about a purchase.", "Contact page response time text"),
+
+            // FAQ page
+            ["faq_eyebrow"] = ("Help", "FAQ page eyebrow text"),
+            ["faq_title"] = ("Frequently asked questions", "FAQ page title"),
+            ["faq_intro"] = ("Quick answers for shopping, ordering, wishlist, delivery, and account questions.", "FAQ page intro"),
+            ["faq_sections"] = (JsonSerializer.Serialize(new[] { new { question = "How do I choose a product?", answer = "Use category, gender, brand, and price filters on the products page. Product detail pages include sizes, descriptions, reviews, and similar recommendations." }, new { question = "Can I save products?", answer = "Yes. Sign in and use the heart icon to save products to your wishlist, then move them to cart when you are ready." }, new { question = "How do I track orders?", answer = "After signing in, open the orders page from your account or footer link to view your purchase archive and order status." }, new { question = "What if my product arrives damaged?", answer = "Contact support with your order number and clear photos of the package and product so the issue can be reviewed." } }), "FAQ sections (JSON array of objects with question+answer)"),
+
+            // Privacy Policy
+            ["privacy_eyebrow"] = ("Privacy", "Privacy policy page eyebrow"),
+            ["privacy_title"] = ("Privacy policy", "Privacy policy page title"),
+            ["privacy_intro"] = ("This policy explains how customer information is used to run the storefront, process orders, and support account activity.", "Privacy policy page intro"),
+            ["privacy_sections"] = (JsonSerializer.Serialize(new[] { new { title = "Information We Collect", body = "We may collect account details, contact information, delivery addresses, cart activity, wishlist activity, payment status, and order history." }, new { title = "How We Use It", body = "Information is used to process orders, manage deliveries, provide support, improve the catalogue experience, prevent misuse, and maintain secure account access." }, new { title = "Data Sharing", body = "Order and delivery details may be shared with service providers involved in payment, fulfilment, shipping, hosting, analytics, or customer support." }, new { title = "Your Choices", body = "You can update account information, manage saved addresses, and contact support for reasonable requests about your stored customer data." } }), "Privacy policy sections (JSON array of objects with title+body)"),
+
+            // Return Policy
+            ["return_eyebrow"] = ("Returns", "Return policy page eyebrow"),
+            ["return_title"] = ("Return policy", "Return policy page title"),
+            ["return_intro"] = ("Returns and exchanges are handled carefully to protect product quality, hygiene, and customer satisfaction.", "Return policy page intro"),
+            ["return_sections"] = (JsonSerializer.Serialize(new[] { new { title = "Return Window", body = "Eligible return requests should be raised soon after delivery. Include the order number, product name, reason, and clear photos when relevant." }, new { title = "Condition", body = "Products should be unused, unopened, and returned with original packaging unless the item arrived damaged, incorrect, or defective." }, new { title = "Non-Returnable Items", body = "Opened fragrance, skincare, cosmetic, or hygiene-sensitive products may not qualify for return unless there is a verified issue with the order." }, new { title = "Refunds and Exchanges", body = "Approved returns may be resolved through replacement, exchange, store credit, or refund depending on the order issue and product condition." } }), "Return policy sections (JSON array of objects with title+body)"),
+
+            // Terms & Conditions
+            ["terms_eyebrow"] = ("Terms", "Terms and conditions page eyebrow"),
+            ["terms_title"] = ("Terms and conditions", "Terms and conditions page title"),
+            ["terms_intro"] = ("These terms outline the basic rules for browsing, purchasing, and using the Fragrance Commerce storefront.", "Terms and conditions page intro"),
+            ["terms_sections"] = (JsonSerializer.Serialize(new[] { new { title = "Use of Website", body = "Customers agree to use the website lawfully, provide accurate account and delivery information, and avoid activity that disrupts the store or its services." }, new { title = "Product Information", body = "Product details, prices, images, availability, and offers may be updated as the catalogue changes. We aim to keep listings accurate and clear." }, new { title = "Orders and Payments", body = "Orders are confirmed after successful checkout and payment validation. We may contact customers if information is incomplete or verification is required." }, new { title = "Changes to Terms", body = "These terms may be revised as store operations, products, services, or legal requirements change." } }), "Terms and conditions sections (JSON array of objects with title+body)"),
+
+            // Login page
+            ["login_brand_title"] = ("Welcome back to your luxury fragrance account.", "Login page brand panel title"),
+            ["login_brand_description"] = ("Sign in to revisit your wishlist, orders, and carefully selected fragrance rituals.", "Login page brand panel description"),
+
+            // Signup page
+            ["signup_brand_title"] = ("Begin your fragrance ritual.", "Signup page brand panel title"),
+            ["signup_brand_description"] = ("Create an account to track orders, save favourites, and discover the private house collection.", "Signup page brand panel description"),
+
+            // 404 page
+            ["not_found_title"] = ("The scent you've been searching for has evaporated.", "404 page headline"),
+            ["not_found_description"] = ("Perhaps the fragrance house has moved to a new location, or the page has drifted into the mist. Our private collection awaits your return.", "404 page description")
         };
 
         foreach (var (key, (value, description)) in defaults)

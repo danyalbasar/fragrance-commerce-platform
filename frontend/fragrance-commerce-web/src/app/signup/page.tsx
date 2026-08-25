@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type SyntheticEvent } from "react";
+import { useEffect, useState, type SyntheticEvent } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { register } from "@/services/authService";
 import { useAuth } from "@/contexts/AuthContext";
+import { getPublicSettings } from "@/services/siteSettingsService";
 
 interface FieldErrors {
     firstName?: string;
@@ -45,6 +46,11 @@ export default function SignupPage() {
     const [errors, setErrors] = useState<FieldErrors>({});
     const [formError, setFormError] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [cms, setCms] = useState<Record<string, string>>({});
+
+    useEffect(() => {
+        getPublicSettings().then(setCms).catch(() => {});
+    }, []);
 
     const passwordChecks = {
         length: password.length >= 8,
@@ -159,13 +165,12 @@ export default function SignupPage() {
                         </p>
 
                         <h2 className="mt-5 text-5xl font-normal leading-tight [font-family:var(--font-serif)]">
-                            Begin your fragrance ritual.
+                            {cms.signup_brand_title || "Begin your fragrance ritual."}
                         </h2>
                     </div>
 
                     <p className="max-w-sm text-sm leading-7 text-white/70">
-                        Create an account to track orders, save favourites, and
-                        discover the private house collection.
+                        {cms.signup_brand_description || "Create an account to track orders, save favourites, and discover the private house collection."}
                     </p>
                 </div>
 
