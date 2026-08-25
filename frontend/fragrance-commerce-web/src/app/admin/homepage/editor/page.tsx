@@ -236,6 +236,8 @@ export default function HomepageEditorPage() {
   const [previewScale, setPreviewScale] = useState(1);
   const [contentHeight, setContentHeight] = useState(6000);
   const [templateMenuOpen, setTemplateMenuOpen] = useState(false);
+  const [treeWidth, setTreeWidth] = useState(220);
+  const dragRef = useRef<{ startX: number; startWidth: number } | null>(null);
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const previewContentRef = useRef<HTMLDivElement>(null);
   const templateMenuRef = useRef<HTMLDivElement>(null);
@@ -309,6 +311,27 @@ export default function HomepageEditorPage() {
 
   function update(key: string, value: string) {
     setValues((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function onDividerMouseDown(e: React.MouseEvent) {
+    e.preventDefault();
+    dragRef.current = { startX: e.clientX, startWidth: treeWidth };
+    const onMove = (ev: MouseEvent) => {
+      if (!dragRef.current) return;
+      const delta = ev.clientX - dragRef.current.startX;
+      setTreeWidth(Math.max(160, Math.min(420, dragRef.current.startWidth + delta)));
+    };
+    const onUp = () => {
+      dragRef.current = null;
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
   }
 
   async function handleSave() {
@@ -422,37 +445,136 @@ export default function HomepageEditorPage() {
         </div>
       </div>
 
-      {/* ── Body: 3-panel layout ───────────────────────────────── */}
+      {/* ── Body: sidebar (tree + settings) + preview ──────────────── */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Left sidebar: Section tree */}
-        <div className="flex w-[220px] shrink-0 flex-col border-r border-[#2a2a2a] bg-[#0d0d0d]">
-          <div className="border-b border-[#2a2a2a] px-4 py-3">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/30">
-              {currentTemplate.label}
-            </p>
+        {/* Left panel: Section tree + divider + Settings */}
+        <div className="flex shrink-0 border-r border-[#2a2a2a] bg-[#0d0d0d]">
+          {/* Section tree */}
+          <div
+            className="flex shrink-0 flex-col border-r border-[#2a2a2a] bg-[#0d0d0d]"
+            style={{ width: treeWidth }}
+          >
+            <div className="border-b border-[#2a2a2a] px-4 py-3">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/30">
+                {currentTemplate.label}
+              </p>
+            </div>
+            <div className="flex-1 overflow-y-auto p-2 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/15">
+              {currentTemplate.sections.map((section) => (
+                <button
+                  key={section.id}
+                  type="button"
+                  onClick={() => setActiveSection(section.id)}
+                  onMouseEnter={() => setHoveredSection(section.id)}
+                  onMouseLeave={() => setHoveredSection(null)}
+                  className={`flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-[12px] font-medium transition ${
+                    activeSection === section.id
+                      ? "bg-[var(--luxury-gold)] text-[var(--luxury-ink)]"
+                      : "text-white/50 hover:bg-white/8 hover:text-white"
+                  }`}
+                >
+                  {section.icon}
+                  <span className="truncate">{section.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="flex-1 overflow-y-auto p-2 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/15">
-            {currentTemplate.sections.map((section) => (
-              <button
-                key={section.id}
-                type="button"
-                onClick={() => setActiveSection(section.id)}
-                onMouseEnter={() => setHoveredSection(section.id)}
-                onMouseLeave={() => setHoveredSection(null)}
-                className={`flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-[12px] font-medium transition ${
-                  activeSection === section.id
-                    ? "bg-[var(--luxury-gold)] text-[var(--luxury-ink)]"
-                    : "text-white/50 hover:bg-white/8 hover:text-white"
-                }`}
-              >
-                {section.icon}
-                <span className="truncate">{section.label}</span>
-              </button>
-            ))}
+
+          {/* Draggable divider */}
+          <div
+            onMouseDown={onDividerMouseDown}
+            className="group flex w-1 shrink-0 cursor-col-resize items-center justify-center bg-[#2a2a2a] transition hover:bg-[var(--luxury-gold)]/50"
+          >
+            <div className="h-8 w-0.5 rounded-full bg-white/20 group-hover:bg-white/50" />
+          </div>
+
+          {/* Settings panel */}
+          <div className="flex w-[340px] shrink-0 flex-col bg-[#111]">
+            {currentSection ? (
+              <>
+                <div className="border-b border-[#2a2a2a] px-4 py-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--luxury-gold)]">
+                    {currentTemplate.label}
+                  </p>
+                  <p className="mt-0.5 text-sm font-semibold text-white">{currentSection.label}</p>
+                </div>
+                <div className="flex-1 overflow-y-auto px-4 py-4 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/15">
+                  <div className="space-y-4">
+                    {currentSection.fields.map((field) => {
+                      if (field.type === "list") {
+                        return (
+                          <ListFieldEditor
+                            key={field.key}
+                            fieldKey={field.key}
+                            label={field.label}
+                            values={values}
+                            update={update}
+                          />
+                        );
+                      }
+                      if (field.type === "object-list") {
+                        return (
+                          <ObjectListFieldEditor
+                            key={field.key}
+                            fieldKey={field.key}
+                            label={field.label}
+                            values={values}
+                            update={update}
+                          />
+                        );
+                      }
+                      if (field.type === "product-picker") {
+                        return (
+                          <ProductPickerField
+                            key={field.key}
+                            fieldKey={field.key}
+                            label={field.label}
+                            values={values}
+                            update={update}
+                          />
+                        );
+                      }
+                      return (
+                        <label key={field.key} className="block">
+                          <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40">
+                            {field.label}
+                          </span>
+                          {field.type === "textarea" ? (
+                            <textarea
+                              value={get(field.key)}
+                              onChange={(e) => update(field.key, e.target.value)}
+                              rows={3}
+                              className="mt-1.5 w-full resize-none rounded-lg border border-[#333] bg-[#1a1a1a] px-3 py-2.5 text-sm text-white outline-none transition focus:border-[var(--luxury-gold)]"
+                            />
+                          ) : field.type === "image" ? (
+                            <ImageUploadField
+                              value={get(field.key)}
+                              onChange={(url) => update(field.key, url)}
+                              className="mt-1.5"
+                            />
+                          ) : (
+                            <input
+                              type="text"
+                              value={get(field.key)}
+                              onChange={(e) => update(field.key, e.target.value)}
+                              className="mt-1.5 h-10 w-full rounded-lg border border-[#333] bg-[#1a1a1a] px-3 text-sm text-white outline-none transition focus:border-[var(--luxury-gold)]"
+                            />
+                          )}
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-1 items-center justify-center">
+                <p className="text-xs text-white/30">Select a section to edit</p>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Middle: Preview */}
+        {/* Preview */}
         <div
           ref={previewContainerRef}
           className="relative flex-1 overflow-auto bg-[#1a1a1a]"
@@ -494,91 +616,6 @@ export default function HomepageEditorPage() {
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Right sidebar: Settings panel */}
-        <div className="flex w-[340px] shrink-0 flex-col border-l border-[#2a2a2a] bg-[#111]">
-          {currentSection ? (
-            <>
-              <div className="border-b border-[#2a2a2a] px-4 py-3">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--luxury-gold)]">
-                  {currentTemplate.label}
-                </p>
-                <p className="mt-0.5 text-sm font-semibold text-white">{currentSection.label}</p>
-              </div>
-              <div className="flex-1 overflow-y-auto px-4 py-4 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/15">
-                <div className="space-y-4">
-                  {currentSection.fields.map((field) => {
-                    if (field.type === "list") {
-                      return (
-                        <ListFieldEditor
-                          key={field.key}
-                          fieldKey={field.key}
-                          label={field.label}
-                          values={values}
-                          update={update}
-                        />
-                      );
-                    }
-                    if (field.type === "object-list") {
-                      return (
-                        <ObjectListFieldEditor
-                          key={field.key}
-                          fieldKey={field.key}
-                          label={field.label}
-                          values={values}
-                          update={update}
-                        />
-                      );
-                    }
-                    if (field.type === "product-picker") {
-                      return (
-                        <ProductPickerField
-                          key={field.key}
-                          fieldKey={field.key}
-                          label={field.label}
-                          values={values}
-                          update={update}
-                        />
-                      );
-                    }
-                    return (
-                      <label key={field.key} className="block">
-                        <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40">
-                          {field.label}
-                        </span>
-                        {field.type === "textarea" ? (
-                          <textarea
-                            value={get(field.key)}
-                            onChange={(e) => update(field.key, e.target.value)}
-                            rows={3}
-                            className="mt-1.5 w-full resize-none rounded-lg border border-[#333] bg-[#1a1a1a] px-3 py-2.5 text-sm text-white outline-none transition focus:border-[var(--luxury-gold)]"
-                          />
-                        ) : field.type === "image" ? (
-                          <ImageUploadField
-                            value={get(field.key)}
-                            onChange={(url) => update(field.key, url)}
-                            className="mt-1.5"
-                          />
-                        ) : (
-                          <input
-                            type="text"
-                            value={get(field.key)}
-                            onChange={(e) => update(field.key, e.target.value)}
-                            className="mt-1.5 h-10 w-full rounded-lg border border-[#333] bg-[#1a1a1a] px-3 text-sm text-white outline-none transition focus:border-[var(--luxury-gold)]"
-                          />
-                        )}
-                      </label>
-                    );
-                  })}
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="flex flex-1 items-center justify-center">
-              <p className="text-xs text-white/30">Select a section to edit</p>
-            </div>
-          )}
         </div>
       </div>
     </div>
