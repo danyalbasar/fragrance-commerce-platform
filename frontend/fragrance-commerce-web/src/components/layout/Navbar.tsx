@@ -81,6 +81,9 @@ export default function Navbar() {
         roles.includes("Vendor") ||
         roles.includes("Admin") ||
         roles.includes("SuperAdmin");
+    const isAdminAccount =
+        roles.includes("Admin") ||
+        roles.includes("SuperAdmin");
     const isVendorAccount = roles.includes("Vendor");
     const homeHref = isVendorAccount ? "/vendor" : "/";
 
@@ -636,7 +639,7 @@ export default function Navbar() {
 
                                     {canUseVendorStudio && (
                                         <Link
-                                            href="/vendor"
+                                            href={isAdminAccount ? "/admin" : "/vendor"}
                                             role="menuitem"
                                             onClick={() => setShowAccountMenu(false)}
                                             className="block rounded-lg px-3 py-2 text-sm font-normal transition-all duration-200 hover:bg-[#efe3d0] hover:translate-x-1"
