@@ -123,7 +123,10 @@ public class SiteSettingsService : ISiteSettingsService
             ["product_shipping_text"] = ("Orders are packed carefully and shipped securely. Return and exchange rules can be added here later.", "Product page shipping & returns text"),
             ["pdp_banner_image"] = ("/home/home-ritual.jpg", "Product detail page banner image"),
             ["pdp_banner_title"] = ("A storefront for house labels that still feels tactile.", "Product detail page banner title"),
-            ["pdp_banner_subtitle"] = ("The collection is staged like a real luxury catalogue: restrained navigation, visual hierarchy, product-led imagery, and clear paths into fragrance or skincare.", "Product detail page banner subtitle")
+            ["pdp_banner_subtitle"] = ("The collection is staged like a real luxury catalogue: restrained navigation, visual hierarchy, product-led imagery, and clear paths into fragrance or skincare.", "Product detail page banner subtitle"),
+            ["products_page_banner_image"] = ("/home/home-fragrance.jpg", "Products listing page banner image"),
+            ["products_page_title"] = ("Discover the Collection", "Products listing page title"),
+            ["products_page_subtitle"] = ("Browse perfumes, attars, skincare, and daily essentials from the private house labels.", "Products listing page subtitle")
         };
 
         foreach (var (key, (value, description)) in defaults)

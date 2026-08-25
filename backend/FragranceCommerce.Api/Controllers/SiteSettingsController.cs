@@ -51,7 +51,8 @@ public class SiteSettingsController : ControllerBase
             "house_promises", "newsletter_title", "newsletter_subtitle",
             "cta_title", "cta_subtitle", "cta_button_text", "cta_button_link",
             "product_trust_badges", "product_shipping_text",
-            "pdp_banner_image", "pdp_banner_title", "pdp_banner_subtitle"
+            "pdp_banner_image", "pdp_banner_title", "pdp_banner_subtitle",
+            "products_page_banner_image", "products_page_title", "products_page_subtitle"
         };
 
         var settings = await _settingsService.GetSettingsAsync(keys);

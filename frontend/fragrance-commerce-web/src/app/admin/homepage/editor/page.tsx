@@ -26,7 +26,6 @@ import {
   GripVertical,
   Eye,
   EyeOff,
-  Package,
   Truck,
   RotateCcw,
   Lock,
@@ -41,7 +40,7 @@ import type { Product } from "@/types/product";
 
 /* ── Types ────────────────────────────────────────────────────────── */
 
-type TemplateId = "homepage" | "product";
+type TemplateId = "homepage" | "products";
 
 type HomepageSectionId =
   | "hero"
@@ -55,9 +54,9 @@ type HomepageSectionId =
   | "cta"
   | "banner";
 
-type ProductSectionId = "product_banner" | "product_trust" | "product_shipping";
+type ProductsSectionId = "products_banner" | "product_trust" | "product_shipping";
 
-type SectionId = HomepageSectionId | ProductSectionId;
+type SectionId = HomepageSectionId | ProductsSectionId;
 
 type FieldType =
   | "text"
@@ -193,15 +192,15 @@ const homepageSections: SectionDef[] = [
   },
 ];
 
-const productSections: SectionDef[] = [
+const productsSections: SectionDef[] = [
   {
-    id: "product_banner",
-    label: "Banner",
+    id: "products_banner",
+    label: "Page Banner",
     icon: <ImageIcon size={15} />,
     fields: [
-      { key: "pdp_banner_image", label: "Banner Image", type: "image" },
-      { key: "pdp_banner_title", label: "Title" },
-      { key: "pdp_banner_subtitle", label: "Subtitle", type: "textarea" },
+      { key: "products_page_banner_image", label: "Banner Image", type: "image" },
+      { key: "products_page_title", label: "Title" },
+      { key: "products_page_subtitle", label: "Subtitle", type: "textarea" },
     ],
   },
   {
@@ -220,7 +219,7 @@ const productSections: SectionDef[] = [
 
 const templates: TemplateDef[] = [
   { id: "homepage", label: "Homepage", sections: homepageSections },
-  { id: "product", label: "Product Page", sections: productSections },
+  { id: "products", label: "Products Page", sections: productsSections },
 ];
 
 /* ── Main editor ──────────────────────────────────────────────────── */
@@ -390,7 +389,7 @@ export default function HomepageEditorPage() {
                         : "text-white/70 hover:bg-white/10 hover:text-white"
                     }`}
                   >
-                    {t.id === "homepage" ? <LayoutTemplate size={14} /> : <Package size={14} />}
+                    {t.id === "homepage" ? <LayoutTemplate size={14} /> : <List size={14} />}
                     {t.label}
                     {activeTemplate === t.id && <Check size={14} className="ml-auto" />}
                   </button>
@@ -483,10 +482,10 @@ export default function HomepageEditorPage() {
                     onHover={setHoveredSection}
                   />
                 ) : (
-                  <ProductPreview
+                  <ProductsPagePreview
                     get={get}
                     values={values}
-                    activeSection={activeSection as ProductSectionId}
+                    activeSection={activeSection as ProductsSectionId}
                     hoveredSection={hoveredSection}
                     onSelect={(id) => setActiveSection(id)}
                     onHover={setHoveredSection}
@@ -1143,9 +1142,9 @@ function PreviewCategoryCard({ image, eyebrow, title, text, cta }: { image: stri
   );
 }
 
-/* ── Product Page Preview ─────────────────────────────────────────── */
+/* ── Products Page Preview ─────────────────────────────────────────── */
 
-function ProductPreview({
+function ProductsPagePreview({
   get,
   values,
   activeSection,
@@ -1155,7 +1154,7 @@ function ProductPreview({
 }: {
   get: (key: string, fallback?: string) => string;
   values: Record<string, string>;
-  activeSection: ProductSectionId;
+  activeSection: ProductsSectionId;
   hoveredSection: SectionId | null;
   onSelect: (id: SectionId) => void;
   onHover: (id: SectionId | null) => void;
@@ -1165,127 +1164,121 @@ function ProductPreview({
   if (trustBadges.length === 0) trustBadges = ["100% authentic products", "Free shipping on eligible orders", "Secure payments", "Easy returns and support"];
 
   const shippingText = get("product_shipping_text", "Orders are packed carefully and shipped securely. Return and exchange rules can be added here later.");
-
   const trustIcons = [Shield, Truck, Lock, RotateCcw];
 
   return (
     <div className="bg-[var(--luxury-ivory)]">
-      {/* Breadcrumb */}
-      <div className="px-12 py-6">
-        <div className="mx-auto max-w-[1600px] text-xs uppercase tracking-[0.12em] text-[var(--luxury-muted)]">
-          Home / Category / Product Name
-        </div>
-      </div>
-
-      <div className="px-12 pb-20">
-        <div className="mx-auto grid max-w-[1600px] items-start gap-12 lg:grid-cols-[50%_1fr]">
-          {/* Product images */}
-          <div className="grid items-start gap-5 md:grid-cols-[90px_1fr]">
-            <div className="order-2 flex gap-3 md:order-1 md:flex-col">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-20 w-20 shrink-0 animate-pulse border border-[#d8c8ad] bg-[#efe3d0] md:h-24 md:w-24" />
-              ))}
-            </div>
-            <div className="order-1 border border-[#d8c8ad] bg-[#efe3d0] md:order-2">
-              <div className="relative h-[480px] md:h-[580px]">
-                <div className="absolute inset-0 flex items-center justify-center text-sm text-[var(--luxury-muted)]">
-                  Product images
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Product info */}
-          <div className="lg:pt-4">
-            <div className="flex items-center justify-between">
-              <p className="text-xs uppercase tracking-[0.2em] text-[var(--luxury-gold-strong)] sm:tracking-[0.34em]">Brand Name</p>
-              <Heart size={22} className="text-[var(--luxury-muted)]" />
-            </div>
-            <h1 className="mt-3 text-4xl font-normal leading-tight [font-family:var(--font-serif)] md:text-6xl">Product Name</h1>
-            <p className="mt-5 max-w-xl text-base leading-7 text-[var(--luxury-muted)]">Product description will appear here with details about the fragrance or skincare item.</p>
-            <p className="mt-5 text-3xl font-semibold [font-family:var(--font-serif)]">{"\u20B9"}4,999</p>
-
-            {/* Trust badges - editable section */}
-            <SectionOverlay
-              label="Trust Badges"
-              isActive={activeSection === "product_trust"}
-              isHovered={hoveredSection === "product_trust"}
-              onSelect={() => onSelect("product_trust")}
-              onHover={(h) => onHover(h ? "product_trust" : null)}
-            >
-              <div className="mt-6 grid gap-3 border border-[#d8c8ad] bg-[var(--luxury-paper)] p-5 text-sm text-[var(--luxury-muted)]">
-                {trustBadges.map((badge, i) => {
-                  const Icon = trustIcons[i % trustIcons.length];
-                  return (
-                    <div key={i} className="flex items-center gap-3">
-                      <Icon size={18} />
-                      <span>{badge}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </SectionOverlay>
-
-            {/* Shipping - editable section */}
-            <SectionOverlay
-              label="Shipping & Returns"
-              isActive={activeSection === "product_shipping"}
-              isHovered={hoveredSection === "product_shipping"}
-              onSelect={() => onSelect("product_shipping")}
-              onHover={(h) => onHover(h ? "product_shipping" : null)}
-            >
-              <div className="mt-8 border-t border-[#d8c8ad]">
-                <div className="flex items-center justify-between py-5">
-                  <span className="text-sm font-semibold uppercase tracking-[0.18em]">Shipping & Returns</span>
-                  <ChevronDown size={18} className="text-[var(--luxury-muted)]" />
-                </div>
-                <div className="pb-5 text-sm leading-7 text-[var(--luxury-muted)]">
-                  {shippingText}
-                </div>
-              </div>
-            </SectionOverlay>
-          </div>
-        </div>
-      </div>
-
-      {/* Banner section at bottom */}
+      {/* Page banner - editable */}
       <SectionOverlay
-        label="Banner"
-        isActive={activeSection === "product_banner"}
-        isHovered={hoveredSection === "product_banner"}
-        onSelect={() => onSelect("product_banner")}
-        onHover={(h) => onHover(h ? "product_banner" : null)}
+        label="Page Banner"
+        isActive={activeSection === "products_banner"}
+        isHovered={hoveredSection === "products_banner"}
+        onSelect={() => onSelect("products_banner")}
+        onHover={(h) => onHover(h ? "products_banner" : null)}
       >
-        <section className="border-t border-[#d8c8ad] px-12 py-20">
-          <div className="mx-auto grid max-w-[1800px] gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-            <div className="relative aspect-[3/2] overflow-hidden bg-[#efe0ca]">
-              {get("pdp_banner_image") ? (
-                <Image src={get("pdp_banner_image")} alt={get("pdp_banner_title", "Banner")} fill sizes="720px" className="object-cover" unoptimized />
-              ) : (
-                <div className="flex h-full items-center justify-center text-sm text-[var(--luxury-muted)]">Add a banner image</div>
-              )}
-            </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">Maison Notes</p>
-              <h2 className="mt-3 text-6xl font-normal leading-tight [font-family:var(--font-serif)]">
-                {get("pdp_banner_title", "A storefront for house labels that still feels tactile.")}
-              </h2>
-              <p className="mt-6 max-w-2xl text-base leading-8 text-[var(--luxury-muted)]">
-                {get("pdp_banner_subtitle", "The collection is staged like a real luxury catalogue: restrained navigation, visual hierarchy, product-led imagery, and clear paths into fragrance or skincare.")}
+        <section className="relative h-[340px] overflow-hidden bg-[#1a1a1a]">
+          {get("products_page_banner_image") && (
+            <Image
+              src={get("products_page_banner_image")}
+              alt="Products"
+              fill
+              sizes="1440px"
+              className="object-cover"
+              unoptimized
+            />
+          )}
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(22,18,13,0.2)_0%,rgba(22,18,13,0.65)_100%)]" />
+          <div className="relative flex h-full items-center px-12">
+            <div className="max-w-2xl text-white">
+              <h1 className="text-5xl font-normal [font-family:var(--font-serif)]">
+                {get("products_page_title", "Discover the Collection")}
+              </h1>
+              <p className="mt-4 max-w-xl text-base leading-8 text-white/78">
+                {get("products_page_subtitle", "Browse perfumes, attars, skincare, and daily essentials from the private house labels.")}
               </p>
             </div>
           </div>
         </section>
       </SectionOverlay>
-    </div>
-  );
-}
 
-/* ── Re-export Heart icon for preview ─────────────────────────────── */
-function Heart({ size, className }: { size: number; className?: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-    </svg>
+      {/* Search/filter bar */}
+      <section className="border-b border-[#d8c8ad] bg-[var(--luxury-paper)] px-8 py-4">
+        <div className="mx-auto flex max-w-[1800px] items-center gap-4">
+          <div className="h-10 flex-1 rounded-full border border-[#d8c8ad] bg-[var(--luxury-input)]" />
+          <div className="flex gap-2">
+            {["All", "Men", "Women", "Unisex"].map((g) => (
+              <span key={g} className="rounded-full border border-[#d8c8ad] px-4 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-[var(--luxury-muted)]">
+                {g}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Product grid */}
+      <section className="px-8 py-10">
+        <div className="mx-auto max-w-[1800px]">
+          <div className="mb-6 text-sm text-[var(--luxury-muted)]">
+            Showing 12 products
+          </div>
+          <div className="grid gap-6 md:grid-cols-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="border border-[#d8c8ad] bg-[var(--luxury-paper)]">
+                <div className="aspect-[1/1.08] animate-pulse bg-[#efe3d0]" />
+                <div className="flex flex-col gap-2 p-4">
+                  <div className="h-3 w-20 animate-pulse rounded bg-[#e5d9c4]" />
+                  <div className="h-5 w-32 animate-pulse rounded bg-[#e5d9c4]" />
+                  <div className="h-4 w-16 animate-pulse rounded bg-[#e5d9c4]" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Trust badges - shared with product detail */}
+      <SectionOverlay
+        label="Trust Badges"
+        isActive={activeSection === "product_trust"}
+        isHovered={hoveredSection === "product_trust"}
+        onSelect={() => onSelect("product_trust")}
+        onHover={(h) => onHover(h ? "product_trust" : null)}
+      >
+        <section className="border-t border-[#d8c8ad] bg-[var(--luxury-paper)] px-8 py-8">
+          <div className="mx-auto grid max-w-[1800px] gap-4 sm:grid-cols-2 md:grid-cols-4">
+            {trustBadges.map((badge, i) => {
+              const Icon = trustIcons[i % trustIcons.length];
+              return (
+                <div key={i} className="flex items-center gap-3 text-sm text-[var(--luxury-muted)]">
+                  <Icon size={18} />
+                  <span>{badge}</span>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      </SectionOverlay>
+
+      {/* Shipping - shared with product detail */}
+      <SectionOverlay
+        label="Shipping & Returns"
+        isActive={activeSection === "product_shipping"}
+        isHovered={hoveredSection === "product_shipping"}
+        onSelect={() => onSelect("product_shipping")}
+        onHover={(h) => onHover(h ? "product_shipping" : null)}
+      >
+        <section className="border-t border-[#d8c8ad] px-8 py-8">
+          <div className="mx-auto max-w-[1800px]">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold uppercase tracking-[0.18em]">Shipping & Returns</span>
+              <ChevronDown size={18} className="text-[var(--luxury-muted)]" />
+            </div>
+            <div className="mt-3 text-sm leading-7 text-[var(--luxury-muted)]">
+              {shippingText}
+            </div>
+          </div>
+        </section>
+      </SectionOverlay>
+    </div>
   );
 }

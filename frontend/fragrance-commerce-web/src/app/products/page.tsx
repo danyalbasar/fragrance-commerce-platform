@@ -62,6 +62,12 @@ function ProductsContent() {
     const [showMobileFilters, setShowMobileFilters] = useState(false);
     const [quickAddProduct, setQuickAddProduct] = useState<Product | null>(null);
 
+    const [pageBanner, setPageBanner] = useState({
+        image: "/banners/fragrance-men.jpg",
+        title: "FRAGRANCE",
+        subtitle: "Refined selections for signature rituals, daily polish, and memorable evenings.",
+    });
+
     const mobileFiltersRef = useRef<HTMLElement>(null);
     useFocusTrap(mobileFiltersRef, showMobileFilters, () => setShowMobileFilters(false));
     useScrollLock(showMobileFilters);
@@ -75,9 +81,9 @@ function ProductsContent() {
         selectedCategory &&
         skincareCategories.includes(selectedCategory.name);
 
-    let heroTitle = "FRAGRANCE";
+    let heroTitle = pageBanner.title;
     let breadcrumbTitle = "Fragrance";
-    let heroImage = "/banners/fragrance-men.jpg";
+    let heroImage = pageBanner.image;
 
     if (isSkincare) {
         heroTitle = "SKINCARE";
@@ -94,6 +100,9 @@ function ProductsContent() {
         heroImage = "/banners/fragrance-women.jpg";
     } else if (gender === "Unisex") {
         heroImage = "/banners/fragrance-unisex.jpg";
+    } else if (!gender && !categoryId && !searchFromUrl) {
+        heroImage = pageBanner.image;
+        heroTitle = pageBanner.title;
     } else {
         heroImage = "/banners/fragrance-men.jpg";
     }
@@ -114,6 +123,14 @@ function ProductsContent() {
                 setGenders(parsedGenders as ProductGender[]);
             }
         } catch { /* keep defaults */ }
+
+        if (siteSettings.products_page_banner_image) {
+            setPageBanner({
+                image: siteSettings.products_page_banner_image || pageBanner.image,
+                title: siteSettings.products_page_title || pageBanner.title,
+                subtitle: siteSettings.products_page_subtitle || pageBanner.subtitle,
+            });
+        }
     }
 
     async function loadProducts() {
@@ -521,7 +538,7 @@ function ProductsContent() {
                         {heroTitle}
                     </h1>
                     <p className="mt-4 max-w-lg text-sm leading-7 text-white/76 md:text-base">
-                        Refined selections for signature rituals, daily polish, and memorable evenings.
+                        {isSkincare ? "Gentle formulations for daily care, polish, and confident skin." : pageBanner.subtitle}
                     </p>
                 </div>
             </section>
