@@ -436,32 +436,37 @@ export default function HomepageEditorPage() {
 
   useEffect(() => {
     const container = previewContainerRef.current;
-    const content = previewContentRef.current;
     if (!container) return;
     let raf = 0;
 
-    function update() {
+    function updateScale() {
       const scale = Math.min(container!.clientWidth / 1440, 1);
       setPreviewScale((prev) => (prev === scale ? prev : scale));
-      if (content) {
-        setContentHeight((prev) => (prev === content.scrollHeight ? prev : content.scrollHeight));
-      }
     }
 
-    update();
+    updateScale();
 
     const ro = new ResizeObserver(() => {
       cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(update);
+      raf = requestAnimationFrame(updateScale);
     });
     ro.observe(container);
-    if (content) ro.observe(content);
 
     return () => {
       cancelAnimationFrame(raf);
       ro.disconnect();
     };
   }, [values, activeTemplate]);
+
+  useEffect(() => {
+    const content = previewContentRef.current;
+    if (!content) return;
+    let raf = requestAnimationFrame(() => {
+      const h = content.scrollHeight;
+      setContentHeight((prev) => (prev === h ? prev : h));
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [values, activeTemplate, previewScale]);
 
   useEffect(() => {
     const firstSection = currentTemplate.sections[0];
