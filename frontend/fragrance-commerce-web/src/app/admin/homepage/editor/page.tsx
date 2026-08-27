@@ -109,6 +109,7 @@ interface Field {
   label: string;
   type?: FieldType;
   options?: { label: string; value: string }[];
+  objectKeys?: { k1: string; k2: string; label1: string; label2: string; addLabel: string };
 }
 
 interface SectionDef {
@@ -300,7 +301,18 @@ const faqSections: SectionDef[] = [
       { key: "faq_eyebrow", label: "Eyebrow" },
       { key: "faq_title", label: "Title" },
       { key: "faq_intro", label: "Intro", type: "textarea" },
-      { key: "faq_sections", label: "Q&A Sections", type: "object-list" },
+      {
+        key: "faq_sections",
+        label: "Q&A Sections",
+        type: "object-list",
+        objectKeys: {
+          k1: "question",
+          k2: "answer",
+          label1: "Question",
+          label2: "Answer",
+          addLabel: "Add Question",
+        },
+      },
     ],
   },
 ];
@@ -314,7 +326,7 @@ const privacySections: SectionDef[] = [
       { key: "privacy_eyebrow", label: "Eyebrow" },
       { key: "privacy_title", label: "Title" },
       { key: "privacy_intro", label: "Intro", type: "textarea" },
-      { key: "privacy_sections", label: "Sections", type: "object-list" },
+      { key: "privacy_sections", label: "Sections", type: "object-list", objectKeys: { k1: "title", k2: "body", label1: "Title", label2: "Body", addLabel: "Add Section" } },
     ],
   },
 ];
@@ -328,7 +340,7 @@ const returnSections: SectionDef[] = [
       { key: "return_eyebrow", label: "Eyebrow" },
       { key: "return_title", label: "Title" },
       { key: "return_intro", label: "Intro", type: "textarea" },
-      { key: "return_sections", label: "Sections", type: "object-list" },
+      { key: "return_sections", label: "Sections", type: "object-list", objectKeys: { k1: "title", k2: "body", label1: "Title", label2: "Body", addLabel: "Add Section" } },
     ],
   },
 ];
@@ -342,7 +354,7 @@ const termsSections: SectionDef[] = [
       { key: "terms_eyebrow", label: "Eyebrow" },
       { key: "terms_title", label: "Title" },
       { key: "terms_intro", label: "Intro", type: "textarea" },
-      { key: "terms_sections", label: "Sections", type: "object-list" },
+      { key: "terms_sections", label: "Sections", type: "object-list", objectKeys: { k1: "title", k2: "body", label1: "Title", label2: "Body", addLabel: "Add Section" } },
     ],
   },
 ];
@@ -797,6 +809,7 @@ function ProductDetailPreview({
                             label={field.label}
                             values={values}
                             update={update}
+                            objectKeys={field.objectKeys}
                           />
                         );
                       }
@@ -1074,21 +1087,32 @@ function ObjectListFieldEditor({
   label,
   values,
   update,
+  objectKeys,
 }: {
   fieldKey: string;
   label: string;
   values: Record<string, string>;
   update: (key: string, value: string) => void;
+  objectKeys?: { k1: string; k2: string; label1: string; label2: string; addLabel: string };
 }) {
-  let items: { title: string; text: string }[] = [];
-  try {
-    items = JSON.parse(values[fieldKey] || "[]");
-  } catch {
-    items = [];
+  const k1 = objectKeys?.k1 ?? "title";
+  const k2 = objectKeys?.k2 ?? "text";
+  const label1 = objectKeys?.label1 ?? "Title";
+  const label2 = objectKeys?.label2 ?? "Text";
+  const addLabel = objectKeys?.addLabel ?? "Add Promise";
+  const items = loadItems(values[fieldKey]);
+
+  function setItems(newItems: Record<string, string>[]) {
+    update(fieldKey, JSON.stringify(newItems));
   }
 
-  function setItems(newItems: { title: string; text: string }[]) {
-    update(fieldKey, JSON.stringify(newItems));
+  function loadItems(v: string): Record<string, string>[] {
+    try {
+      const parsed = JSON.parse(v || "[]");
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
   }
 
   return (
@@ -1113,22 +1137,22 @@ function ObjectListFieldEditor({
             </div>
             <input
               type="text"
-              value={item.title}
-              placeholder="Title"
+              value={item[k1] ?? ""}
+              placeholder={label1}
               onChange={(e) => {
                 const copy = [...items];
-                copy[i] = { ...copy[i], title: e.target.value };
+                copy[i] = { ...copy[i], [k1]: e.target.value };
                 setItems(copy);
               }}
               className="h-9 w-full rounded-lg border border-[#333] bg-[#222] px-3 text-sm text-white outline-none transition focus:border-[var(--luxury-gold)]"
             />
             <textarea
-              value={item.text}
-              placeholder="Description"
+              value={item[k2] ?? ""}
+              placeholder={label2}
               rows={2}
               onChange={(e) => {
                 const copy = [...items];
-                copy[i] = { ...copy[i], text: e.target.value };
+                copy[i] = { ...copy[i], [k2]: e.target.value };
                 setItems(copy);
               }}
               className="w-full resize-none rounded-lg border border-[#333] bg-[#222] px-3 py-2 text-sm text-white outline-none transition focus:border-[var(--luxury-gold)]"
@@ -1137,10 +1161,10 @@ function ObjectListFieldEditor({
         ))}
         <button
           type="button"
-          onClick={() => setItems([...items, { title: "", text: "" }])}
+          onClick={() => setItems([...items, { [k1]: "", [k2]: "" }])}
           className="flex h-9 w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-[#444] text-xs text-white/40 transition hover:border-[var(--luxury-gold)] hover:text-[var(--luxury-gold)]"
         >
-          <Plus size={12} /> Add Promise
+          <Plus size={12} /> {addLabel}
         </button>
       </div>
     </div>
