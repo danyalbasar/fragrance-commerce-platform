@@ -876,6 +876,7 @@ function ProductDetailPreview({
         <div
           ref={previewContainerRef}
           className="relative flex-1 overflow-auto bg-[#1a1a1a]"
+          style={{ scrollbarGutter: "stable" }}
         >
           <div className="w-full overflow-hidden">
             <div
