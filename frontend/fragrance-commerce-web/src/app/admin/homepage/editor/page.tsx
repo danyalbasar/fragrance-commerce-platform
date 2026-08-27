@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -46,7 +46,7 @@ import { productService } from "@/services/productService";
 import ImageUploadField from "@/components/common/ImageUploadField";
 import type { Product } from "@/types/product";
 
-/* ── Types ────────────────────────────────────────────────────────── */
+/* â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 type TemplateId =
   | "homepage"
@@ -124,7 +124,7 @@ interface TemplateDef {
   sections: SectionDef[];
 }
 
-/* ── Section definitions ──────────────────────────────────────────── */
+/* â”€â”€ Section definitions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 const linkOptions = [
   { label: "Home", value: "/" },
@@ -397,7 +397,7 @@ const templates: TemplateDef[] = [
   { id: "not-found", label: "404 Page", sections: notFoundSections },
 ];
 
-/* ── Main editor ──────────────────────────────────────────────────── */
+/* â”€â”€ Main editor â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 export default function HomepageEditorPage() {
   const [values, setValues] = useState<Record<string, string>>({});
@@ -468,6 +468,16 @@ export default function HomepageEditorPage() {
       setActiveSection(firstSection.id);
     }
   }, [activeTemplate, currentTemplate, activeSection]);
+
+  useEffect(() => {
+    const container = previewContainerRef.current;
+    if (!container) return;
+    const target = container.querySelector<HTMLElement>(`[data-section="${activeSection}"]`);
+    if (!target) return;
+    const scale = previewScale || 1;
+    const top = Math.max(0, target.offsetTop * scale - 12);
+    container.scrollTo({ top, behavior: "smooth" });
+  }, [activeSection, activeTemplate, previewScale]);
 
   async function loadSettings() {
     try {
@@ -587,6 +597,7 @@ function ProductDetailPreview({
         label="Trust Badges"
         isActive={activeSection === "pdp_trust"}
         isHovered={hoveredSection === "pdp_trust"}
+        sectionId="pdp_trust"
         onSelect={() => onSelect("pdp_trust")}
         onHover={(h) => onHover(h ? "pdp_trust" : null)}
       >
@@ -610,6 +621,7 @@ function ProductDetailPreview({
         label="Shipping & Returns"
         isActive={activeSection === "pdp_shipping"}
         isHovered={hoveredSection === "pdp_shipping"}
+        sectionId="pdp_shipping"
         onSelect={() => onSelect("pdp_shipping")}
         onHover={(h) => onHover(h ? "pdp_shipping" : null)}
       >
@@ -631,7 +643,7 @@ function ProductDetailPreview({
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-[#111]">
-      {/* ── Top bar ─────────────────────────────────────────────── */}
+      {/* â”€â”€ Top bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="flex h-14 shrink-0 items-center border-b border-[#2a2a2a] bg-[#111] px-4">
         {/* Left: Back */}
         <Link
@@ -703,7 +715,7 @@ function ProductDetailPreview({
         </div>
       </div>
 
-      {/* ── Body: sidebar (tree + settings) + preview ──────────────── */}
+      {/* â”€â”€ Body: sidebar (tree + settings) + preview â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left panel: Section tree + divider + Settings */}
         <div className="flex shrink-0 border-r border-[#2a2a2a] bg-[#0d0d0d]">
@@ -985,7 +997,7 @@ function ProductDetailPreview({
   );
 }
 
-/* ── Custom Field Editors ─────────────────────────────────────────── */
+/* â”€â”€ Custom Field Editors â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 function ListFieldEditor({
   fieldKey,
@@ -1239,9 +1251,10 @@ function ProductPickerField({
   );
 }
 
-/* ── Section Overlay ──────────────────────────────────────────────── */
+/* â”€â”€ Section Overlay â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 function SectionOverlay({
+  sectionId,
   label,
   isActive,
   isHovered,
@@ -1249,6 +1262,7 @@ function SectionOverlay({
   onHover,
   children,
 }: {
+  sectionId: string;
   label: string;
   isActive: boolean;
   isHovered: boolean;
@@ -1258,6 +1272,7 @@ function SectionOverlay({
 }) {
   return (
     <div
+      data-section={sectionId}
       className={`relative cursor-pointer transition-all ${
         isActive
           ? "ring-2 ring-[var(--luxury-gold)] ring-offset-2 ring-offset-[#222]"
@@ -1285,7 +1300,7 @@ function SectionOverlay({
   );
 }
 
-/* ── Homepage Preview ─────────────────────────────────────────────── */
+/* â”€â”€ Homepage Preview â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 function HomepagePreview({
   get,
@@ -1308,6 +1323,7 @@ function HomepagePreview({
         label="Hero"
         isActive={activeSection === "hero"}
         isHovered={hoveredSection === "hero"}
+        sectionId="hero"
         onSelect={() => onSelect("hero")}
         onHover={(h) => onHover(h ? "hero" : null)}
       >
@@ -1342,6 +1358,7 @@ function HomepagePreview({
         label="Value Bar"
         isActive={activeSection === "valuebar"}
         isHovered={hoveredSection === "valuebar"}
+        sectionId="valuebar"
         onSelect={() => onSelect("valuebar")}
         onHover={(h) => onHover(h ? "valuebar" : null)}
       >
@@ -1358,17 +1375,17 @@ function HomepagePreview({
             <span className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold-strong)]">View all products</span>
           </div>
           <div className="grid gap-6 lg:grid-cols-2">
-            <SectionOverlay label="Category Panel 1" isActive={activeSection === "panel1"} isHovered={hoveredSection === "panel1"} onSelect={() => onSelect("panel1")} onHover={(h) => onHover(h ? "panel1" : null)}>
+            <SectionOverlay sectionId="panel1" label="Category Panel 1" isActive={activeSection === "panel1"} isHovered={hoveredSection === "panel1"} onSelect={() => onSelect("panel1")} onHover={(h) => onHover(h ? "panel1" : null)}>
               <PreviewCategoryCard image={get("category_panel_1_image", "/home/home-fragrance.jpg")} eyebrow={get("category_panel_1_eyebrow", "Fragrance Wardrobe")} title={get("category_panel_1_title", "Perfumes, attars, and customised blends")} text={get("category_panel_1_text", "From saffroned warmth to smoky cedar...")} cta={get("category_panel_1_cta", "Shop Fragrance")} />
             </SectionOverlay>
-            <SectionOverlay label="Category Panel 2" isActive={activeSection === "panel2"} isHovered={hoveredSection === "panel2"} onSelect={() => onSelect("panel2")} onHover={(h) => onHover(h ? "panel2" : null)}>
+            <SectionOverlay sectionId="panel2" label="Category Panel 2" isActive={activeSection === "panel2"} isHovered={hoveredSection === "panel2"} onSelect={() => onSelect("panel2")} onHover={(h) => onHover(h ? "panel2" : null)}>
               <PreviewCategoryCard image={get("category_panel_2_image", "/home/home-skincare.jpg")} eyebrow={get("category_panel_2_eyebrow", "Skin Rituals")} title={get("category_panel_2_title", "Cleansers, creams, and polished care")} text={get("category_panel_2_text", "Soft-focus skincare essentials...")} cta={get("category_panel_2_cta", "Shop Skincare")} />
             </SectionOverlay>
           </div>
         </div>
       </section>
 
-      <SectionOverlay label="Featured Products" isActive={activeSection === "featured"} isHovered={hoveredSection === "featured"} onSelect={() => onSelect("featured")} onHover={(h) => onHover(h ? "featured" : null)}>
+      <SectionOverlay sectionId="featured" label="Featured Products" isActive={activeSection === "featured"} isHovered={hoveredSection === "featured"} onSelect={() => onSelect("featured")} onHover={(h) => onHover(h ? "featured" : null)}>
         <section className="bg-[#efe3d0] px-8 py-20">
           <div className="mx-auto max-w-[1800px]">
             <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -1428,13 +1445,13 @@ function HomepagePreview({
         </div>
       </section>
 
-      <SectionOverlay label="Quote" isActive={activeSection === "quote"} isHovered={hoveredSection === "quote"} onSelect={() => onSelect("quote")} onHover={(h) => onHover(h ? "quote" : null)}>
+      <SectionOverlay sectionId="quote" label="Quote" isActive={activeSection === "quote"} isHovered={hoveredSection === "quote"} onSelect={() => onSelect("quote")} onHover={(h) => onHover(h ? "quote" : null)}>
         <section className="relative overflow-hidden bg-[var(--luxury-ink)] px-8 py-28 text-[var(--luxury-paper)]">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(182,138,66,0.14)_0%,rgba(22,18,13,0)_68%)]" />
           <div className="relative mx-auto max-w-4xl text-center">
             <span aria-hidden className="block text-7xl leading-[0.6] text-[var(--luxury-gold)] [font-family:var(--font-serif)]">&ldquo;</span>
             <blockquote className="mt-4 text-4xl font-normal leading-relaxed [font-family:var(--font-serif)]">
-              {get("quote_text", "A fragrance should be worn like a signature — quietly, deliberately, and entirely your own.")}
+              {get("quote_text", "A fragrance should be worn like a signature â€” quietly, deliberately, and entirely your own.")}
             </blockquote>
             <p className="mt-8 text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold)]">
               {get("quote_attribution", "The House Motto")}
@@ -1443,7 +1460,7 @@ function HomepagePreview({
         </section>
       </SectionOverlay>
 
-      <SectionOverlay label="Maison Notes" isActive={activeSection === "banner"} isHovered={hoveredSection === "banner"} onSelect={() => onSelect("banner")} onHover={(h) => onHover(h ? "banner" : null)}>
+      <SectionOverlay sectionId="banner" label="Maison Notes" isActive={activeSection === "banner"} isHovered={hoveredSection === "banner"} onSelect={() => onSelect("banner")} onHover={(h) => onHover(h ? "banner" : null)}>
         <section className="px-8 py-20">
           <div className="mx-auto grid max-w-[1800px] gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
             <div className="relative aspect-[3/2] overflow-hidden bg-[#efe0ca]">
@@ -1462,7 +1479,7 @@ function HomepagePreview({
         </section>
       </SectionOverlay>
 
-      <SectionOverlay label="House Promises" isActive={activeSection === "promises"} isHovered={hoveredSection === "promises"} onSelect={() => onSelect("promises")} onHover={(h) => onHover(h ? "promises" : null)}>
+      <SectionOverlay sectionId="promises" label="House Promises" isActive={activeSection === "promises"} isHovered={hoveredSection === "promises"} onSelect={() => onSelect("promises")} onHover={(h) => onHover(h ? "promises" : null)}>
         <section className="border-y border-[#d8c8ad] bg-[var(--luxury-paper)] px-8 py-16">
           <div className="mx-auto grid max-w-[1800px] gap-8 md:grid-cols-3">
             {(() => {
@@ -1484,7 +1501,7 @@ function HomepagePreview({
         </section>
       </SectionOverlay>
 
-      <SectionOverlay label="Newsletter" isActive={activeSection === "newsletter"} isHovered={hoveredSection === "newsletter"} onSelect={() => onSelect("newsletter")} onHover={(h) => onHover(h ? "newsletter" : null)}>
+      <SectionOverlay sectionId="newsletter" label="Newsletter" isActive={activeSection === "newsletter"} isHovered={hoveredSection === "newsletter"} onSelect={() => onSelect("newsletter")} onHover={(h) => onHover(h ? "newsletter" : null)}>
         <section className="bg-[#efe3d0] px-8 py-20">
           <div className="mx-auto max-w-2xl text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">The List</p>
@@ -1498,7 +1515,7 @@ function HomepagePreview({
         </section>
       </SectionOverlay>
 
-      <SectionOverlay label="Bottom CTA" isActive={activeSection === "cta"} isHovered={hoveredSection === "cta"} onSelect={() => onSelect("cta")} onHover={(h) => onHover(h ? "cta" : null)}>
+      <SectionOverlay sectionId="cta" label="Bottom CTA" isActive={activeSection === "cta"} isHovered={hoveredSection === "cta"} onSelect={() => onSelect("cta")} onHover={(h) => onHover(h ? "cta" : null)}>
         <section className="px-8 py-28 text-center">
           <div className="mx-auto max-w-3xl">
             <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">Begin Again</p>
@@ -1542,7 +1559,7 @@ function PreviewCategoryCard({ image, eyebrow, title, text, cta }: { image: stri
   );
 }
 
-/* ── Products Page Preview ─────────────────────────────────────────── */
+/* â”€â”€ Products Page Preview â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 function ProductsPagePreview({
   get,
@@ -1565,6 +1582,7 @@ function ProductsPagePreview({
         label="Page Banner"
         isActive={activeSection === "products_banner"}
         isHovered={hoveredSection === "products_banner"}
+        sectionId="products_banner"
         onSelect={() => onSelect("products_banner")}
         onHover={(h) => onHover(h ? "products_banner" : null)}
       >
@@ -1651,6 +1669,7 @@ function ContactPreview({
         label="Contact Info"
         isActive={activeSection === "contact_content"}
         isHovered={hoveredSection === "contact_content"}
+        sectionId="contact_content"
         onSelect={() => onSelect("contact_content")}
         onHover={(h) => onHover(h ? "contact_content" : null)}
       >
@@ -1742,6 +1761,7 @@ function InfoPagePreview({
         label="Page Content"
         isActive={activeSection === "info_content"}
         isHovered={hoveredSection === "info_content"}
+        sectionId="info_content"
         onSelect={() => onSelect("info_content")}
         onHover={(h) => onHover(h ? "info_content" : null)}
       >
@@ -1796,6 +1816,7 @@ function AuthPreview({
         label="Brand Panel"
         isActive={activeSection === "auth_brand"}
         isHovered={hoveredSection === "auth_brand"}
+        sectionId="auth_brand"
         onSelect={() => onSelect("auth_brand")}
         onHover={(h) => onHover(h ? "auth_brand" : null)}
       >
@@ -1847,6 +1868,7 @@ function NotFoundPreview({
         label="404 Content"
         isActive={activeSection === "not_found_content"}
         isHovered={hoveredSection === "not_found_content"}
+        sectionId="not_found_content"
         onSelect={() => onSelect("not_found_content")}
         onHover={(h) => onHover(h ? "not_found_content" : null)}
       >
