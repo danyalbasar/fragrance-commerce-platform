@@ -438,28 +438,29 @@ export default function HomepageEditorPage() {
     const container = previewContainerRef.current;
     const content = previewContentRef.current;
     if (!container) return;
+    let raf = 0;
 
-    function updateScale() {
-      const containerWidth = container!.clientWidth;
-      const scale = Math.min(containerWidth / 1440, 1);
-      setPreviewScale(scale);
+    function update() {
+      const scale = Math.min(container!.clientWidth / 1440, 1);
+      setPreviewScale((prev) => (prev === scale ? prev : scale));
+      if (content) {
+        setContentHeight((prev) => (prev === content.scrollHeight ? prev : content.scrollHeight));
+      }
     }
 
-    function updateHeight() {
-      if (content) setContentHeight(content.scrollHeight);
-    }
-
-    updateScale();
-    updateHeight();
+    update();
 
     const ro = new ResizeObserver(() => {
-      updateScale();
-      updateHeight();
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(update);
     });
     ro.observe(container);
     if (content) ro.observe(content);
 
-    return () => ro.disconnect();
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+    };
   }, [values, activeTemplate]);
 
   useEffect(() => {
@@ -477,7 +478,8 @@ export default function HomepageEditorPage() {
     const scale = previewScale || 1;
     const top = Math.max(0, target.offsetTop * scale - 12);
     container.scrollTo({ top, behavior: "smooth" });
-  }, [activeSection, activeTemplate, previewScale]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeSection, activeTemplate]);
 
   async function loadSettings() {
     try {
