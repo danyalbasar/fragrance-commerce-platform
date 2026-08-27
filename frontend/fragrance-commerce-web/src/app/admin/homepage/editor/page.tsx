@@ -101,12 +101,14 @@ type FieldType =
   | "image"
   | "list"
   | "object-list"
-  | "product-picker";
+  | "product-picker"
+  | "link";
 
 interface Field {
   key: string;
   label: string;
   type?: FieldType;
+  options?: { label: string; value: string }[];
 }
 
 interface SectionDef {
@@ -124,6 +126,23 @@ interface TemplateDef {
 
 /* ── Section definitions ──────────────────────────────────────────── */
 
+const linkOptions = [
+  { label: "Home", value: "/" },
+  { label: "All Products", value: "/products" },
+  { label: "Men's Fragrance", value: "/products?gender=Men" },
+  { label: "Women's Fragrance", value: "/products?gender=Women" },
+  { label: "Unisex Fragrance", value: "/products?gender=Unisex" },
+  { label: "Perfumes", value: "/products?category=Perfume" },
+  { label: "Attars", value: "/products?category=Attar" },
+  { label: "Face Wash", value: "/products?category=Face%20Wash" },
+  { label: "Skincare", value: "/products?category=Fairness%20Cream" },
+  { label: "Contact", value: "/contact" },
+  { label: "FAQ", value: "/faq" },
+  { label: "Privacy Policy", value: "/privacy-policy" },
+  { label: "Return Policy", value: "/return-policy" },
+  { label: "Terms & Conditions", value: "/terms-and-conditions" },
+];
+
 const homepageSections: SectionDef[] = [
   {
     id: "hero",
@@ -134,9 +153,9 @@ const homepageSections: SectionDef[] = [
       { key: "hero_title", label: "Title" },
       { key: "hero_subtitle", label: "Subtitle", type: "textarea" },
       { key: "hero_cta_text", label: "Primary CTA Text" },
-      { key: "hero_cta_link", label: "Primary CTA Link" },
+      { key: "hero_cta_link", label: "Primary CTA Link", type: "link", options: linkOptions },
       { key: "hero_secondary_cta_text", label: "Secondary CTA Text" },
-      { key: "hero_secondary_cta_link", label: "Secondary CTA Link" },
+      { key: "hero_secondary_cta_link", label: "Secondary CTA Link", type: "link", options: linkOptions },
     ],
   },
   {
@@ -154,7 +173,7 @@ const homepageSections: SectionDef[] = [
       { key: "category_panel_1_eyebrow", label: "Eyebrow" },
       { key: "category_panel_1_title", label: "Title" },
       { key: "category_panel_1_text", label: "Text", type: "textarea" },
-      { key: "category_panel_1_link", label: "Link" },
+      { key: "category_panel_1_link", label: "Link", type: "link", options: linkOptions },
       { key: "category_panel_1_cta", label: "CTA Text" },
     ],
   },
@@ -167,7 +186,7 @@ const homepageSections: SectionDef[] = [
       { key: "category_panel_2_eyebrow", label: "Eyebrow" },
       { key: "category_panel_2_title", label: "Title" },
       { key: "category_panel_2_text", label: "Text", type: "textarea" },
-      { key: "category_panel_2_link", label: "Link" },
+      { key: "category_panel_2_link", label: "Link", type: "link", options: linkOptions },
       { key: "category_panel_2_cta", label: "CTA Text" },
     ],
   },
@@ -213,7 +232,7 @@ const homepageSections: SectionDef[] = [
       { key: "cta_title", label: "Title" },
       { key: "cta_subtitle", label: "Subtitle", type: "textarea" },
       { key: "cta_button_text", label: "Button Text" },
-      { key: "cta_button_link", label: "Button Link" },
+      { key: "cta_button_link", label: "Button Link", type: "link", options: linkOptions },
     ],
   },
   {
@@ -771,6 +790,27 @@ function ProductDetailPreview({
                             values={values}
                             update={update}
                           />
+                        );
+                      }
+                      if (field.type === "link") {
+                        return (
+                          <label key={field.key} className="block">
+                            <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40">
+                              {field.label}
+                            </span>
+                            <select
+                              value={get(field.key)}
+                              onChange={(e) => update(field.key, e.target.value)}
+                              className="mt-1.5 h-10 w-full rounded-lg border border-[#333] bg-[#1a1a1a] px-3 text-sm text-white outline-none transition focus:border-[var(--luxury-gold)]"
+                            >
+                              <option value="">Select a page...</option>
+                              {field.options?.map((opt) => (
+                                <option key={opt.value} value={opt.value}>
+                                  {opt.label}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
                         );
                       }
                       return (
