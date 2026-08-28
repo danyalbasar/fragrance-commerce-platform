@@ -25,6 +25,9 @@ import {
   Search,
   GripVertical,
   Eye,
+  TrendingUp,
+  Sparkles,
+  Building2,
   EyeOff,
   Truck,
   RotateCcw,
@@ -65,10 +68,13 @@ type TemplateId =
 type HomepageSectionId =
   | "hero"
   | "valuebar"
-  | "headers"
+  | "panels"
   | "panel1"
   | "panel2"
   | "featured"
+  | "best_sellers"
+  | "new_arrivals"
+  | "brands"
   | "quote"
   | "promises"
   | "newsletter"
@@ -163,28 +169,20 @@ const homepageSections: SectionDef[] = [
     ],
   },
   {
-    id: "headers",
-    label: "Section Headings",
-    icon: <Type size={15} />,
-    fields: [
-      { key: "categories_eyebrow", label: "Panels Eyebrow" },
-      { key: "categories_title", label: "Panels Title" },
-      { key: "categories_link_text", label: "Panels Link Text" },
-      { key: "featured_eyebrow", label: "Featured Eyebrow" },
-      { key: "best_sellers_eyebrow", label: "Best Sellers Eyebrow" },
-      { key: "best_sellers_title", label: "Best Sellers Title" },
-      { key: "best_sellers_link_text", label: "Best Sellers Link Text" },
-      { key: "new_arrivals_eyebrow", label: "New Arrivals Eyebrow" },
-      { key: "new_arrivals_title", label: "New Arrivals Title" },
-      { key: "new_arrivals_link_text", label: "New Arrivals Link Text" },
-      { key: "brands_eyebrow", label: "Brands Eyebrow" },
-    ],
-  },
-  {
     id: "valuebar",
     label: "Value Bar",
     icon: <List size={15} />,
     fields: [{ key: "value_bar_items", label: "Items", type: "list" }],
+  },
+  {
+    id: "panels",
+    label: "Category Panels",
+    icon: <MousePointer2 size={15} />,
+    fields: [
+      { key: "categories_eyebrow", label: "Eyebrow" },
+      { key: "categories_title", label: "Title" },
+      { key: "categories_link_text", label: "Link Text" },
+    ],
   },
   {
     id: "panel1",
@@ -222,6 +220,32 @@ const homepageSections: SectionDef[] = [
       { key: "featured_section_subtitle", label: "Section Subtitle", type: "textarea" },
       { key: "featured_product_ids", label: "Select Products", type: "product-picker" },
     ],
+  },
+  {
+    id: "best_sellers",
+    label: "Best Sellers",
+    icon: <TrendingUp size={15} />,
+    fields: [
+      { key: "best_sellers_eyebrow", label: "Eyebrow" },
+      { key: "best_sellers_title", label: "Title" },
+      { key: "best_sellers_link_text", label: "Link Text" },
+    ],
+  },
+  {
+    id: "new_arrivals",
+    label: "New Arrivals",
+    icon: <Sparkles size={15} />,
+    fields: [
+      { key: "new_arrivals_eyebrow", label: "Eyebrow" },
+      { key: "new_arrivals_title", label: "Title" },
+      { key: "new_arrivals_link_text", label: "Link Text" },
+    ],
+  },
+  {
+    id: "brands",
+    label: "Brands Strip",
+    icon: <Building2 size={15} />,
+    fields: [{ key: "brands_eyebrow", label: "Eyebrow" }],
   },
   {
     id: "quote",
@@ -1567,13 +1591,15 @@ function HomepagePreview({
 
       <section className="px-8 py-20">
         <div className="mx-auto max-w-[1800px]">
-          <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div>
+          <SectionOverlay sectionId="panels" label="Category Panels" isActive={activeSection === "panels"} isHovered={hoveredSection === "panels"} onSelect={() => onSelect("panels")} onHover={(h) => onHover(h ? "panels" : null)}>
+            <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+              <div>
 <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">{get("categories_eyebrow", "Enter the House")}</p>
 <h2 className="mt-3 text-5xl font-normal [font-family:var(--font-serif)]">{get("categories_title", "Choose your ritual.")}</h2>
+              </div>
+              <span className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold-strong)]">{get("categories_link_text", "View all products")}</span>
             </div>
-            <span className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold-strong)]">View all products</span>
-          </div>
+          </SectionOverlay>
           <div className="grid gap-6 lg:grid-cols-2">
             <SectionOverlay sectionId="panel1" label="Category Panel 1" isActive={activeSection === "panel1"} isHovered={hoveredSection === "panel1"} onSelect={() => onSelect("panel1")} onHover={(h) => onHover(h ? "panel1" : null)}>
               <PreviewCategoryCard image={get("category_panel_1_image", "/home/home-fragrance.jpg")} eyebrow={get("category_panel_1_eyebrow", "Fragrance Wardrobe")} title={get("category_panel_1_title", "Perfumes, attars, and customised blends")} text={get("category_panel_1_text", "From saffroned warmth to smoky cedar...")} cta={get("category_panel_1_cta", "Shop Fragrance")} />
@@ -1637,39 +1663,57 @@ function HomepagePreview({
         </section>
       </SectionOverlay>
 
-      <section className="px-8 py-20">
-        <div className="mx-auto max-w-[1800px]">
-          <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div>
+      <SectionOverlay sectionId="best_sellers" label="Best Sellers" isActive={activeSection === "best_sellers"} isHovered={hoveredSection === "best_sellers"} onSelect={() => onSelect("best_sellers")} onHover={(h) => onHover(h ? "best_sellers" : null)}>
+        <section className="px-8 py-20">
+          <div className="mx-auto max-w-[1800px]">
+            <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+              <div>
 <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">{get("best_sellers_eyebrow", "Most Loved")}</p>
 <h2 className="mt-3 text-5xl font-normal [font-family:var(--font-serif)]">{get("best_sellers_title", "The best sellers.")}</h2>
+              </div>
+              <span className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold-strong)]">{get("best_sellers_link_text", "View all")}</span>
             </div>
-            <span className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold-strong)]">View all</span>
+            <div className="grid gap-6 md:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="aspect-[1/1.08] animate-pulse rounded-[var(--luxury-radius)] bg-[#efe3d0]" />
+              ))}
+            </div>
           </div>
-          <div className="grid gap-6 md:grid-cols-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="aspect-[1/1.08] animate-pulse rounded-[var(--luxury-radius)] bg-[#efe3d0]" />
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
+      </SectionOverlay>
 
-      <section className="bg-[#efe3d0] px-8 py-20">
-        <div className="mx-auto max-w-[1800px]">
-          <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div>
+      <SectionOverlay sectionId="new_arrivals" label="New Arrivals" isActive={activeSection === "new_arrivals"} isHovered={hoveredSection === "new_arrivals"} onSelect={() => onSelect("new_arrivals")} onHover={(h) => onHover(h ? "new_arrivals" : null)}>
+        <section className="bg-[#efe3d0] px-8 py-20">
+          <div className="mx-auto max-w-[1800px]">
+            <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+              <div>
 <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">{get("new_arrivals_eyebrow", "Just Arrived")}</p>
 <h2 className="mt-3 text-5xl font-normal [font-family:var(--font-serif)]">{get("new_arrivals_title", "New arrivals.")}</h2>
+              </div>
+              <span className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold-strong)]">{get("new_arrivals_link_text", "Explore new")}</span>
             </div>
-            <span className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold-strong)]">Explore new</span>
+            <div className="grid gap-6 md:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="aspect-[1/1.08] animate-pulse rounded-[var(--luxury-radius)] bg-[#ead9c0]" />
+              ))}
+            </div>
           </div>
-          <div className="grid gap-6 md:grid-cols-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="aspect-[1/1.08] animate-pulse rounded-[var(--luxury-radius)] bg-[#ead9c0]" />
-            ))}
+        </section>
+      </SectionOverlay>
+
+      <SectionOverlay sectionId="brands" label="Brands Strip" isActive={activeSection === "brands"} isHovered={hoveredSection === "brands"} onSelect={() => onSelect("brands")} onHover={(h) => onHover(h ? "brands" : null)}>
+        <section className="border-y border-[#d8c8ad] bg-[rgba(255,250,242,0.72)] px-8 py-12">
+          <div className="mx-auto max-w-[1800px] text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-muted)]">{get("brands_eyebrow", "The Houses & Partners")}</p>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-x-12 gap-y-6">
+              {["Aurum House", "Maison Vela", "Saffron Atelier", "Cedar & Co."].map((brand) => (
+                <span key={brand} className="text-base font-normal uppercase tracking-[0.16em] text-[var(--luxury-muted)] [font-family:var(--font-serif)]">{brand}</span>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </SectionOverlay>
+
 
       <SectionOverlay sectionId="quote" label="Quote" isActive={activeSection === "quote"} isHovered={hoveredSection === "quote"} onSelect={() => onSelect("quote")} onHover={(h) => onHover(h ? "quote" : null)}>
         <section className="relative overflow-hidden bg-[var(--luxury-ink)] px-8 py-28 text-[var(--luxury-paper)]">
