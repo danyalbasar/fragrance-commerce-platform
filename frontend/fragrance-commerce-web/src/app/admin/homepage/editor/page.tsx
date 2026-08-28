@@ -39,6 +39,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import {
+  getSiteSetting,
   getSiteSettings,
   updateSiteSetting,
 } from "@/services/siteSettingsService";
@@ -505,6 +506,41 @@ export default function HomepageEditorPage() {
       settings.forEach((s) => {
         map[s.key] = s.value;
       });
+      let featuredIds: string[] = [];
+      try {
+        featuredIds = JSON.parse(map["featured_product_ids"] || "[]");
+      } catch {
+        featuredIds = [];
+      }
+      if (!Array.isArray(featuredIds) || featuredIds.length === 0) {
+        try {
+          const [allProducts, houseBrandsRaw] = await Promise.all([
+            productService.getAll(),
+            getSiteSetting("house_brands").catch(() => null),
+          ]);
+          const houseBrands: string[] = houseBrandsRaw?.value
+            ? (JSON.parse(houseBrandsRaw.value) as string[])
+            : [];
+          const inStock = allProducts.filter(
+            (product) =>
+              product.images.length > 0 &&
+              product.variants.some((variant) => variant.stockQuantity > 0)
+          );
+          const autoPicked = houseBrands.length > 0
+            ? houseBrands
+                .map((brand) => inStock.find((product) => product.brandName === brand))
+                .filter((product): product is typeof allProducts[0] => Boolean(product))
+            : [];
+          const chosen = (autoPicked.length > 0 ? autoPicked : inStock).slice(0, 3);
+          if (chosen.length > 0) {
+            const ids = chosen.map((p) => p.id);
+            map["featured_product_ids"] = JSON.stringify(ids);
+            updateSiteSetting("featured_product_ids", JSON.stringify(ids)).catch(() => {});
+          }
+        } catch {
+          /* keep empty */
+        }
+      }
       setValues(map);
     } catch {
       setError("Could not load settings.");

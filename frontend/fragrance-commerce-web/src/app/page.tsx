@@ -219,6 +219,34 @@ export default function Home() {
               if (mapped.length > 0) setFeatured(mapped);
             })
             .catch(() => { /* keep default */ });
+        } else {
+          productService.getAll().then((all) => {
+            const inStock = all.filter(
+              (product) =>
+                product.images.length > 0 &&
+                product.variants.some((variant) => variant.stockQuantity > 0)
+            );
+            const autoPicked = houseBrands
+              ? [...houseBrands.map((brand) => inStock.find((product) => product.brandName === brand))]
+                  .filter((product): product is typeof all[0] => Boolean(product))
+              : [];
+            const featuredSource = autoPicked.length > 0 ? autoPicked : inStock;
+            const chosen = featuredSource.slice(0, 3);
+            if (chosen.length > 0) {
+              const mapped: FeaturedProduct[] = chosen.map((p) => {
+                const variant = p.variants[0];
+                return {
+                  brand: p.brandName || "",
+                  name: p.name,
+                  category: variant?.variantName || p.categoryName || "",
+                  price: variant?.sellingPrice ? `\u20B9${variant.sellingPrice.toLocaleString("en-IN")}` : "",
+                  image: p.images[0]?.imageUrl || "",
+                  href: `/products/${p.id}`,
+                };
+              });
+              setFeatured(mapped);
+            }
+          }).catch(() => { /* keep default */ });
         }
       } catch { /* keep default */ }
 
