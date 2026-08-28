@@ -77,7 +77,7 @@ type HomepageSectionId =
 
 type ProductsSectionId = "products_banner";
 
-type ProductDetailSectionId = "pdp_trust" | "pdp_shipping";
+type ProductDetailSectionId = "pdp_trust" | "pdp_shipping" | "pdp_banner";
 
 type ContactSectionId = "contact_content";
 
@@ -282,6 +282,7 @@ const productsSections: SectionDef[] = [
       { key: "products_page_banner_image", label: "Banner Image", type: "image" },
       { key: "products_page_title", label: "Title" },
       { key: "products_page_subtitle", label: "Subtitle", type: "textarea" },
+      { key: "products_eyebrow", label: "Eyebrow" },
     ],
   },
 ];
@@ -292,6 +293,18 @@ const productDetailSections: SectionDef[] = [
     label: "Trust Badges",
     icon: <Shield size={15} />,
     fields: [{ key: "product_trust_badges", label: "Badges", type: "list" }],
+  },
+  {
+    id: "pdp_banner",
+    label: "Banner",
+    icon: <ImageIcon size={15} />,
+    fields: [
+      { key: "pdp_banner_image", label: "Banner Image", type: "image" },
+      { key: "pdp_banner_title", label: "Title" },
+      { key: "pdp_banner_subtitle", label: "Subtitle", type: "textarea" },
+      { key: "pdp_banner_eyebrow", label: "Eyebrow" },
+      { key: "pdp_similar_eyebrow", label: "Similar Products Eyebrow" },
+    ],
   },
   {
     id: "pdp_shipping",
@@ -307,11 +320,13 @@ const contactSections: SectionDef[] = [
     label: "Contact Info",
     icon: <Mail size={15} />,
     fields: [
+      { key: "contact_eyebrow", label: "Eyebrow" },
       { key: "contact_heading", label: "Heading" },
       { key: "contact_description", label: "Description", type: "textarea" },
       { key: "contact_email", label: "Email" },
       { key: "contact_phone", label: "Phone" },
       { key: "contact_address", label: "Address" },
+      { key: "contact_response_label", label: "Response Time Label" },
       { key: "contact_response_text", label: "Response Time Text", type: "textarea" },
     ],
   },
@@ -390,6 +405,8 @@ const loginSections: SectionDef[] = [
     label: "Brand Panel",
     icon: <KeyRound size={15} />,
     fields: [
+      { key: "login_eyebrow", label: "Eyebrow" },
+      { key: "login_form_eyebrow", label: "Form Eyebrow" },
       { key: "login_brand_title", label: "Title" },
       { key: "login_brand_description", label: "Description", type: "textarea" },
     ],
@@ -402,6 +419,8 @@ const signupSections: SectionDef[] = [
     label: "Brand Panel",
     icon: <UserPlus size={15} />,
     fields: [
+      { key: "signup_eyebrow", label: "Eyebrow" },
+      { key: "signup_form_eyebrow", label: "Form Eyebrow" },
       { key: "signup_brand_title", label: "Title" },
       { key: "signup_brand_description", label: "Description", type: "textarea" },
     ],
@@ -414,6 +433,7 @@ const notFoundSections: SectionDef[] = [
     label: "404 Content",
     icon: <AlertTriangle size={15} />,
     fields: [
+      { key: "not_found_eyebrow", label: "Eyebrow" },
       { key: "not_found_title", label: "Headline" },
       { key: "not_found_description", label: "Description", type: "textarea" },
     ],
@@ -670,6 +690,31 @@ function ProductDetailPreview({
           <div className="mt-4 h-12 w-48 rounded-full bg-[var(--luxury-gold)]/20" />
         </div>
       </section>
+
+      {/* Banner */}
+      <SectionOverlay
+        label="Banner"
+        isActive={activeSection === "pdp_banner"}
+        isHovered={hoveredSection === "pdp_banner"}
+        sectionId="pdp_banner"
+        onSelect={() => onSelect("pdp_banner")}
+        onHover={(h) => onHover(h ? "pdp_banner" : null)}
+      >
+        <section className="grid items-center gap-10 border-t border-[#d8c8ad] px-8 py-12 lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="aspect-[3/2] bg-[#efe0ca]" />
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">
+              {get("pdp_banner_eyebrow", "Maison Notes")}
+            </p>
+            <h2 className="mt-3 text-3xl font-normal [font-family:var(--font-serif)]">
+              {get("pdp_banner_title", "A storefront for house labels that still feels tactile.")}
+            </h2>
+            <p className="mt-6 max-w-2xl text-base leading-8 text-[var(--luxury-muted)]">
+              {get("pdp_banner_subtitle", "The collection is staged like a real luxury catalogue.")}
+            </p>
+          </div>
+        </section>
+      </SectionOverlay>
 
       {/* Trust badges */}
       <SectionOverlay
@@ -1781,6 +1826,9 @@ function ProductsPagePreview({
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(22,18,13,0.2)_0%,rgba(22,18,13,0.65)_100%)]" />
           <div className="relative flex h-full items-center px-12">
             <div className="max-w-2xl text-white">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.38em] text-[var(--luxury-gold)]">
+                {get("products_eyebrow", "Curated Collection")}
+              </p>
               <h1 className="text-5xl font-normal [font-family:var(--font-serif)]">
                 {get("products_page_title", "Discover the Collection")}
               </h1>
@@ -1858,7 +1906,7 @@ function ContactPreview({
           <div className="mx-auto grid max-w-6xl items-start gap-16 lg:grid-cols-[0.85fr_1.15fr]">
             <div>
               <p className="font-normal uppercase tracking-[0.24em] text-[var(--luxury-gold-strong)]">
-                {get("contact_heading", "Contact us").split(" ").length > 0 ? "Contact" : "Contact"}
+                {get("contact_eyebrow", "Contact")}
               </p>
               <h1 className="mt-5 text-5xl font-normal leading-[1.1] [font-family:var(--font-serif)] md:text-7xl">
                 {get("contact_heading", "Contact us")}
@@ -1890,7 +1938,7 @@ function ContactPreview({
                 </div>
               </div>
               <div className="mt-12 border-t border-[#d8c8ad] pt-8">
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--luxury-gold-strong)]">Response Time</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--luxury-gold-strong)]">{get("contact_response_label", "Response Time")}</p>
                 <p className="mt-3 text-base leading-7 text-[var(--luxury-muted)]">
                   {get("contact_response_text", "Most messages are reviewed within one business day. Include your order number if your message is about a purchase.")}
                 </p>
@@ -2005,7 +2053,7 @@ function AuthPreview({
           <div className="hidden w-[40%] bg-[var(--luxury-ink)] p-10 text-[var(--luxury-paper)] lg:flex lg:flex-col lg:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.38em] text-[var(--luxury-gold)]">
-                Fragrance Commerce
+                {get(`${prefix}_eyebrow`, "Fragrance Commerce")}
               </p>
               <h1 className="mt-5 text-5xl font-normal leading-tight [font-family:var(--font-serif)]">
                 {get(`${prefix}_brand_title`, prefix === "login" ? "Welcome back to your luxury fragrance account." : "Begin your fragrance ritual.")}
@@ -2059,7 +2107,7 @@ function NotFoundPreview({
               404
             </div>
             <p className="font-normal uppercase tracking-[0.24em] text-[var(--luxury-gold-strong)]">
-              Page Not Found
+              {get("not_found_eyebrow", "Page Not Found")}
             </p>
             <h1 className="mt-5 text-4xl font-normal leading-[1.1] [font-family:var(--font-serif)] sm:text-6xl md:text-7xl">
               {get("not_found_title", "The scent you've been searching for has evaporated.")}

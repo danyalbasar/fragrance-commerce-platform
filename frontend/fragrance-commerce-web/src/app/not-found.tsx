@@ -40,7 +40,7 @@ export default function NotFoundPage() {
           {/* Content */}
           <div className="max-w-2xl">
             <p className="font-normal uppercase tracking-[0.24em] text-[var(--luxury-gold-strong)]">
-              Page Not Found
+              {cms.not_found_eyebrow || "Page Not Found"}
             </p>
 
             <h1 className="mt-5 text-4xl font-normal leading-[1.1] [font-family:var(--font-serif)] sm:text-6xl md:text-7xl">

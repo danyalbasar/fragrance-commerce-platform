@@ -68,6 +68,8 @@ function ProductsContent() {
         subtitle: "Refined selections for signature rituals, daily polish, and memorable evenings.",
     });
 
+    const [productsEyebrow, setProductsEyebrow] = useState("Curated Collection");
+
     const mobileFiltersRef = useRef<HTMLElement>(null);
     useFocusTrap(mobileFiltersRef, showMobileFilters, () => setShowMobileFilters(false));
     useScrollLock(showMobileFilters);
@@ -130,6 +132,10 @@ function ProductsContent() {
                 title: siteSettings.products_page_title || pageBanner.title,
                 subtitle: siteSettings.products_page_subtitle || pageBanner.subtitle,
             });
+        }
+
+        if (siteSettings.products_eyebrow) {
+            setProductsEyebrow(siteSettings.products_eyebrow);
         }
     }
 
@@ -532,7 +538,7 @@ function ProductsContent() {
 
                 <div className="absolute bottom-8 left-4 max-w-2xl pr-4 sm:left-6 md:bottom-10 md:left-16">
                     <p className="mb-4 text-xs font-semibold uppercase tracking-[0.22em] text-[var(--luxury-gold)] sm:tracking-[0.38em]">
-                        Curated Collection
+                        {productsEyebrow}
                     </p>
                     <h1 className="text-4xl font-normal tracking-normal text-white [font-family:var(--font-serif)] sm:text-5xl md:text-7xl">
                         {heroTitle}

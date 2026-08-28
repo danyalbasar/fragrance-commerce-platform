@@ -66,7 +66,7 @@ export default function ContactPage() {
             <section className="mx-auto grid max-w-6xl items-start gap-16 lg:grid-cols-[0.85fr_1.15fr]">
                 <div>
                     <p className="font-normal uppercase tracking-[0.24em] text-[var(--luxury-gold-strong)]">
-                        Contact
+                        {cms.contact_eyebrow || "Contact"}
                     </p>
 
                     <h1 className="mt-5 text-5xl font-normal leading-[1.1] [font-family:var(--font-serif)] md:text-7xl">
@@ -97,7 +97,7 @@ export default function ContactPage() {
 
                     <div className="mt-12 border-t border-[#d8c8ad] pt-8">
                         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--luxury-gold-strong)]">
-                            Response Time
+                            {cms.contact_response_label || "Response Time"}
                         </p>
                         <p className="mt-3 text-base leading-7 text-[var(--luxury-muted)]">
                             {cms.contact_response_text || "Most messages are reviewed within one business day. Include your order number if your message is about a purchase."}

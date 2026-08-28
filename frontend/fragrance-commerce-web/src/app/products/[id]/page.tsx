@@ -87,6 +87,8 @@ function ProductDetailsContent() {
     bannerImage: "/home/home-ritual.jpg",
     bannerTitle: "A storefront for house labels that still feels tactile.",
     bannerSubtitle: "The collection is staged like a real luxury catalogue: restrained navigation, visual hierarchy, product-led imagery, and clear paths into fragrance or skincare.",
+    bannerEyebrow: "Maison Notes",
+    similarEyebrow: "You May Also Like",
     trustBadges: ["100% authentic products", "Free shipping on eligible orders", "Secure payments", "Easy returns and support"] as string[],
     shippingText: "Orders are packed carefully and shipped securely. Return and exchange rules can be added here later.",
   });
@@ -98,6 +100,8 @@ function ProductDetailsContent() {
         bannerImage: settings.pdp_banner_image || "/home/home-ritual.jpg",
         bannerTitle: settings.pdp_banner_title || "A storefront for house labels that still feels tactile.",
         bannerSubtitle: settings.pdp_banner_subtitle || "The collection is staged like a real luxury catalogue.",
+        bannerEyebrow: settings.pdp_banner_eyebrow || "Maison Notes",
+        similarEyebrow: settings.pdp_similar_eyebrow || "You May Also Like",
         trustBadges: badges.length > 0 ? badges : ["100% authentic products", "Free shipping on eligible orders", "Secure payments", "Easy returns and support"],
         shippingText: settings.product_shipping_text || "Orders are packed carefully and shipped securely. Return and exchange rules can be added here later.",
       });
@@ -840,7 +844,7 @@ function ProductDetailsContent() {
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">
-              Maison Notes
+              {pdpSettings.bannerEyebrow}
             </p>
             <h2 className="mt-3 text-3xl font-normal leading-tight [font-family:var(--font-serif)] sm:text-4xl md:text-6xl">
               {pdpSettings.bannerTitle}
@@ -856,7 +860,7 @@ function ProductDetailsContent() {
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--luxury-gold-strong)] sm:tracking-[0.34em]">
-              You May Also Like
+              {pdpSettings.similarEyebrow}
             </p>
             <h2 className="mt-3 text-3xl font-normal [font-family:var(--font-serif)] sm:text-4xl">
               More products like this

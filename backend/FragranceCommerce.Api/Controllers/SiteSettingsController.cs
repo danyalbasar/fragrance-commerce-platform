@@ -56,16 +56,18 @@ public class SiteSettingsController : ControllerBase
             "brands_eyebrow", "maison_notes_eyebrow", "newsletter_eyebrow", "cta_eyebrow",
             "product_trust_badges", "product_shipping_text",
             "pdp_banner_image", "pdp_banner_title", "pdp_banner_subtitle",
+            "pdp_banner_eyebrow", "pdp_similar_eyebrow",
             "products_page_banner_image", "products_page_title", "products_page_subtitle",
+            "products_eyebrow",
             "contact_heading", "contact_description", "contact_email", "contact_phone",
-            "contact_address", "contact_response_text",
+            "contact_address", "contact_response_text", "contact_eyebrow", "contact_response_label",
             "faq_eyebrow", "faq_title", "faq_intro", "faq_sections",
             "privacy_eyebrow", "privacy_title", "privacy_intro", "privacy_sections",
             "return_eyebrow", "return_title", "return_intro", "return_sections",
             "terms_eyebrow", "terms_title", "terms_intro", "terms_sections",
-            "login_brand_title", "login_brand_description",
-            "signup_brand_title", "signup_brand_description",
-            "not_found_title", "not_found_description"
+            "login_eyebrow", "login_form_eyebrow", "login_brand_title", "login_brand_description",
+            "signup_eyebrow", "signup_form_eyebrow", "signup_brand_title", "signup_brand_description",
+            "not_found_eyebrow", "not_found_title", "not_found_description"
         };
 
         var settings = await _settingsService.GetSettingsAsync(keys);

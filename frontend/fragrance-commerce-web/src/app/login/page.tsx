@@ -70,7 +70,7 @@ export default function LoginPage() {
                 <div className="hidden bg-[var(--luxury-ink)] p-10 text-[var(--luxury-paper)] lg:flex lg:flex-col lg:justify-between">
                     <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.38em] text-[var(--luxury-gold)]">
-                            Fragrance Commerce
+                            {cms.login_eyebrow || "Fragrance Commerce"}
                         </p>
 
                         <h1 className="mt-5 text-5xl font-normal leading-tight [font-family:var(--font-serif)]">
@@ -88,7 +88,7 @@ export default function LoginPage() {
                     className="w-full p-5 sm:p-8 md:p-10"
                 >
                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--luxury-gold-strong)] sm:tracking-[0.34em]">
-                        Account Sign In
+                        {cms.login_form_eyebrow || "Account Sign In"}
                     </p>
 
                     <h2 className="mt-3 text-3xl font-normal [font-family:var(--font-serif)] sm:text-4xl">

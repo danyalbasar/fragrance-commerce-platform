@@ -144,9 +144,14 @@ public class SiteSettingsService : ISiteSettingsService
             ["products_page_banner_image"] = ("/home/home-fragrance.jpg", "Products listing page banner image"),
             ["products_page_title"] = ("Discover the Collection", "Products listing page title"),
             ["products_page_subtitle"] = ("Browse perfumes, attars, skincare, and daily essentials from the private house labels.", "Products listing page subtitle"),
+            ["products_eyebrow"] = ("Curated Collection", "Products listing page banner eyebrow"),
+            ["pdp_banner_eyebrow"] = ("Maison Notes", "Product detail page banner eyebrow"),
+            ["pdp_similar_eyebrow"] = ("You May Also Like", "Product detail page similar products eyebrow"),
 
             // Contact page
             ["contact_heading"] = ("Contact us", "Contact page heading"),
+            ["contact_eyebrow"] = ("Contact", "Contact page eyebrow"),
+            ["contact_response_label"] = ("Response Time", "Contact page response time label"),
             ["contact_description"] = ("Reach out for help with orders, product selection, account questions, or delivery support.", "Contact page description"),
             ["contact_email"] = ("care@fragrancehouse.test", "Contact page email address"),
             ["contact_phone"] = ("+91 98765 43210", "Contact page phone number"),
@@ -178,14 +183,19 @@ public class SiteSettingsService : ISiteSettingsService
             ["terms_sections"] = (JsonSerializer.Serialize(new[] { new { title = "Use of Website", body = "Customers agree to use the website lawfully, provide accurate account and delivery information, and avoid activity that disrupts the store or its services." }, new { title = "Product Information", body = "Product details, prices, images, availability, and offers may be updated as the catalogue changes. We aim to keep listings accurate and clear." }, new { title = "Orders and Payments", body = "Orders are confirmed after successful checkout and payment validation. We may contact customers if information is incomplete or verification is required." }, new { title = "Changes to Terms", body = "These terms may be revised as store operations, products, services, or legal requirements change." } }), "Terms and conditions sections (JSON array of objects with title+body)"),
 
             // Login page
+            ["login_eyebrow"] = ("Fragrance Commerce", "Login page eyebrow"),
+            ["login_form_eyebrow"] = ("Account Sign In", "Login page form eyebrow"),
             ["login_brand_title"] = ("Welcome back to your luxury fragrance account.", "Login page brand panel title"),
             ["login_brand_description"] = ("Sign in to revisit your wishlist, orders, and carefully selected fragrance rituals.", "Login page brand panel description"),
 
             // Signup page
+            ["signup_eyebrow"] = ("Fragrance Commerce", "Signup page eyebrow"),
+            ["signup_form_eyebrow"] = ("Account Registration", "Signup page form eyebrow"),
             ["signup_brand_title"] = ("Begin your fragrance ritual.", "Signup page brand panel title"),
             ["signup_brand_description"] = ("Create an account to track orders, save favourites, and discover the private house collection.", "Signup page brand panel description"),
 
             // 404 page
+            ["not_found_eyebrow"] = ("Page Not Found", "404 page eyebrow"),
             ["not_found_title"] = ("The scent you've been searching for has evaporated.", "404 page headline"),
             ["not_found_description"] = ("Perhaps the fragrance house has moved to a new location, or the page has drifted into the mist. Our private collection awaits your return.", "404 page description")
         };
