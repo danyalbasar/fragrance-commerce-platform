@@ -66,75 +66,76 @@ export default function ImageUploadField({
 
     return (
         <div className={className}>
-            {label && (
-                <span className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40">
-                    {label}
-                </span>
-            )}
+            <input
+                ref={inputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+            />
 
-            {/* URL input */}
-            <div className="flex gap-2">
-                <input
-                    type="url"
-                    value={value}
-                    onChange={(e) => onChange(e.target.value)}
-                    placeholder="https://... or upload below"
-                    className="h-10 flex-1 rounded-lg border border-[#333] bg-[#1a1a1a] px-3 text-sm text-white outline-none transition focus:border-[var(--luxury-gold)]"
-                />
-                <input
-                    ref={inputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="hidden"
-                />
-                <button
-                    type="button"
-                    onClick={() => inputRef.current?.click()}
-                    disabled={uploading}
-                    className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-[#444] bg-[#222] px-3 text-xs font-medium text-white/70 transition hover:border-[var(--luxury-gold)] hover:text-white disabled:opacity-50"
-                >
-                    {uploading ? (
-                        <Loader2 size={14} className="animate-spin" />
-                    ) : (
-                        <Upload size={14} />
-                    )}
-                    Upload
-                </button>
-            </div>
-
-            {/* Drag & drop zone + preview */}
-            {value ? (
-                <div className="group relative mt-2 aspect-video w-full overflow-hidden rounded-lg border border-[#333]">
-                    <Image
-                        src={value}
-                        alt="Preview"
-                        fill
-                        sizes="340px"
-                        className="object-cover"
-                        unoptimized
-                    />
+            {/* Centered upload / preview area */}
+            <div
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={handleDrop}
+                onClick={() => inputRef.current?.click()}
+                className="group relative flex aspect-video w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-dashed border-[#444] bg-[#1a1a1a] transition hover:border-[var(--luxury-gold)] hover:bg-[#1e1e1e]"
+            >
+                {value ? (
+                    <>
+                        <Image
+                            src={value}
+                            alt="Preview"
+                            fill
+                            sizes="340px"
+                            className="object-cover"
+                            unoptimized
+                        />
+                        <div className="absolute inset-0 bg-black/45 opacity-0 transition group-hover:opacity-100" />
+                        <button
+                            type="button"
+                            onClick={() => inputRef.current?.click()}
+                            disabled={uploading}
+                            title="Replace image"
+                            className="absolute inset-0 z-10 flex items-center justify-center"
+                        >
+                            <span className="inline-flex items-center gap-2 rounded-full bg-black/70 px-4 py-2 text-xs font-medium text-white shadow-lg">
+                                {uploading ? (
+                                    <Loader2 size={14} className="animate-spin" />
+                                ) : (
+                                    <Upload size={14} />
+                                )}
+                                {uploading ? "Uploading..." : "Upload"}
+                            </span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onChange("");
+                            }}
+                            title="Remove image"
+                            className="absolute right-2 top-2 z-20 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-red-600"
+                        >
+                            <X size={14} />
+                        </button>
+                    </>
+                ) : (
                     <button
                         type="button"
-                        onClick={() => onChange("")}
-                        className="absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition hover:bg-red-600 group-hover:opacity-100"
+                        onClick={() => inputRef.current?.click()}
+                        disabled={uploading}
+                        className="inline-flex items-center gap-2 rounded-full border border-[#444] bg-[#222] px-4 py-2 text-xs font-medium text-white/70 transition hover:border-[var(--luxury-gold)] hover:text-white disabled:opacity-50"
                     >
-                        <X size={14} />
+                        {uploading ? (
+                            <Loader2 size={14} className="animate-spin" />
+                        ) : (
+                            <Upload size={14} />
+                        )}
+                        {uploading ? "Uploading..." : "Upload"}
                     </button>
-                </div>
-            ) : (
-                <div
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={handleDrop}
-                    onClick={() => inputRef.current?.click()}
-                    className="mt-2 flex aspect-video w-full cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-[#444] bg-[#1a1a1a] transition hover:border-[var(--luxury-gold)] hover:bg-[#1e1e1e]"
-                >
-                    <Upload size={24} className="text-white/25" />
-                    <p className="mt-2 text-[11px] text-white/30">
-                        Drag & drop or click to upload
-                    </p>
-                </div>
-            )}
+                )}
+            </div>
 
             {error && (
                 <p className="mt-1.5 text-[11px] text-red-400">{error}</p>
