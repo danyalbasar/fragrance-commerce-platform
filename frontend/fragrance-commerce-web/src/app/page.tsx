@@ -153,6 +153,22 @@ export default function Home() {
   const [ctaButtonText, setCtaButtonText] = useState("Shop the Archive");
   const [ctaButtonLink, setCtaButtonLink] = useState("/products");
 
+  const [heroEyebrow, setHeroEyebrow] = useState("Private Fragrance House");
+  const [categoriesEyebrow, setCategoriesEyebrow] = useState("Enter the House");
+  const [categoriesTitle, setCategoriesTitle] = useState("Choose your ritual.");
+  const [categoriesLinkText, setCategoriesLinkText] = useState("View all products");
+  const [featuredEyebrow, setFeaturedEyebrow] = useState("Featured Collection");
+  const [bestSellersEyebrow, setBestSellersEyebrow] = useState("Most Loved");
+  const [bestSellersTitle, setBestSellersTitle] = useState("The best sellers.");
+  const [bestSellersLinkText, setBestSellersLinkText] = useState("View all");
+  const [newArrivalsEyebrow, setNewArrivalsEyebrow] = useState("Just Arrived");
+  const [newArrivalsTitle, setNewArrivalsTitle] = useState("New arrivals.");
+  const [newArrivalsLinkText, setNewArrivalsLinkText] = useState("Explore new");
+  const [brandsEyebrow, setBrandsEyebrow] = useState("The Houses & Partners");
+  const [maisonNotesEyebrow, setMaisonNotesEyebrow] = useState("Maison Notes");
+  const [newsletterEyebrow, setNewsletterEyebrow] = useState("The List");
+  const [ctaEyebrow, setCtaEyebrow] = useState("Begin Again");
+
   useEffect(() => {
     getPublicSettings().then((settings) => {
       setHero({
@@ -262,6 +278,22 @@ export default function Home() {
       if (settings.cta_subtitle) setCtaSubtitle(settings.cta_subtitle);
       if (settings.cta_button_text) setCtaButtonText(settings.cta_button_text);
       if (settings.cta_button_link) setCtaButtonLink(settings.cta_button_link);
+
+      if (settings.hero_eyebrow) setHeroEyebrow(settings.hero_eyebrow);
+      if (settings.categories_eyebrow) setCategoriesEyebrow(settings.categories_eyebrow);
+      if (settings.categories_title) setCategoriesTitle(settings.categories_title);
+      if (settings.categories_link_text) setCategoriesLinkText(settings.categories_link_text);
+      if (settings.featured_eyebrow) setFeaturedEyebrow(settings.featured_eyebrow);
+      if (settings.best_sellers_eyebrow) setBestSellersEyebrow(settings.best_sellers_eyebrow);
+      if (settings.best_sellers_title) setBestSellersTitle(settings.best_sellers_title);
+      if (settings.best_sellers_link_text) setBestSellersLinkText(settings.best_sellers_link_text);
+      if (settings.new_arrivals_eyebrow) setNewArrivalsEyebrow(settings.new_arrivals_eyebrow);
+      if (settings.new_arrivals_title) setNewArrivalsTitle(settings.new_arrivals_title);
+      if (settings.new_arrivals_link_text) setNewArrivalsLinkText(settings.new_arrivals_link_text);
+      if (settings.brands_eyebrow) setBrandsEyebrow(settings.brands_eyebrow);
+      if (settings.maison_notes_eyebrow) setMaisonNotesEyebrow(settings.maison_notes_eyebrow);
+      if (settings.newsletter_eyebrow) setNewsletterEyebrow(settings.newsletter_eyebrow);
+      if (settings.cta_eyebrow) setCtaEyebrow(settings.cta_eyebrow);
     }).catch(() => { /* keep defaults */ });
   }, []);
 
@@ -367,7 +399,7 @@ export default function Home() {
               variants={heroItem}
               className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--luxury-gold)] sm:tracking-[0.42em]"
             >
-              Private Fragrance House
+              {heroEyebrow}
             </motion.p>
             <motion.h1
               variants={heroItem}
@@ -416,17 +448,17 @@ export default function Home() {
           <Reveal className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">
-                Enter the House
+                {categoriesEyebrow}
               </p>
               <h2 className="mt-3 text-3xl font-normal [font-family:var(--font-serif)] sm:text-4xl md:text-5xl">
-                Choose your ritual.
+                {categoriesTitle}
               </h2>
             </div>
             <Link
               href="/products"
               className="-my-2.5 py-2.5 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold-strong)] hover:text-[var(--luxury-ink)]"
             >
-              View all products
+              {categoriesLinkText}
             </Link>
           </Reveal>
 
@@ -460,7 +492,7 @@ export default function Home() {
           <Reveal className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">
-                Featured Collection
+                {featuredEyebrow}
               </p>
               <h2 className="mt-3 text-3xl font-normal [font-family:var(--font-serif)] sm:text-4xl md:text-5xl">
                 {featuredTitle}
@@ -482,17 +514,17 @@ export default function Home() {
           <Reveal className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">
-                Most Loved
+                {bestSellersEyebrow}
               </p>
               <h2 className="mt-3 text-3xl font-normal [font-family:var(--font-serif)] sm:text-4xl md:text-5xl">
-                The best sellers.
+                {bestSellersTitle}
               </h2>
             </div>
             <Link
               href="/products"
               className="-my-2.5 py-2.5 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold-strong)] hover:text-[var(--luxury-ink)]"
             >
-              View all
+              {bestSellersLinkText}
             </Link>
           </Reveal>
 
@@ -507,17 +539,17 @@ export default function Home() {
           <Reveal className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">
-                Just Arrived
+                {newArrivalsEyebrow}
               </p>
               <h2 className="mt-3 text-3xl font-normal [font-family:var(--font-serif)] sm:text-4xl md:text-5xl">
-                New arrivals.
+                {newArrivalsTitle}
               </h2>
             </div>
             <Link
               href="/products"
               className="-my-2.5 py-2.5 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold-strong)] hover:text-[var(--luxury-ink)]"
             >
-              Explore new
+              {newArrivalsLinkText}
             </Link>
           </Reveal>
 
@@ -530,7 +562,7 @@ export default function Home() {
       <section className="border-y border-[#d8c8ad] bg-[rgba(255,250,242,0.72)] px-4 py-12 backdrop-blur-xl sm:px-6 md:py-16">
         <Reveal className="mx-auto max-w-[1800px]">
           <p className="text-center text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-muted)]">
-            The Houses &amp; Partners
+            {brandsEyebrow}
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-x-12 gap-y-6">
             {brands.map((brand) => (
@@ -578,7 +610,7 @@ export default function Home() {
 
           <Reveal delay={0.12}>
             <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">
-              Maison Notes
+              {maisonNotesEyebrow}
             </p>
             <h2 className="mt-3 text-3xl font-normal leading-tight [font-family:var(--font-serif)] sm:text-4xl md:text-6xl">
               A storefront for house labels that still feels tactile.
@@ -620,7 +652,7 @@ export default function Home() {
       <section className="bg-[#efe3d0] px-4 py-14 sm:px-6 md:px-8 md:py-24 xl:px-12">
         <Reveal className="mx-auto max-w-2xl text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">
-            The List
+            {newsletterEyebrow}
           </p>
           <h2 className="mt-3 text-3xl font-normal [font-family:var(--font-serif)] sm:text-4xl md:text-5xl">
             {newsletterTitle}
@@ -636,7 +668,7 @@ export default function Home() {
       <section className="px-4 py-14 text-center sm:px-6 md:px-8 md:py-24 xl:px-12">
         <Reveal className="mx-auto max-w-3xl">
           <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">
-            Begin Again
+            {ctaEyebrow}
           </p>
           <h2 className="mt-3 text-3xl font-normal [font-family:var(--font-serif)] sm:text-4xl md:text-6xl">
             {ctaTitle}

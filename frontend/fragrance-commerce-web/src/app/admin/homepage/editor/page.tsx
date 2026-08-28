@@ -65,6 +65,7 @@ type TemplateId =
 type HomepageSectionId =
   | "hero"
   | "valuebar"
+  | "headers"
   | "panel1"
   | "panel2"
   | "featured"
@@ -152,12 +153,31 @@ const homepageSections: SectionDef[] = [
     icon: <LayoutTemplate size={15} />,
     fields: [
       { key: "hero_image_url", label: "Background Image", type: "image" },
+      { key: "hero_eyebrow", label: "Eyebrow" },
       { key: "hero_title", label: "Title" },
       { key: "hero_subtitle", label: "Subtitle", type: "textarea" },
       { key: "hero_cta_text", label: "Primary CTA Text" },
       { key: "hero_cta_link", label: "Primary CTA Link", type: "link", options: linkOptions },
       { key: "hero_secondary_cta_text", label: "Secondary CTA Text" },
       { key: "hero_secondary_cta_link", label: "Secondary CTA Link", type: "link", options: linkOptions },
+    ],
+  },
+  {
+    id: "headers",
+    label: "Section Headings",
+    icon: <Type size={15} />,
+    fields: [
+      { key: "categories_eyebrow", label: "Panels Eyebrow" },
+      { key: "categories_title", label: "Panels Title" },
+      { key: "categories_link_text", label: "Panels Link Text" },
+      { key: "featured_eyebrow", label: "Featured Eyebrow" },
+      { key: "best_sellers_eyebrow", label: "Best Sellers Eyebrow" },
+      { key: "best_sellers_title", label: "Best Sellers Title" },
+      { key: "best_sellers_link_text", label: "Best Sellers Link Text" },
+      { key: "new_arrivals_eyebrow", label: "New Arrivals Eyebrow" },
+      { key: "new_arrivals_title", label: "New Arrivals Title" },
+      { key: "new_arrivals_link_text", label: "New Arrivals Link Text" },
+      { key: "brands_eyebrow", label: "Brands Eyebrow" },
     ],
   },
   {
@@ -197,6 +217,7 @@ const homepageSections: SectionDef[] = [
     label: "Featured Products",
     icon: <Star size={15} />,
     fields: [
+      { key: "featured_eyebrow", label: "Section Eyebrow" },
       { key: "featured_section_title", label: "Section Title" },
       { key: "featured_section_subtitle", label: "Section Subtitle", type: "textarea" },
       { key: "featured_product_ids", label: "Select Products", type: "product-picker" },
@@ -222,6 +243,7 @@ const homepageSections: SectionDef[] = [
     label: "Newsletter",
     icon: <Mail size={15} />,
     fields: [
+      { key: "newsletter_eyebrow", label: "Eyebrow" },
       { key: "newsletter_title", label: "Title" },
       { key: "newsletter_subtitle", label: "Subtitle", type: "textarea" },
     ],
@@ -231,6 +253,7 @@ const homepageSections: SectionDef[] = [
     label: "Bottom CTA",
     icon: <Megaphone size={15} />,
     fields: [
+      { key: "cta_eyebrow", label: "Eyebrow" },
       { key: "cta_title", label: "Title" },
       { key: "cta_subtitle", label: "Subtitle", type: "textarea" },
       { key: "cta_button_text", label: "Button Text" },
@@ -243,6 +266,7 @@ const homepageSections: SectionDef[] = [
     icon: <ImageIcon size={15} />,
     fields: [
       { key: "product_banner_image", label: "Image", type: "image" },
+      { key: "maison_notes_eyebrow", label: "Eyebrow" },
       { key: "product_banner_title", label: "Title" },
       { key: "product_banner_text", label: "Text", type: "textarea" },
     ],
@@ -1465,7 +1489,7 @@ function HomepagePreview({
           <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(22,18,13,0.84)_0%,rgba(22,18,13,0.56)_42%,rgba(22,18,13,0.06)_100%)]" />
           <div className="relative flex h-full items-center px-12">
             <div className="max-w-2xl text-white">
-              <p className="text-xs font-semibold uppercase tracking-[0.42em] text-[var(--luxury-gold)]">Private Fragrance House</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.42em] text-[var(--luxury-gold)]">{get("hero_eyebrow", "Private Fragrance House")}</p>
               <h1 className="mt-5 text-7xl font-normal leading-[1.02] [font-family:var(--font-serif)]">
                 {get("hero_title", "Your hero title here")}
               </h1>
@@ -1500,8 +1524,8 @@ function HomepagePreview({
         <div className="mx-auto max-w-[1800px]">
           <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">Enter the House</p>
-              <h2 className="mt-3 text-5xl font-normal [font-family:var(--font-serif)]">Choose your ritual.</h2>
+<p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">{get("categories_eyebrow", "Enter the House")}</p>
+<h2 className="mt-3 text-5xl font-normal [font-family:var(--font-serif)]">{get("categories_title", "Choose your ritual.")}</h2>
             </div>
             <span className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold-strong)]">View all products</span>
           </div>
@@ -1521,7 +1545,7 @@ function HomepagePreview({
           <div className="mx-auto max-w-[1800px]">
             <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">Featured Collection</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">{get("featured_eyebrow", "Featured Collection")}</p>
                 <h2 className="mt-3 text-5xl font-normal [font-family:var(--font-serif)]">{get("featured_section_title", "Objects of desire.")}</h2>
               </div>
               <p className="max-w-md text-sm leading-7 text-[var(--luxury-muted)]">{get("featured_section_subtitle", "A focused selection from the private labels now available in the store.")}</p>
@@ -1572,8 +1596,8 @@ function HomepagePreview({
         <div className="mx-auto max-w-[1800px]">
           <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">Most Loved</p>
-              <h2 className="mt-3 text-5xl font-normal [font-family:var(--font-serif)]">The best sellers.</h2>
+<p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">{get("best_sellers_eyebrow", "Most Loved")}</p>
+<h2 className="mt-3 text-5xl font-normal [font-family:var(--font-serif)]">{get("best_sellers_title", "The best sellers.")}</h2>
             </div>
             <span className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold-strong)]">View all</span>
           </div>
@@ -1589,8 +1613,8 @@ function HomepagePreview({
         <div className="mx-auto max-w-[1800px]">
           <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">Just Arrived</p>
-              <h2 className="mt-3 text-5xl font-normal [font-family:var(--font-serif)]">New arrivals.</h2>
+<p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">{get("new_arrivals_eyebrow", "Just Arrived")}</p>
+<h2 className="mt-3 text-5xl font-normal [font-family:var(--font-serif)]">{get("new_arrivals_title", "New arrivals.")}</h2>
             </div>
             <span className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold-strong)]">Explore new</span>
           </div>
@@ -1628,7 +1652,7 @@ function HomepagePreview({
               )}
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">Maison Notes</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">{get("maison_notes_eyebrow", "Maison Notes")}</p>
               <h2 className="mt-3 text-6xl font-normal leading-tight [font-family:var(--font-serif)]">{get("product_banner_title", "A storefront for house labels that still feels tactile.")}</h2>
               <p className="mt-6 max-w-2xl text-base leading-8 text-[var(--luxury-muted)]">{get("product_banner_text", "The collection is staged like a real luxury catalogue.")}</p>
             </div>
@@ -1661,7 +1685,7 @@ function HomepagePreview({
       <SectionOverlay sectionId="newsletter" label="Newsletter" isActive={activeSection === "newsletter"} isHovered={hoveredSection === "newsletter"} onSelect={() => onSelect("newsletter")} onHover={(h) => onHover(h ? "newsletter" : null)}>
         <section className="bg-[#efe3d0] px-8 py-20">
           <div className="mx-auto max-w-2xl text-center">
-            <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">The List</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">{get("newsletter_eyebrow", "The List")}</p>
             <h2 className="mt-3 text-5xl font-normal [font-family:var(--font-serif)]">{get("newsletter_title", "Letters from the house.")}</h2>
             <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-[var(--luxury-muted)]">{get("newsletter_subtitle", "New releases, private previews, and quiet notes on the collection.")}</p>
             <div className="mx-auto mt-8 flex max-w-md gap-3">
@@ -1675,7 +1699,7 @@ function HomepagePreview({
       <SectionOverlay sectionId="cta" label="Bottom CTA" isActive={activeSection === "cta"} isHovered={hoveredSection === "cta"} onSelect={() => onSelect("cta")} onHover={(h) => onHover(h ? "cta" : null)}>
         <section className="px-8 py-28 text-center">
           <div className="mx-auto max-w-3xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">Begin Again</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">{get("cta_eyebrow", "Begin Again")}</p>
             <h2 className="mt-3 text-6xl font-normal [font-family:var(--font-serif)]">{get("cta_title", "Find the next signature.")}</h2>
             <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-[var(--luxury-muted)]">{get("cta_subtitle", "Browse perfumes, attars, customised blends, face washes, creams, and nail care from the new house catalogue.")}</p>
             <span className="mt-8 inline-flex rounded-full bg-[var(--luxury-ink)] px-8 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-paper)]">{get("cta_button_text", "Shop the Archive")}</span>
