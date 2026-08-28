@@ -1233,6 +1233,41 @@ function ProductPickerField({
           {selectedIds.length} product{selectedIds.length !== 1 && "s"} selected &middot; empty = auto
         </p>
       )}
+      {selectedIds.length > 0 && (
+        <div className="mt-2 space-y-1">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/40">
+            Selected
+          </span>
+          {allProducts
+            .filter((p) => selectedIds.includes(p.id))
+            .map((product) => (
+              <div
+                key={product.id}
+                className="flex items-center gap-2 rounded-lg border border-[var(--luxury-gold)]/40 bg-[var(--luxury-gold)]/10 px-2 py-1.5"
+              >
+                {product.images[0]?.imageUrl ? (
+                  <div className="relative h-7 w-7 shrink-0 overflow-hidden rounded bg-[#2a2a2a]">
+                    <Image src={product.images[0].imageUrl} alt="" fill sizes="28px" className="object-cover" unoptimized />
+                  </div>
+                ) : (
+                  <div className="h-7 w-7 shrink-0 rounded bg-[#2a2a2a]" />
+                )}
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[11px] text-white">{product.name}</p>
+                  <p className="truncate text-[10px] text-white/40">{product.brandName}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => toggle(product.id)}
+                  title="Remove"
+                  className="shrink-0 text-white/40 transition hover:text-red-400"
+                >
+                  <X size={13} />
+                </button>
+              </div>
+            ))}
+        </div>
+      )}
       <div className="mt-1.5 relative">
         <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
         <input
