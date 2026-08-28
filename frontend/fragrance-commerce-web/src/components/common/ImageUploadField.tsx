@@ -97,7 +97,7 @@ export default function ImageUploadField({
                             onClick={() => inputRef.current?.click()}
                             disabled={uploading}
                             title="Replace image"
-                            className="absolute inset-0 z-10 flex items-center justify-center"
+                            className="absolute inset-0 z-10 flex items-center justify-center opacity-0 transition group-hover:opacity-100"
                         >
                             <span className="inline-flex items-center gap-2 rounded-full bg-black/70 px-4 py-2 text-xs font-medium text-white shadow-lg">
                                 {uploading ? (
@@ -115,7 +115,7 @@ export default function ImageUploadField({
                                 onChange("");
                             }}
                             title="Remove image"
-                            className="absolute right-2 top-2 z-20 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-red-600"
+                            className="absolute right-2 top-2 z-20 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition group-hover:opacity-100 hover:bg-red-600"
                         >
                             <X size={14} />
                         </button>
