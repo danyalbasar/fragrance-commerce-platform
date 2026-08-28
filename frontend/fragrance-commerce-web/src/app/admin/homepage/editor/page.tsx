@@ -1384,6 +1384,34 @@ function HomepagePreview({
   onSelect: (id: SectionId) => void;
   onHover: (id: SectionId | null) => void;
 }) {
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    let ids: string[] = [];
+    try {
+      ids = JSON.parse(values["featured_product_ids"] || "[]");
+    } catch {
+      ids = [];
+    }
+    if (!Array.isArray(ids) || ids.length === 0) {
+      setFeaturedProducts([]);
+      return () => {
+        active = false;
+      };
+    }
+    Promise.all(ids.map((id: string) => productService.getById(id)))
+      .then((products) => {
+        if (active) setFeaturedProducts(products.filter((p) => !!p && !!p.images?.[0]?.imageUrl));
+      })
+      .catch(() => {
+        if (active) setFeaturedProducts([]);
+      });
+    return () => {
+      active = false;
+    };
+  }, [values["featured_product_ids"]]);
+
   return (
     <>
       <SectionOverlay
@@ -1463,16 +1491,42 @@ function HomepagePreview({
               <p className="max-w-md text-sm leading-7 text-[var(--luxury-muted)]">{get("featured_section_subtitle", "A focused selection from the private labels now available in the store.")}</p>
             </div>
             <div className="grid gap-6 md:grid-cols-3">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="border border-[#d8c8ad] bg-[var(--luxury-paper)]">
-                  <div className="aspect-[1/1.18] animate-pulse bg-[#ead9c0]" />
-                  <div className="flex flex-col gap-3 p-5">
-                    <div className="h-3 w-24 animate-pulse rounded bg-[#e5d9c4]" />
-                    <div className="h-6 w-40 animate-pulse rounded bg-[#e5d9c4]" />
-                    <div className="h-4 w-28 animate-pulse rounded bg-[#e5d9c4]" />
-                  </div>
-                </div>
-              ))}
+              {featuredProducts.length > 0
+                ? featuredProducts.map((product) => {
+                    const variant = product.variants?.[0];
+                    return (
+                      <div key={product.id} className="border border-[#d8c8ad] bg-[var(--luxury-paper)]">
+                        <div className="relative aspect-[1/1.18] bg-[#ead9c0]">
+                          {product.images[0]?.imageUrl && (
+                            <Image src={product.images[0].imageUrl} alt={product.name} fill sizes="440px" className="object-cover" unoptimized />
+                          )}
+                        </div>
+                        <div className="flex flex-col gap-3 p-5">
+                          <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--luxury-gold-strong)]">
+                            {product.brandName || "\u00A0"}
+                          </p>
+                          <h3 className="text-xl font-normal leading-snug [font-family:var(--font-serif)]">
+                            {product.name}
+                          </h3>
+                          <p className="text-sm text-[var(--luxury-muted)]">
+                            {variant
+                              ? `${variant.variantName || ""}${variant.sellingPrice ? ` \u00B7 \u20B9${variant.sellingPrice.toLocaleString("en-IN")}` : ""}`
+                              : "\u00A0"}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })
+                : Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="border border-[#d8c8ad] bg-[var(--luxury-paper)]">
+                      <div className="aspect-[1/1.18] animate-pulse bg-[#ead9c0]" />
+                      <div className="flex flex-col gap-3 p-5">
+                        <div className="h-3 w-24 animate-pulse rounded bg-[#e5d9c4]" />
+                        <div className="h-6 w-40 animate-pulse rounded bg-[#e5d9c4]" />
+                        <div className="h-4 w-28 animate-pulse rounded bg-[#e5d9c4]" />
+                      </div>
+                    </div>
+                  ))}
             </div>
           </div>
         </section>
