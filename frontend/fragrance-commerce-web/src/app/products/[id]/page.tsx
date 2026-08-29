@@ -84,10 +84,6 @@ function ProductDetailsContent() {
   const [quickAddProduct, setQuickAddProduct] = useState<Product | null>(null);
 
   const [pdpSettings, setPdpSettings] = useState({
-    bannerImage: "/home/home-ritual.jpg",
-    bannerTitle: "A storefront for house labels that still feels tactile.",
-    bannerSubtitle: "The collection is staged like a real luxury catalogue: restrained navigation, visual hierarchy, product-led imagery, and clear paths into fragrance or skincare.",
-    bannerEyebrow: "Maison Notes",
     similarEyebrow: "You May Also Like",
     trustBadges: ["100% authentic products", "Free shipping on eligible orders", "Secure payments", "Easy returns and support"] as string[],
     shippingText: "Orders are packed carefully and shipped securely. Return and exchange rules can be added here later.",
@@ -97,10 +93,6 @@ function ProductDetailsContent() {
     getPublicSettings().then((settings) => {
       const badges = (() => { try { return JSON.parse(settings.product_trust_badges || "[]"); } catch { return []; } })();
       setPdpSettings({
-        bannerImage: settings.pdp_banner_image || "/home/home-ritual.jpg",
-        bannerTitle: settings.pdp_banner_title || "A storefront for house labels that still feels tactile.",
-        bannerSubtitle: settings.pdp_banner_subtitle || "The collection is staged like a real luxury catalogue.",
-        bannerEyebrow: settings.pdp_banner_eyebrow || "Maison Notes",
         similarEyebrow: settings.pdp_similar_eyebrow || "You May Also Like",
         trustBadges: badges.length > 0 ? badges : ["100% authentic products", "Free shipping on eligible orders", "Secure payments", "Easy returns and support"],
         shippingText: settings.product_shipping_text || "Orders are packed carefully and shipped securely. Return and exchange rules can be added here later.",
@@ -830,31 +822,6 @@ function ProductDetailsContent() {
           setReviews((currentReviews) => [review, ...currentReviews]);
         }}
       />
-
-      <section className="mx-auto mt-12 max-w-[1800px] border-t border-[#d8c8ad] px-4 sm:mt-16 sm:px-6 md:px-8">
-        <div className="grid items-center gap-10 py-20 lg:grid-cols-[0.9fr_1.1fr]">
-          <div className="relative aspect-[3/2] overflow-hidden bg-[#efe0ca]">
-            <Image
-              src={pdpSettings.bannerImage}
-              alt={pdpSettings.bannerTitle}
-              fill
-              sizes="(min-width: 1024px) 45vw, 100vw"
-              className="object-cover"
-            />
-          </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">
-              {pdpSettings.bannerEyebrow}
-            </p>
-            <h2 className="mt-3 text-3xl font-normal leading-tight [font-family:var(--font-serif)] sm:text-4xl md:text-6xl">
-              {pdpSettings.bannerTitle}
-            </h2>
-            <p className="mt-6 max-w-2xl text-base leading-8 text-[var(--luxury-muted)]">
-              {pdpSettings.bannerSubtitle}
-            </p>
-          </div>
-        </div>
-      </section>
 
       <section className="mx-auto mt-12 max-w-[1800px] border-t border-[#d8c8ad] pt-10 sm:mt-16 sm:pt-12">
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">

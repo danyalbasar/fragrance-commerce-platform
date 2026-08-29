@@ -83,7 +83,7 @@ type HomepageSectionId =
 
 type ProductsSectionId = "products_banner";
 
-type ProductDetailSectionId = "pdp_trust" | "pdp_shipping" | "pdp_banner";
+type ProductDetailSectionId = "pdp_trust" | "pdp_shipping" | "pdp_similar";
 
 type ContactSectionId = "contact_content";
 
@@ -319,16 +319,10 @@ const productDetailSections: SectionDef[] = [
     fields: [{ key: "product_trust_badges", label: "Badges", type: "list" }],
   },
   {
-    id: "pdp_banner",
-    label: "Banner",
-    icon: <ImageIcon size={15} />,
-    fields: [
-      { key: "pdp_banner_image", label: "Banner Image", type: "image" },
-      { key: "pdp_banner_title", label: "Title" },
-      { key: "pdp_banner_subtitle", label: "Subtitle", type: "textarea" },
-      { key: "pdp_banner_eyebrow", label: "Eyebrow" },
-      { key: "pdp_similar_eyebrow", label: "Similar Products Eyebrow" },
-    ],
+    id: "pdp_similar",
+    label: "Similar Products",
+    icon: <Sparkles size={15} />,
+    fields: [{ key: "pdp_similar_eyebrow", label: "Eyebrow" }],
   },
   {
     id: "pdp_shipping",
@@ -715,27 +709,35 @@ function ProductDetailPreview({
         </div>
       </section>
 
-      {/* Banner */}
+      {/* Similar products */}
       <SectionOverlay
-        label="Banner"
-        isActive={activeSection === "pdp_banner"}
-        isHovered={hoveredSection === "pdp_banner"}
-        sectionId="pdp_banner"
-        onSelect={() => onSelect("pdp_banner")}
-        onHover={(h) => onHover(h ? "pdp_banner" : null)}
+        label="Similar Products"
+        isActive={activeSection === "pdp_similar"}
+        isHovered={hoveredSection === "pdp_similar"}
+        sectionId="pdp_similar"
+        onSelect={() => onSelect("pdp_similar")}
+        onHover={(h) => onHover(h ? "pdp_similar" : null)}
       >
-        <section className="grid items-center gap-10 border-t border-[#d8c8ad] px-8 py-12 lg:grid-cols-[0.9fr_1.1fr]">
-          <div className="aspect-[3/2] bg-[#efe0ca]" />
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">
-              {get("pdp_banner_eyebrow", "Maison Notes")}
-            </p>
-            <h2 className="mt-3 text-3xl font-normal [font-family:var(--font-serif)]">
-              {get("pdp_banner_title", "A storefront for house labels that still feels tactile.")}
-            </h2>
-            <p className="mt-6 max-w-2xl text-base leading-8 text-[var(--luxury-muted)]">
-              {get("pdp_banner_subtitle", "The collection is staged like a real luxury catalogue.")}
-            </p>
+        <section className="border-t border-[#d8c8ad] px-8 py-12">
+          <div className="mx-auto max-w-[1440px]">
+            <div className="mb-8 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--luxury-gold-strong)] sm:tracking-[0.34em]">
+                  {get("pdp_similar_eyebrow", "You May Also Like")}
+                </p>
+                <h2 className="mt-3 text-3xl font-normal [font-family:var(--font-serif)] sm:text-4xl">
+                  More products like this
+                </h2>
+              </div>
+              <span className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold-strong)]">
+                View similar
+              </span>
+            </div>
+            <div className="grid gap-6 md:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="aspect-[1/1.08] animate-pulse rounded-[var(--luxury-radius)] bg-[#efe3d0]" />
+              ))}
+            </div>
           </div>
         </section>
       </SectionOverlay>
