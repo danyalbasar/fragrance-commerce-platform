@@ -319,16 +319,16 @@ const productDetailSections: SectionDef[] = [
     fields: [{ key: "product_trust_badges", label: "Badges", type: "list" }],
   },
   {
-    id: "pdp_similar",
-    label: "Similar Products",
-    icon: <Sparkles size={15} />,
-    fields: [{ key: "pdp_similar_eyebrow", label: "Eyebrow" }],
-  },
-  {
     id: "pdp_shipping",
     label: "Shipping & Returns",
     icon: <Truck size={15} />,
     fields: [{ key: "product_shipping_text", label: "Text", type: "textarea" }],
+  },
+  {
+    id: "pdp_similar",
+    label: "Similar Products",
+    icon: <Sparkles size={15} />,
+    fields: [{ key: "pdp_similar_eyebrow", label: "Eyebrow" }],
   },
 ];
 
@@ -709,39 +709,6 @@ function ProductDetailPreview({
         </div>
       </section>
 
-      {/* Similar products */}
-      <SectionOverlay
-        label="Similar Products"
-        isActive={activeSection === "pdp_similar"}
-        isHovered={hoveredSection === "pdp_similar"}
-        sectionId="pdp_similar"
-        onSelect={() => onSelect("pdp_similar")}
-        onHover={(h) => onHover(h ? "pdp_similar" : null)}
-      >
-        <section className="border-t border-[#d8c8ad] px-8 py-12">
-          <div className="mx-auto max-w-[1440px]">
-            <div className="mb-8 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--luxury-gold-strong)] sm:tracking-[0.34em]">
-                  {get("pdp_similar_eyebrow", "You May Also Like")}
-                </p>
-                <h2 className="mt-3 text-3xl font-normal [font-family:var(--font-serif)] sm:text-4xl">
-                  More products like this
-                </h2>
-              </div>
-              <span className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold-strong)]">
-                View similar
-              </span>
-            </div>
-            <div className="grid gap-6 md:grid-cols-4">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="aspect-[1/1.08] animate-pulse rounded-[var(--luxury-radius)] bg-[#efe3d0]" />
-              ))}
-            </div>
-          </div>
-        </section>
-      </SectionOverlay>
-
       {/* Trust badges */}
       <SectionOverlay
         label="Trust Badges"
@@ -783,6 +750,39 @@ function ProductDetailPreview({
             </div>
             <div className="mt-3 text-sm leading-7 text-[var(--luxury-muted)]">
               {shippingText}
+            </div>
+          </div>
+        </section>
+      </SectionOverlay>
+
+      {/* Similar products */}
+      <SectionOverlay
+        label="Similar Products"
+        isActive={activeSection === "pdp_similar"}
+        isHovered={hoveredSection === "pdp_similar"}
+        sectionId="pdp_similar"
+        onSelect={() => onSelect("pdp_similar")}
+        onHover={(h) => onHover(h ? "pdp_similar" : null)}
+      >
+        <section className="border-t border-[#d8c8ad] px-8 py-12">
+          <div className="mx-auto max-w-[1440px]">
+            <div className="mb-8 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--luxury-gold-strong)] sm:tracking-[0.34em]">
+                  {get("pdp_similar_eyebrow", "You May Also Like")}
+                </p>
+                <h2 className="mt-3 text-3xl font-normal [font-family:var(--font-serif)] sm:text-4xl">
+                  More products like this
+                </h2>
+              </div>
+              <span className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold-strong)]">
+                View similar
+              </span>
+            </div>
+            <div className="grid gap-6 md:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="aspect-[1/1.08] animate-pulse rounded-[var(--luxury-radius)] bg-[#efe3d0]" />
+              ))}
             </div>
           </div>
         </section>
