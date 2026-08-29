@@ -257,6 +257,17 @@ const homepageSections: SectionDef[] = [
     ],
   },
   {
+    id: "banner",
+    label: "Maison Notes",
+    icon: <ImageIcon size={15} />,
+    fields: [
+      { key: "product_banner_image", label: "Image", type: "image" },
+      { key: "maison_notes_eyebrow", label: "Eyebrow" },
+      { key: "product_banner_title", label: "Title" },
+      { key: "product_banner_text", label: "Text", type: "textarea" },
+    ],
+  },
+  {
     id: "promises",
     label: "House Promises",
     icon: <Shield size={15} />,
@@ -282,17 +293,6 @@ const homepageSections: SectionDef[] = [
       { key: "cta_subtitle", label: "Subtitle", type: "textarea" },
       { key: "cta_button_text", label: "Button Text" },
       { key: "cta_button_link", label: "Button Link", type: "link", options: linkOptions },
-    ],
-  },
-  {
-    id: "banner",
-    label: "Maison Notes",
-    icon: <ImageIcon size={15} />,
-    fields: [
-      { key: "product_banner_image", label: "Image", type: "image" },
-      { key: "maison_notes_eyebrow", label: "Eyebrow" },
-      { key: "product_banner_title", label: "Title" },
-      { key: "product_banner_text", label: "Text", type: "textarea" },
     ],
   },
 ];
@@ -1752,7 +1752,7 @@ function HomepagePreview({
       <SectionOverlay sectionId="promises" label="House Promises" isActive={activeSection === "promises"} isHovered={hoveredSection === "promises"} onSelect={() => onSelect("promises")} onHover={(h) => onHover(h ? "promises" : null)}>
         <section className="border-y border-[#d8c8ad] bg-[var(--luxury-paper)] px-8 py-16">
           <div className="mx-auto grid max-w-[1800px] gap-8 md:grid-cols-3">
-            {(() => {
+{(() => {
               let promises: { title: string; text: string }[] = [];
               try { promises = JSON.parse(values["house_promises"] || "[]"); } catch { /* */ }
               if (promises.length === 0) promises = [
