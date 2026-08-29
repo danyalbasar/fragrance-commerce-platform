@@ -794,9 +794,9 @@ function ProductDetailPreview({
                 View similar
               </span>
             </div>
-            <div className="grid gap-6 md:grid-cols-4">
+            <div className="flex snap-x snap-mandatory items-stretch gap-4 overflow-x-auto scroll-smooth px-5 pb-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:px-6 md:grid md:grid-cols-4 md:gap-6 md:overflow-visible md:px-0 md:pb-0">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="aspect-[1/1.08] animate-pulse rounded-[var(--luxury-radius)] bg-[#efe3d0]" />
+                <div key={i} className="aspect-[1/1.08] min-w-[70%] max-w-[70%] basis-[70%] shrink-0 snap-start animate-pulse rounded-[var(--luxury-radius)] bg-[#efe3d0] md:min-w-0 md:max-w-none md:basis-auto md:shrink" />
               ))}
             </div>
           </div>
@@ -1692,12 +1692,12 @@ function HomepagePreview({
               </div>
               <p className="max-w-md text-sm leading-7 text-[var(--luxury-muted)]">{get("featured_section_subtitle", "A focused selection from the private labels now available in the store.")}</p>
             </div>
-            <div className="grid gap-6 md:grid-cols-3">
+            <div className="flex snap-x snap-mandatory items-stretch gap-4 overflow-x-auto scroll-smooth px-5 pb-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:px-6 md:grid md:grid-cols-3 md:gap-6 md:overflow-visible md:px-0 md:pb-0">
               {featuredProducts.length > 0
                 ? featuredProducts.map((product) => {
                     const variant = product.variants?.[0];
                     return (
-                      <div key={product.id} className="border border-[#d8c8ad] bg-[var(--luxury-paper)]">
+                      <div key={product.id} className="min-w-[70%] max-w-[70%] basis-[70%] shrink-0 snap-start border border-[#d8c8ad] bg-[var(--luxury-paper)] md:min-w-0 md:max-w-none md:basis-auto md:shrink">
                         <div className="relative aspect-[1/1.18] bg-[#ead9c0]">
                           {product.images[0]?.imageUrl && (
                             <Image src={product.images[0].imageUrl} alt={product.name} fill sizes="440px" className="object-cover" unoptimized />
@@ -1720,7 +1720,7 @@ function HomepagePreview({
                     );
                   })
                 : Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="border border-[#d8c8ad] bg-[var(--luxury-paper)]">
+<div key={i} className="min-w-[70%] max-w-[70%] basis-[70%] shrink-0 snap-start border border-[#d8c8ad] bg-[var(--luxury-paper)] md:min-w-0 md:max-w-none md:basis-auto md:shrink">
                       <div className="aspect-[1/1.18] animate-pulse bg-[#ead9c0]" />
                       <div className="flex flex-col gap-3 p-5">
                         <div className="h-3 w-24 animate-pulse rounded bg-[#e5d9c4]" />
@@ -1740,13 +1740,13 @@ function HomepagePreview({
             <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div>
 <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">{get("best_sellers_eyebrow", "Most Loved")}</p>
-<h2 className="mt-3 text-5xl font-normal [font-family:var(--font-serif)]">{get("best_sellers_title", "The best sellers.")}</h2>
+                <h2 className="mt-3 text-5xl font-normal [font-family:var(--font-serif)]">{get("best_sellers_title", "The best sellers.")}</h2>
               </div>
               <span className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold-strong)]">{get("best_sellers_link_text", "View all")}</span>
             </div>
-            <div className="grid gap-6 md:grid-cols-4">
+            <div className="flex snap-x snap-mandatory items-stretch gap-4 overflow-x-auto scroll-smooth px-5 pb-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:px-6 md:grid md:grid-cols-4 md:gap-6 md:overflow-visible md:px-0 md:pb-0">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="aspect-[1/1.08] animate-pulse rounded-[var(--luxury-radius)] bg-[#efe3d0]" />
+                <div key={i} className="aspect-[1/1.08] min-w-[70%] max-w-[70%] basis-[70%] shrink-0 snap-start animate-pulse rounded-[var(--luxury-radius)] bg-[#efe3d0] md:min-w-0 md:max-w-none md:basis-auto md:shrink" />
               ))}
             </div>
           </div>
@@ -1759,13 +1759,13 @@ function HomepagePreview({
             <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div>
 <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">{get("new_arrivals_eyebrow", "Just Arrived")}</p>
-<h2 className="mt-3 text-5xl font-normal [font-family:var(--font-serif)]">{get("new_arrivals_title", "New arrivals.")}</h2>
+                <h2 className="mt-3 text-5xl font-normal [font-family:var(--font-serif)]">{get("new_arrivals_title", "New arrivals.")}</h2>
               </div>
               <span className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold-strong)]">{get("new_arrivals_link_text", "Explore new")}</span>
             </div>
-            <div className="grid gap-6 md:grid-cols-4">
+            <div className="flex snap-x snap-mandatory items-stretch gap-4 overflow-x-auto scroll-smooth px-5 pb-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:px-6 md:grid md:grid-cols-4 md:gap-6 md:overflow-visible md:px-0 md:pb-0">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="aspect-[1/1.08] animate-pulse rounded-[var(--luxury-radius)] bg-[#ead9c0]" />
+                <div key={i} className="aspect-[1/1.08] min-w-[70%] max-w-[70%] basis-[70%] shrink-0 snap-start animate-pulse rounded-[var(--luxury-radius)] bg-[#ead9c0] md:min-w-0 md:max-w-none md:basis-auto md:shrink" />
               ))}
             </div>
           </div>
