@@ -487,6 +487,8 @@ export default function HomepageEditorPage() {
   const [contentHeight, setContentHeight] = useState(6000);
   const [templateMenuOpen, setTemplateMenuOpen] = useState(false);
   const [treeWidth, setTreeWidth] = useState(220);
+  const [isMobile, setIsMobile] = useState(false);
+  const [mobileView, setMobileView] = useState<"preview" | "sections" | "settings">("preview");
   const dragRef = useRef<{ startX: number; startWidth: number } | null>(null);
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const previewContentRef = useRef<HTMLDivElement>(null);
@@ -507,6 +509,14 @@ export default function HomepageEditorPage() {
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const update = () => setIsMobile(!mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
   }, []);
 
   useEffect(() => {
@@ -613,6 +623,11 @@ export default function HomepageEditorPage() {
 
   function update(key: string, value: string) {
     setValues((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function pickSection(id: SectionId) {
+    setActiveSection(id);
+    if (isMobile) setMobileView("settings");
   }
 
   function onDividerMouseDown(e: React.MouseEvent) {
@@ -801,7 +816,7 @@ function ProductDetailPreview({
           className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-white/60 transition hover:bg-white/10 hover:text-white"
         >
           <ArrowLeft size={16} />
-          <span className="text-xs font-semibold uppercase tracking-[0.12em]">Online Store</span>
+          <span className="hidden text-xs font-semibold uppercase tracking-[0.12em] sm:inline">Online Store</span>
         </Link>
 
         {/* Center: Template selector */}
@@ -865,10 +880,34 @@ function ProductDetailPreview({
         </div>
       </div>
 
-      {/* â”€â”€ Body: sidebar (tree + settings) + preview â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* Mobile view switcher */}
+      <div className="flex shrink-0 items-center gap-2 border-b border-[#2a2a2a] bg-[#0d0d0d] px-3 py-2 lg:hidden">
+        {(
+          [
+            ["preview", "Preview"],
+            ["sections", "Sections"],
+            ["settings", "Edit"],
+          ] as const
+        ).map(([view, label]) => (
+          <button
+            key={view}
+            type="button"
+            onClick={() => setMobileView(view)}
+            className={`flex-1 rounded-lg py-2 text-xs font-semibold uppercase tracking-[0.12em] transition ${
+              mobileView === view
+                ? "bg-[var(--luxury-gold)] text-[var(--luxury-ink)]"
+                : "text-white/40 hover:bg-white/8 hover:text-white"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* Body: sidebar (tree + settings) + preview */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left panel: Section tree + divider + Settings */}
-        <div className="flex shrink-0 border-r border-[#2a2a2a] bg-[#0d0d0d]">
+        <div className="hidden shrink-0 border-r border-[#2a2a2a] bg-[#0d0d0d] lg:flex">
           {/* Section tree */}
           <div
             className="flex shrink-0 flex-col border-r border-[#2a2a2a] bg-[#0d0d0d]"
@@ -884,7 +923,7 @@ function ProductDetailPreview({
                 <button
                   key={section.id}
                   type="button"
-                  onClick={() => setActiveSection(section.id)}
+                  onClick={() => pickSection(section.id)}
                   onMouseEnter={() => setHoveredSection(section.id)}
                   onMouseLeave={() => setHoveredSection(null)}
                   className={`flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-[12px] font-medium transition ${
@@ -907,9 +946,40 @@ function ProductDetailPreview({
           >
             <div className="h-8 w-0.5 rounded-full bg-white/20 group-hover:bg-white/50" />
           </div>
+        </div>
 
-          {/* Settings panel */}
-          <div className="flex w-[340px] shrink-0 flex-col bg-[#111]">
+        {/* Mobile: Sections list */}
+        <div
+          className={`${isMobile && mobileView === "sections" ? "flex" : "hidden"} min-w-0 flex-1 flex-col bg-[#0d0d0d] lg:hidden`}
+        >
+          <div className="border-b border-[#2a2a2a] px-4 py-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/30">
+              {currentTemplate.label}
+            </p>
+          </div>
+          <div className="flex-1 overflow-y-auto p-2 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/15">
+            {currentTemplate.sections.map((section) => (
+              <button
+                key={section.id}
+                type="button"
+                onClick={() => pickSection(section.id)}
+                className={`flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-[12px] font-medium transition ${
+                  activeSection === section.id
+                    ? "bg-[var(--luxury-gold)] text-[var(--luxury-ink)]"
+                    : "text-white/50 hover:bg-white/8 hover:text-white"
+                }`}
+              >
+                {section.icon}
+                <span className="truncate">{section.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Settings panel */}
+        <div
+          className={`${isMobile && mobileView !== "settings" ? "hidden" : ""} min-w-0 flex-1 flex-col bg-[#111] lg:w-[340px] lg:flex-none`}
+        >
             {currentSection ? (
               <>
                 <div className="border-b border-[#2a2a2a] px-4 py-3">
@@ -1014,12 +1084,11 @@ function ProductDetailPreview({
               </div>
             )}
           </div>
-        </div>
 
         {/* Preview */}
         <div
           ref={previewContainerRef}
-          className="relative flex-1 overflow-auto bg-[#1a1a1a]"
+          className={`relative flex-1 overflow-auto bg-[#1a1a1a] ${isMobile && mobileView !== "preview" ? "hidden" : ""}`}
           style={{ scrollbarGutter: "stable" }}
         >
           <div className="w-full overflow-hidden">
@@ -1043,7 +1112,7 @@ function ProductDetailPreview({
                     values={values}
                     activeSection={activeSection as HomepageSectionId}
                     hoveredSection={hoveredSection}
-                    onSelect={(id) => setActiveSection(id)}
+                    onSelect={pickSection}
                     onHover={setHoveredSection}
                   />
                 ) : activeTemplate === "products" ? (
@@ -1052,7 +1121,7 @@ function ProductDetailPreview({
                     values={values}
                     activeSection={activeSection as ProductsSectionId}
                     hoveredSection={hoveredSection}
-                    onSelect={(id) => setActiveSection(id)}
+                    onSelect={pickSection}
                     onHover={setHoveredSection}
                   />
                 ) : activeTemplate === "product-detail" ? (
@@ -1061,7 +1130,7 @@ function ProductDetailPreview({
                     values={values}
                     activeSection={activeSection as ProductDetailSectionId}
                     hoveredSection={hoveredSection}
-                    onSelect={(id) => setActiveSection(id)}
+                    onSelect={pickSection}
                     onHover={setHoveredSection}
                   />
                 ) : activeTemplate === "contact" ? (
@@ -1070,7 +1139,7 @@ function ProductDetailPreview({
                     values={values}
                     activeSection={activeSection as ContactSectionId}
                     hoveredSection={hoveredSection}
-                    onSelect={(id) => setActiveSection(id)}
+                    onSelect={pickSection}
                     onHover={setHoveredSection}
                   />
                 ) : activeTemplate === "faq" ? (
@@ -1079,7 +1148,7 @@ function ProductDetailPreview({
                     prefix="faq"
                     activeSection={activeSection as InfoPageSectionId}
                     hoveredSection={hoveredSection}
-                    onSelect={(id) => setActiveSection(id)}
+                    onSelect={pickSection}
                     onHover={setHoveredSection}
                     sectionType="question"
                   />
@@ -1089,7 +1158,7 @@ function ProductDetailPreview({
                     prefix="privacy"
                     activeSection={activeSection as InfoPageSectionId}
                     hoveredSection={hoveredSection}
-                    onSelect={(id) => setActiveSection(id)}
+                    onSelect={pickSection}
                     onHover={setHoveredSection}
                     sectionType="title"
                   />
@@ -1099,7 +1168,7 @@ function ProductDetailPreview({
                     prefix="return"
                     activeSection={activeSection as InfoPageSectionId}
                     hoveredSection={hoveredSection}
-                    onSelect={(id) => setActiveSection(id)}
+                    onSelect={pickSection}
                     onHover={setHoveredSection}
                     sectionType="title"
                   />
@@ -1109,7 +1178,7 @@ function ProductDetailPreview({
                     prefix="terms"
                     activeSection={activeSection as InfoPageSectionId}
                     hoveredSection={hoveredSection}
-                    onSelect={(id) => setActiveSection(id)}
+                    onSelect={pickSection}
                     onHover={setHoveredSection}
                     sectionType="title"
                   />
@@ -1119,7 +1188,7 @@ function ProductDetailPreview({
                     prefix="login"
                     activeSection={activeSection as AuthSectionId}
                     hoveredSection={hoveredSection}
-                    onSelect={(id) => setActiveSection(id)}
+                    onSelect={pickSection}
                     onHover={setHoveredSection}
                   />
                 ) : activeTemplate === "signup" ? (
@@ -1128,7 +1197,7 @@ function ProductDetailPreview({
                     prefix="signup"
                     activeSection={activeSection as AuthSectionId}
                     hoveredSection={hoveredSection}
-                    onSelect={(id) => setActiveSection(id)}
+                    onSelect={pickSection}
                     onHover={setHoveredSection}
                   />
                 ) : (
@@ -1136,7 +1205,7 @@ function ProductDetailPreview({
                     get={get}
                     activeSection={activeSection as NotFoundSectionId}
                     hoveredSection={hoveredSection}
-                    onSelect={(id) => setActiveSection(id)}
+                    onSelect={pickSection}
                     onHover={setHoveredSection}
                   />
                 )}
