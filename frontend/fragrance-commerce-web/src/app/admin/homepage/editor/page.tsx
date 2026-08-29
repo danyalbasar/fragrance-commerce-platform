@@ -1544,7 +1544,7 @@ function HomepagePreview({
   }, [values["featured_product_ids"]]);
 
   return (
-    <>
+    <div className="bg-[var(--luxury-ivory)]">
       <SectionOverlay
         label="Hero"
         isActive={activeSection === "hero"}
@@ -1797,7 +1797,7 @@ function HomepagePreview({
           </div>
         </section>
       </SectionOverlay>
-    </>
+    </div>
   );
 }
 
