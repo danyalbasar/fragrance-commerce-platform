@@ -1781,7 +1781,7 @@ function HomepagePreview({
             <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-[var(--luxury-muted)]">{get("newsletter_subtitle", "New releases, private previews, and quiet notes on the collection.")}</p>
             <div className="mx-auto mt-8 flex max-w-md gap-3">
               <div className="h-12 flex-1 rounded-full border border-[#d8c8ad] bg-[var(--luxury-input)]" />
-              <div className="inline-flex h-12 w-28 items-center justify-center gap-2 rounded-full bg-[var(--luxury-ink)] text-sm font-semibold uppercase tracking-[0.12em] text-[var(--luxury-paper)]">
+              <div className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[var(--luxury-ink)] px-7 text-sm font-semibold uppercase tracking-[0.12em] text-[var(--luxury-paper)]">
                 <Mail size={16} />
                 Subscribe
               </div>
