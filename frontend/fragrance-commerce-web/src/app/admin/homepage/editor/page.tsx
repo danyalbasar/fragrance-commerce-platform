@@ -7,6 +7,7 @@ import {
   ArrowLeft,
   Check,
   ChevronDown,
+  ChevronLeft,
   ChevronRight,
   LayoutTemplate,
   MousePointer2,
@@ -794,11 +795,11 @@ function ProductDetailPreview({
                 View similar
               </span>
             </div>
-            <div className="flex snap-x snap-mandatory items-stretch gap-4 overflow-x-auto scroll-smooth px-5 pb-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:px-6 md:grid md:grid-cols-4 md:gap-6 md:overflow-visible md:px-0 md:pb-0">
-              {Array.from({ length: 4 }).map((_, i) => (
+            <PreviewStrip columns="md:grid-cols-2 xl:grid-cols-3" arrowVertical="top-36">
+              {Array.from({ length: 3 }).map((_, i) => (
                 <div key={i} className="aspect-[1/1.08] min-w-[70%] max-w-[70%] basis-[70%] shrink-0 snap-start animate-pulse rounded-[var(--luxury-radius)] bg-[#efe3d0] md:min-w-0 md:max-w-none md:basis-auto md:shrink" />
               ))}
-            </div>
+            </PreviewStrip>
           </div>
         </section>
       </SectionOverlay>
@@ -1569,6 +1570,101 @@ function SectionOverlay({
 
 /* â”€â”€ Homepage Preview â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
+function PreviewStrip({
+  columns = "md:grid-cols-4",
+  arrowVertical = "top-1/2 -translate-y-1/2",
+  children,
+}: {
+  columns?: string;
+  arrowVertical?: string;
+  children: React.ReactNode;
+}) {
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  function scrollStrip(direction: "left" | "right") {
+    const scroller = scrollerRef.current;
+
+    if (!scroller) return;
+
+    scroller.scrollBy({
+      left:
+        direction === "left"
+          ? -scroller.clientWidth * 0.85
+          : scroller.clientWidth * 0.85,
+      behavior: "smooth",
+    });
+  }
+
+  const updateScrollControls = useCallback(() => {
+    const scroller = scrollerRef.current;
+
+    if (!scroller) return;
+
+    const firstCard = scroller.firstElementChild as HTMLElement | null;
+    const lastCard = scroller.lastElementChild as HTMLElement | null;
+    const scrollerBounds = scroller.getBoundingClientRect();
+
+    setCanScrollLeft(
+      firstCard ? firstCard.getBoundingClientRect().left < scrollerBounds.left - 2 : false
+    );
+    setCanScrollRight(
+      lastCard ? lastCard.getBoundingClientRect().right > scrollerBounds.right + 2 : false
+    );
+  }, []);
+
+  useEffect(() => {
+    updateScrollControls();
+
+    const scroller = scrollerRef.current;
+
+    if (!scroller) return;
+
+    scroller.addEventListener("scroll", updateScrollControls);
+    window.addEventListener("resize", updateScrollControls);
+
+    return () => {
+      scroller.removeEventListener("scroll", updateScrollControls);
+      window.removeEventListener("resize", updateScrollControls);
+    };
+  }, [updateScrollControls]);
+
+  return (
+    <div className="relative">
+      {canScrollLeft && (
+        <button
+          type="button"
+          onClick={() => scrollStrip("left")}
+          className={`absolute left-4 z-10 flex h-12 w-12 ${arrowVertical} items-center justify-center rounded-full bg-[var(--luxury-paper)] text-[var(--luxury-ink)] shadow-[0_14px_30px_rgba(22,18,13,0.18)] transition-all duration-200 hover:scale-105 hover:text-[var(--luxury-gold)] active:scale-90 md:hidden`}
+          aria-label="Scroll products left"
+        >
+          <ChevronLeft size={24} />
+        </button>
+      )}
+
+      <div
+        ref={scrollerRef}
+        onScroll={updateScrollControls}
+        className={`flex snap-x snap-mandatory items-stretch gap-4 overflow-x-auto scroll-smooth px-5 pb-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:px-6 md:grid ${columns} md:gap-6 md:overflow-visible md:px-0 md:pb-0`}
+      >
+        {children}
+      </div>
+
+      {canScrollRight && (
+        <button
+          type="button"
+          onClick={() => scrollStrip("right")}
+          className={`absolute right-4 z-10 flex h-12 w-12 ${arrowVertical} items-center justify-center rounded-full bg-[var(--luxury-paper)] text-[var(--luxury-ink)] shadow-[0_14px_30px_rgba(22,18,13,0.18)] transition-all duration-200 hover:scale-105 hover:text-[var(--luxury-gold)] active:scale-90 md:hidden`}
+          aria-label="Scroll products right"
+        >
+          <ChevronRight size={24} />
+        </button>
+      )}
+    </div>
+  );
+}
+
 function HomepagePreview({
   get,
   values,
@@ -1690,9 +1786,9 @@ function HomepagePreview({
                 <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--luxury-gold-strong)]">{get("featured_eyebrow", "Featured Collection")}</p>
                 <h2 className="mt-3 text-5xl font-normal [font-family:var(--font-serif)]">{get("featured_section_title", "Objects of desire.")}</h2>
               </div>
-              <p className="max-w-md text-sm leading-7 text-[var(--luxury-muted)]">{get("featured_section_subtitle", "A focused selection from the private labels now available in the store.")}</p>
+<p className="max-w-md text-sm leading-7 text-[var(--luxury-muted)]">{get("featured_section_subtitle", "A focused selection from the private labels now available in the store.")}</p>
             </div>
-            <div className="flex snap-x snap-mandatory items-stretch gap-4 overflow-x-auto scroll-smooth px-5 pb-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:px-6 md:grid md:grid-cols-3 md:gap-6 md:overflow-visible md:px-0 md:pb-0">
+            <PreviewStrip columns="md:grid-cols-3">
               {featuredProducts.length > 0
                 ? featuredProducts.map((product) => {
                     const variant = product.variants?.[0];
@@ -1720,7 +1816,7 @@ function HomepagePreview({
                     );
                   })
                 : Array.from({ length: 3 }).map((_, i) => (
-<div key={i} className="min-w-[70%] max-w-[70%] basis-[70%] shrink-0 snap-start border border-[#d8c8ad] bg-[var(--luxury-paper)] md:min-w-0 md:max-w-none md:basis-auto md:shrink">
+                    <div key={i} className="min-w-[70%] max-w-[70%] basis-[70%] shrink-0 snap-start border border-[#d8c8ad] bg-[var(--luxury-paper)] md:min-w-0 md:max-w-none md:basis-auto md:shrink">
                       <div className="aspect-[1/1.18] animate-pulse bg-[#ead9c0]" />
                       <div className="flex flex-col gap-3 p-5">
                         <div className="h-3 w-24 animate-pulse rounded bg-[#e5d9c4]" />
@@ -1729,7 +1825,7 @@ function HomepagePreview({
                       </div>
                     </div>
                   ))}
-            </div>
+            </PreviewStrip>
           </div>
         </section>
       </SectionOverlay>
@@ -1744,11 +1840,11 @@ function HomepagePreview({
               </div>
               <span className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold-strong)]">{get("best_sellers_link_text", "View all")}</span>
             </div>
-            <div className="flex snap-x snap-mandatory items-stretch gap-4 overflow-x-auto scroll-smooth px-5 pb-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:px-6 md:grid md:grid-cols-4 md:gap-6 md:overflow-visible md:px-0 md:pb-0">
+            <PreviewStrip>
               {Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="aspect-[1/1.08] min-w-[70%] max-w-[70%] basis-[70%] shrink-0 snap-start animate-pulse rounded-[var(--luxury-radius)] bg-[#efe3d0] md:min-w-0 md:max-w-none md:basis-auto md:shrink" />
               ))}
-            </div>
+            </PreviewStrip>
           </div>
         </section>
       </SectionOverlay>
@@ -1763,11 +1859,11 @@ function HomepagePreview({
               </div>
               <span className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--luxury-gold-strong)]">{get("new_arrivals_link_text", "Explore new")}</span>
             </div>
-            <div className="flex snap-x snap-mandatory items-stretch gap-4 overflow-x-auto scroll-smooth px-5 pb-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:px-6 md:grid md:grid-cols-4 md:gap-6 md:overflow-visible md:px-0 md:pb-0">
+            <PreviewStrip>
               {Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="aspect-[1/1.08] min-w-[70%] max-w-[70%] basis-[70%] shrink-0 snap-start animate-pulse rounded-[var(--luxury-radius)] bg-[#ead9c0] md:min-w-0 md:max-w-none md:basis-auto md:shrink" />
               ))}
-            </div>
+            </PreviewStrip>
           </div>
         </section>
       </SectionOverlay>
