@@ -7,10 +7,14 @@ namespace FragranceCommerce.Api.Services;
 public class PaymentService : IPaymentService
 {
     private readonly IPaymentRepository _paymentRepository;
+    private readonly IRazorpayService _razorpayService;
 
-    public PaymentService(IPaymentRepository paymentRepository)
+    public PaymentService(
+        IPaymentRepository paymentRepository,
+        IRazorpayService razorpayService)
     {
         _paymentRepository = paymentRepository;
+        _razorpayService = razorpayService;
     }
 
     public async Task<PaymentDto?> GetByIdAsync(Guid paymentId)
@@ -60,6 +64,94 @@ public class PaymentService : IPaymentService
         }
 
         payment.UpdatedAt = DateTime.UtcNow;
+
+        await _paymentRepository.SaveChangesAsync();
+
+        return MapToDto(payment);
+    }
+
+    public async Task<RazorpayOrderDto> CreateRazorpayOrderAsync(
+        Guid paymentId,
+        Guid currentUserId)
+    {
+        var payment = await _paymentRepository.GetByIdAsync(paymentId);
+
+        if (payment == null || payment.Order.UserId != currentUserId)
+            throw new InvalidOperationException("Payment not found.");
+
+        if (payment.PaymentStatus == PaymentStatus.Completed)
+            throw new InvalidOperationException("Payment is already completed.");
+
+        if (payment.PaymentMethod == PaymentMethod.CashOnDelivery)
+            throw new InvalidOperationException(
+                "Cash on delivery does not require an online payment.");
+
+        if (payment.Amount <= 0)
+            throw new InvalidOperationException(
+                "Payment amount must be greater than zero.");
+
+        if (string.IsNullOrWhiteSpace(payment.GatewayOrderId))
+        {
+            var created = await _razorpayService.CreateOrderAsync(
+                payment.Amount,
+                payment.Order.OrderNumber);
+
+            payment.GatewayOrderId = created.Id;
+            payment.UpdatedAt = DateTime.UtcNow;
+
+            await _paymentRepository.SaveChangesAsync();
+        }
+
+        return new RazorpayOrderDto
+        {
+            KeyId = _razorpayService.KeyId,
+            OrderId = payment.GatewayOrderId,
+            AmountPaise = (int)Math.Round(
+                payment.Amount * 100,
+                0,
+                MidpointRounding.AwayFromZero),
+            Currency = "INR",
+            OrderNumber = payment.Order.OrderNumber
+        };
+    }
+
+    public async Task<PaymentDto> VerifyRazorpayPaymentAsync(
+        VerifyRazorpayPaymentDto dto,
+        Guid currentUserId)
+    {
+        var payment = await _paymentRepository.GetByIdAsync(dto.PaymentId);
+
+        if (payment == null || payment.Order.UserId != currentUserId)
+            throw new InvalidOperationException("Payment not found.");
+
+        if (payment.PaymentStatus == PaymentStatus.Completed)
+            return MapToDto(payment);
+
+        if (payment.PaymentMethod == PaymentMethod.CashOnDelivery)
+            throw new InvalidOperationException(
+                "Cash on delivery does not require payment verification.");
+
+        if (string.IsNullOrWhiteSpace(payment.GatewayOrderId) ||
+            payment.GatewayOrderId != dto.RazorpayOrderId)
+        {
+            throw new InvalidOperationException("Invalid Razorpay order.");
+        }
+
+        if (!_razorpayService.VerifySignature(
+                dto.RazorpayOrderId,
+                dto.RazorpayPaymentId,
+                dto.Signature))
+        {
+            throw new InvalidOperationException("Payment verification failed.");
+        }
+
+        payment.PaymentStatus = PaymentStatus.Completed;
+        payment.TransactionId = dto.RazorpayPaymentId;
+        payment.PaidAt = DateTime.UtcNow;
+        payment.UpdatedAt = DateTime.UtcNow;
+
+        payment.Order.Status = OrderStatus.Confirmed;
+        payment.Order.UpdatedAt = DateTime.UtcNow;
 
         await _paymentRepository.SaveChangesAsync();
 

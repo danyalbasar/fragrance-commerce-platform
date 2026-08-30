@@ -41,7 +41,7 @@ const nextConfig: NextConfig = {
           {
             key: "Content-Security-Policy",
             value:
-              `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://res.cloudinary.com; font-src 'self' data:; connect-src ${connectSources}; frame-ancestors 'none'; base-uri 'self'`,
+              `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.razorpay.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://res.cloudinary.com; font-src 'self' data:; connect-src ${connectSources}; frame-src 'self' https://*.razorpay.com; frame-ancestors 'none'; base-uri 'self'`,
           },
         ],
       },

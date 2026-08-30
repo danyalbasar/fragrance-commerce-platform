@@ -16,6 +16,11 @@ import {
     updateAddress,
 } from "@/services/addressService";
 import { createOrder } from "@/services/orderService";
+import {
+    createRazorpayOrder,
+    verifyRazorpayPayment,
+} from "@/services/paymentService";
+import { openRazorpayCheckout } from "@/lib/razorpay";
 
 export default function CheckoutPage() {
     const router = useRouter();
@@ -139,9 +144,40 @@ export default function CheckoutPage() {
             setPlacingOrder(true);
             setOrderError("");
 
-            await createOrder({
+            const order = await createOrder({
                 addressId: selectedAddressId,
                 paymentMethod,
+            });
+
+            if (paymentMethod === "CashOnDelivery") {
+                window.dispatchEvent(new Event("cartUpdated"));
+                router.push("/orders");
+                return;
+            }
+
+            const razorpayOrder = await createRazorpayOrder(order.payment.id);
+
+            const payment = await openRazorpayCheckout({
+                key: razorpayOrder.keyId,
+                amountPaise: razorpayOrder.amountPaise,
+                currency: razorpayOrder.currency,
+                orderId: razorpayOrder.orderId,
+                name: "Fragrance Commerce",
+                description: `Order ${razorpayOrder.orderNumber}`,
+            });
+
+            if (!payment) {
+                setOrderError(
+                    "Payment was not completed. Your order has been saved as pending."
+                );
+                return;
+            }
+
+            await verifyRazorpayPayment({
+                paymentId: order.payment.id,
+                razorpayOrderId: payment.razorpay_order_id,
+                razorpayPaymentId: payment.razorpay_payment_id,
+                signature: payment.razorpay_signature,
             });
 
             window.dispatchEvent(new Event("cartUpdated"));

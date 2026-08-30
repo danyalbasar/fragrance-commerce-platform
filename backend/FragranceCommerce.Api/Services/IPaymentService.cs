@@ -8,4 +8,10 @@ public interface IPaymentService
     Task<PaymentDto> UpdateStatusAsync(
         Guid paymentId,
         UpdatePaymentStatusDto dto);
+    Task<RazorpayOrderDto> CreateRazorpayOrderAsync(
+        Guid paymentId,
+        Guid currentUserId);
+    Task<PaymentDto> VerifyRazorpayPaymentAsync(
+        VerifyRazorpayPaymentDto dto,
+        Guid currentUserId);
 }

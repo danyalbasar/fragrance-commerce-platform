@@ -156,6 +156,11 @@ builder.Services.AddScoped<IImageUploadService, CloudinaryImageUploadService>();
 builder.Services.Configure<CloudinarySettings>(
     builder.Configuration.GetSection("CloudinarySettings"));
 
+builder.Services.Configure<RazorpaySettings>(
+    builder.Configuration.GetSection("RazorpaySettings"));
+
+builder.Services.AddHttpClient<IRazorpayService, RazorpayService>();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>

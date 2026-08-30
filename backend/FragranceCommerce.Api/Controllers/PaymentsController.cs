@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using FragranceCommerce.Api.DTOs;
 using FragranceCommerce.Api.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -43,5 +44,50 @@ public class PaymentsController : ControllerBase
         {
             return BadRequest(ex.Message);
         }
+    }
+
+    [HttpPost("{id}/razorpay/order")]
+    public async Task<ActionResult<RazorpayOrderDto>> CreateRazorpayOrder(Guid id)
+    {
+        try
+        {
+            var order = await _paymentService.CreateRazorpayOrderAsync(
+                id,
+                GetCurrentUserId());
+
+            return Ok(order);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpPost("razorpay/verify")]
+    public async Task<ActionResult<PaymentDto>> VerifyRazorpayPayment(
+        VerifyRazorpayPaymentDto dto)
+    {
+        try
+        {
+            var payment = await _paymentService.VerifyRazorpayPaymentAsync(
+                dto,
+                GetCurrentUserId());
+
+            return Ok(payment);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    private Guid GetCurrentUserId()
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+        if (userIdClaim == null)
+            throw new UnauthorizedAccessException();
+
+        return Guid.Parse(userIdClaim.Value);
     }
 }
