@@ -52,6 +52,13 @@ export default function NewAddressPage() {
         <ProtectedRoute>
             <main className="min-h-screen bg-[var(--luxury-ivory)] px-4 py-8 text-[var(--luxury-ink)] sm:px-6 sm:py-10">
                 <div className="mx-auto max-w-3xl">
+                <button
+                    onClick={() => router.push("/addresses")}
+                    className="mb-6 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--luxury-muted)] hover:text-[var(--luxury-gold-strong)]"
+                >
+                    ← Back to Saved Addresses
+                </button>
+
                 <div className="mb-8 border-b border-[#d8c8ad] pb-6">
                     <h1 className="text-4xl font-normal leading-[1.05] [font-family:var(--font-serif)] sm:text-5xl">
                         Add Address
