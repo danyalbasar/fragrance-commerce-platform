@@ -152,7 +152,7 @@ export default function SignupPage() {
     }
 
     return (
-        <main className="relative flex min-h-[calc(100svh-65px)] items-start justify-center overflow-hidden bg-[var(--luxury-ivory)] p-4 pt-8 text-[var(--luxury-ink)] sm:p-6 sm:pt-10 lg:min-h-screen lg:items-center lg:pt-6">
+        <main className="relative flex min-h-[calc(100svh-65px)] items-start justify-center overflow-hidden bg-[var(--luxury-ivory)] px-4 py-10 text-[var(--luxury-ink)] sm:px-6 sm:py-12 lg:min-h-screen lg:items-center lg:py-16">
             <h1 className="sr-only lg:hidden">Create Account</h1>
 
             <div className="absolute inset-x-0 top-0 h-24 bg-[linear-gradient(180deg,#efe3d0,rgba(239,227,208,0))] sm:h-48" />
