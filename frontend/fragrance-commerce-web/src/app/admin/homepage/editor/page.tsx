@@ -979,7 +979,7 @@ function ProductDetailPreview({
 
         {/* Settings panel */}
         <div
-          className={`${isMobile && mobileView !== "settings" ? "hidden" : ""} min-w-0 flex-1 flex-col bg-[#111] lg:w-[340px] lg:flex-none`}
+          className={`${isMobile && mobileView !== "settings" ? "hidden" : ""} flex min-w-0 flex-1 flex-col bg-[#111] lg:w-[340px] lg:flex-none`}
         >
             {currentSection ? (
               <>
