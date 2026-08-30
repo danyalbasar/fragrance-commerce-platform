@@ -15,11 +15,27 @@ export interface RazorpayCheckoutOptions {
     prefill?: { name?: string; email?: string; contact?: string };
     theme?: { color?: string; color_background?: string };
     modal?: { ondismiss?: () => void };
+    onerror?: (error: {
+        code?: string;
+        description?: string;
+        reason?: string;
+        error?: { code?: string; description?: string; reason?: string };
+    }) => void;
 }
 
 export interface RazorpayCheckout {
     open(): void;
     close(): void;
+}
+
+export class RazorpayCheckoutError extends Error {
+    constructor(
+        public readonly code: string,
+        description: string
+    ) {
+        super(description || `Razorpay checkout failed (${code}).`);
+        this.name = "RazorpayCheckoutError";
+    }
 }
 
 declare global {
@@ -69,7 +85,7 @@ export async function openRazorpayCheckout(input: {
 }): Promise<RazorpayPaymentResponse | null> {
     await loadRazorpayScript();
 
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         const checkout = new window.Razorpay({
             key: input.key,
             amount: input.amountPaise,
@@ -78,6 +94,15 @@ export async function openRazorpayCheckout(input: {
             name: input.name,
             description: input.description,
             handler: (response) => resolve(response),
+            onerror: (error) =>
+                reject(
+                    new RazorpayCheckoutError(
+                        error.error?.code ?? error.code ?? "UNKNOWN",
+                        error.error?.description ??
+                            error.description ??
+                            "Payment could not be completed."
+                    )
+                ),
             modal: {
                 ondismiss: () => resolve(null),
             },

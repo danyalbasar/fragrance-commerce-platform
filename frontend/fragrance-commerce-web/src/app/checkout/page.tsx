@@ -170,7 +170,9 @@ export default function CheckoutPage() {
             const message =
                 typeof response?.data === "string" && response.data.trim()
                     ? response.data
-                    : "Failed to place order. Please try again.";
+                    : err instanceof Error && err.message
+                      ? err.message
+                      : "Failed to place order. Please try again.";
 
             setOrderError(message);
         } finally {

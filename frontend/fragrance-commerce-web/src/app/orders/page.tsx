@@ -64,7 +64,9 @@ export default function OrdersPage() {
                 typeof response?.data === "string" &&
                     response.data.trim()
                     ? response.data
-                    : "Failed to complete payment. Please try again."
+                    : err instanceof Error && err.message
+                      ? err.message
+                      : "Failed to complete payment. Please try again."
             );
         } finally {
             setPayingOrderId(null);
