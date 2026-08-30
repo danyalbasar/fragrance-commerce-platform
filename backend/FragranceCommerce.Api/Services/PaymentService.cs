@@ -90,6 +90,10 @@ public class PaymentService : IPaymentService
             throw new InvalidOperationException(
                 "Payment amount must be greater than zero.");
 
+        if (Math.Round(payment.Amount * 100) < 100)
+            throw new InvalidOperationException(
+                "Order amount is below the minimum payment threshold.");
+
         if (string.IsNullOrWhiteSpace(payment.GatewayOrderId))
         {
             var created = await _razorpayService.CreateOrderAsync(

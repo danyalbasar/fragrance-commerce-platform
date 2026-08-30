@@ -11,6 +11,8 @@ using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
+LoadEnvFile(builder.Configuration);
+
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.AddServerHeader = false;
@@ -276,3 +278,44 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.Run();
+
+static void LoadEnvFile(ConfigurationManager configuration)
+{
+    var envPath = Path.Combine(Directory.GetCurrentDirectory(), ".env");
+
+    if (!File.Exists(envPath))
+        return;
+
+    var mapping = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+        ["RAZORPAY_KEY_ID"] = "RazorpaySettings:KeyId",
+        ["RAZORPAY_KEY_SECRET"] = "RazorpaySettings:KeySecret",
+        ["RAZORPAY_WEBHOOK_SECRET"] = "RazorpaySettings:WebhookSecret"
+    };
+
+    foreach (var line in File.ReadAllLines(envPath))
+    {
+        var trimmed = line.Trim();
+
+        if (trimmed.Length == 0 || trimmed.StartsWith('#'))
+            continue;
+
+        var separator = trimmed.IndexOf('=');
+
+        if (separator <= 0)
+            continue;
+
+        var key = trimmed[..separator].Trim();
+        var value = trimmed[(separator + 1)..].Trim().Trim('"', '\'');
+
+        if (mapping.TryGetValue(key, out var configKey))
+        {
+            if (string.IsNullOrWhiteSpace(configuration[configKey]))
+                configuration[configKey] = value;
+        }
+        else if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(key)))
+        {
+            Environment.SetEnvironmentVariable(key, value);
+        }
+    }
+}

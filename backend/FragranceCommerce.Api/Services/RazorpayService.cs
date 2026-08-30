@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
@@ -59,6 +60,10 @@ public class RazorpayService : IRazorpayService
 
         var response = await _httpClient.SendAsync(request);
         var body = await response.Content.ReadAsStringAsync();
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+            throw new UnauthorizedAccessException(
+                "Razorpay authentication failed. Check the configured API keys.");
 
         if (!response.IsSuccessStatusCode)
             throw new InvalidOperationException(

@@ -57,6 +57,10 @@ public class PaymentsController : ControllerBase
 
             return Ok(order);
         }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(StatusCodes.Status401Unauthorized, ex.Message);
+        }
         catch (InvalidOperationException ex)
         {
             return BadRequest(ex.Message);

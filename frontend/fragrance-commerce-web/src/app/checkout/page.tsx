@@ -158,7 +158,9 @@ export default function CheckoutPage() {
             const razorpayOrder = await createRazorpayOrder(order.payment.id);
 
             const payment = await openRazorpayCheckout({
-                key: razorpayOrder.keyId,
+                key:
+                    process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ??
+                    razorpayOrder.keyId,
                 amountPaise: razorpayOrder.amountPaise,
                 currency: razorpayOrder.currency,
                 orderId: razorpayOrder.orderId,
