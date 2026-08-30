@@ -206,11 +206,11 @@ const ProductCard = memo(function ProductCard({
                         firstVariant.stockQuantity <= 0
                     }
                     aria-label={`Add ${product.name} to cart`}
-                    className="absolute -bottom-5 right-3 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--luxury-ink)] text-[var(--luxury-paper)] shadow-[0_10px_24px_rgba(22,18,13,0.3)] transition-all duration-200 hover:scale-105 hover:bg-[var(--luxury-gold)] active:scale-90 disabled:bg-[#c9c2b4] disabled:text-white/70 md:hidden"
+                    className="absolute -bottom-[18px] right-3 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-[var(--luxury-ink)] text-[var(--luxury-paper)] shadow-[0_10px_24px_rgba(22,18,13,0.3)] transition-all duration-200 hover:scale-105 hover:bg-[var(--luxury-gold)] active:scale-90 disabled:bg-[#c9c2b4] disabled:text-white/70 md:hidden"
                 >
-                    <ShoppingCart size={16} strokeWidth={2.2} />
-                    <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--luxury-gold)] text-[var(--luxury-ink)] ring-2 ring-[var(--luxury-paper)]">
-                        <Plus size={10} strokeWidth={3} />
+                    <ShoppingCart size={14} strokeWidth={2.2} />
+                    <span className="absolute -right-0.5 -top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[var(--luxury-gold)] text-[var(--luxury-ink)] ring-2 ring-[var(--luxury-paper)]">
+                        <Plus size={9} strokeWidth={3} />
                     </span>
                 </button>
             )}
