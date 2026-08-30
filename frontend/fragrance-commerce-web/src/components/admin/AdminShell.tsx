@@ -31,7 +31,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     }
 
     return (
-        <div className="flex min-h-screen bg-[var(--luxury-ivory)] text-[var(--luxury-ink)]">
+        <div className="flex h-screen overflow-hidden bg-[var(--luxury-ivory)] text-[var(--luxury-ink)]">
             {/* Mobile overlay */}
             {mobileOpen && (
                 <div
@@ -42,7 +42,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
             {/* Sidebar */}
             <aside
-                className={`fixed inset-y-0 left-0 z-50 w-64 border-r border-[#d8c8ad] bg-[var(--luxury-paper)] transition-transform duration-300 lg:translate-x-0 lg:static lg:z-auto ${
+                className={`fixed inset-y-0 left-0 z-50 w-64 border-r border-[#d8c8ad] bg-[var(--luxury-paper)] transition-transform duration-300 lg:translate-x-0 lg:z-auto ${
                     mobileOpen ? "translate-x-0" : "-translate-x-full"
                 }`}
             >
@@ -103,7 +103,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             </aside>
 
             {/* Main content */}
-            <main className="flex-1 min-w-0 overflow-x-hidden">
+            <main className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden">
                 <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
                     <button
                         type="button"

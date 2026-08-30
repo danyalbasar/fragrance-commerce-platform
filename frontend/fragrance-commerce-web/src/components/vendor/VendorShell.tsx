@@ -8,10 +8,10 @@ export default function VendorShell({ children }: { children: React.ReactNode })
     const [mobileOpen, setMobileOpen] = useState(false);
 
     return (
-        <div className="flex min-h-screen bg-[var(--luxury-ivory)] text-[var(--luxury-ink)]">
+        <div className="flex h-screen overflow-hidden bg-[var(--luxury-ivory)] text-[var(--luxury-ink)]">
             <VendorSidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
-            <main className="flex-1 min-w-0 overflow-x-hidden">
+            <main className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden">
                 <div className="mx-auto max-w-6xl px-2 py-8 sm:px-4 lg:px-6 lg:py-10">
                     <button
                         type="button"
