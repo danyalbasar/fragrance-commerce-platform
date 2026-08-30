@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import type { WishlistItem } from "@/types/wishlist";
 import type { Product } from "@/types/product";
@@ -56,6 +56,7 @@ export default function WishlistCard({
 
     return (
         <div className="group flex h-full flex-col overflow-hidden rounded-[var(--luxury-radius)] border border-[var(--luxury-line)] bg-[var(--luxury-paper)] shadow-[var(--luxury-shadow-sm)] transition-all duration-200 hover:-translate-y-1 hover:border-[var(--luxury-gold)] hover:shadow-[var(--luxury-shadow-md)] active:scale-[0.99]">
+<div className="relative">
             <div
                 className={
                     compactMobile
@@ -98,7 +99,7 @@ export default function WishlistCard({
                 <div
                     className={
                         compactMobile
-                            ? "pointer-events-none absolute inset-x-3 bottom-3 translate-y-0 opacity-100 transition-all duration-300 md:inset-x-6 md:bottom-5 md:translate-y-3 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 md:group-focus-within:translate-y-0 md:group-focus-within:opacity-100"
+                            ? "pointer-events-none absolute inset-x-3 bottom-3 hidden translate-y-0 opacity-100 transition-all duration-300 md:inset-x-6 md:bottom-5 md:block md:translate-y-3 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 md:group-focus-within:translate-y-0 md:group-focus-within:opacity-100"
                             : "pointer-events-none absolute inset-x-4 bottom-4 translate-y-0 opacity-100 transition-all duration-300 md:inset-x-6 md:bottom-5 md:translate-y-3 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 md:group-focus-within:translate-y-0 md:group-focus-within:opacity-100"
                     }
                 >
@@ -115,6 +116,20 @@ export default function WishlistCard({
                     </button>
                 </div>
             </div>
+
+            {compactMobile && (
+                <button
+                    onClick={handleQuickAdd}
+                    disabled={loading || item.stockQuantity <= 0}
+                    aria-label={`Add ${item.productName} to cart`}
+                    className="absolute -bottom-[18px] right-2 z-20 flex h-9 w-9 items-center justify-center transition-all duration-200 active:scale-90 disabled:opacity-50 md:hidden"
+                >
+                    <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[var(--luxury-gold)] text-[var(--luxury-ink)] ring-2 ring-[var(--luxury-paper)]">
+                        <Plus size={10} strokeWidth={3} />
+                    </span>
+                </button>
+            )}
+        </div>
 
             <div className={compactMobile ? "flex flex-1 flex-col p-3 sm:p-5" : "flex flex-1 flex-col p-4 sm:p-5"}>
                 <Link href={`/products/${item.productId}`} className="block">
