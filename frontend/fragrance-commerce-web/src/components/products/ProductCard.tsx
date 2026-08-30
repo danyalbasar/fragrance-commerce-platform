@@ -208,7 +208,7 @@ const ProductCard = memo(function ProductCard({
                     aria-label={`Add ${product.name} to cart`}
                     className="absolute -bottom-[18px] right-3 z-20 flex h-9 w-9 items-center justify-center transition-all duration-200 active:scale-90 disabled:opacity-50 md:hidden"
                 >
-                    <span className="absolute -right-0.5 -top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[var(--luxury-gold)] text-[var(--luxury-ink)] ring-2 ring-[var(--luxury-paper)]">
+                    <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[var(--luxury-gold)] text-[var(--luxury-ink)] ring-2 ring-[var(--luxury-paper)]">
                         <Plus size={9} strokeWidth={3} />
                     </span>
                 </button>
