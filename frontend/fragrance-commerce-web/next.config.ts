@@ -3,6 +3,8 @@ import type { NextConfig } from "next";
 const connectSources = [
   "'self'",
   "https://fragrance-api-654j.onrender.com",
+  "https://api.razorpay.com",
+  "https://lumberjack.razorpay.com",
   ...(process.env.NODE_ENV === "development"
     ? ["http://localhost:5203"]
     : []),
@@ -41,7 +43,7 @@ const nextConfig: NextConfig = {
           {
             key: "Content-Security-Policy",
             value:
-              `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.razorpay.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://res.cloudinary.com; font-src 'self' data:; connect-src ${connectSources}; frame-src 'self' https://*.razorpay.com; frame-ancestors 'none'; base-uri 'self'`,
+              `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.razorpay.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://res.cloudinary.com https://*.razorpay.com; font-src 'self' data:; connect-src ${connectSources}; frame-src 'self' https://*.razorpay.com; frame-ancestors 'none'; base-uri 'self'`,
           },
         ],
       },
