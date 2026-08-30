@@ -42,7 +42,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
             {/* Sidebar */}
             <aside
-                className={`fixed inset-y-0 left-0 z-50 w-64 border-r border-[#d8c8ad] bg-[var(--luxury-paper)] transition-transform duration-300 lg:translate-x-0 lg:z-auto ${
+                className={`fixed inset-y-0 left-0 z-50 w-64 shrink-0 border-r border-[#d8c8ad] bg-[var(--luxury-paper)] transition-transform duration-300 lg:translate-x-0 lg:static lg:z-auto ${
                     mobileOpen ? "translate-x-0" : "-translate-x-full"
                 }`}
             >

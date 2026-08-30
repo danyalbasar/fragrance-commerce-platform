@@ -141,7 +141,7 @@ export default function VendorSidebar({ mobileOpen, setMobileOpen }: { mobileOpe
 
             {/* Desktop sidebar */}
             <aside
-                className={`hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:flex lg:h-screen lg:flex-col lg:border-r lg:border-[var(--luxury-line)] lg:bg-[var(--luxury-paper)] transition-all duration-200 ${
+                className={`hidden lg:flex lg:h-screen lg:shrink-0 lg:flex-col lg:border-r lg:border-[var(--luxury-line)] lg:bg-[var(--luxury-paper)] transition-all duration-200 ${
                     collapsed ? "lg:w-[68px]" : "lg:w-60"
                 }`}
             >
