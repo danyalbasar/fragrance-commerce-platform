@@ -13,6 +13,8 @@ import { getStatusClasses } from "@/utils/orderStatus";
 import { useAuth } from "@/contexts/AuthContext";
 import { addToCart } from "@/services/cartService";
 import { readCache, writeCache } from "@/utils/swrCache";
+import { canPayNow, payOrderPayment } from "@/lib/payOrder";
+import { getApiResponse } from "@/services/api";
 
 export default function OrdersPage() {
     const { isLoggedIn } = useAuth();
@@ -22,6 +24,8 @@ export default function OrdersPage() {
     );
     const [loading, setLoading] = useState(orders.length === 0);
     const [cartError, setCartError] = useState("");
+    const [payError, setPayError] = useState("");
+    const [payingOrderId, setPayingOrderId] = useState<string | null>(null);
 
     async function loadOrders() {
         try {
@@ -40,6 +44,30 @@ export default function OrdersPage() {
             window.dispatchEvent(new Event("cartUpdated"));
         } catch {
             setCartError("Failed to add item to cart. Please try again.");
+        }
+    }
+
+    async function handleRetryPayment(order: Order) {
+        try {
+            setPayError("");
+            setPayingOrderId(order.id);
+
+            const { paid } = await payOrderPayment(order);
+
+            if (paid) {
+                await loadOrders();
+            }
+        } catch (err) {
+            const response = getApiResponse(err);
+
+            setPayError(
+                typeof response?.data === "string" &&
+                    response.data.trim()
+                    ? response.data
+                    : "Failed to complete payment. Please try again."
+            );
+        } finally {
+            setPayingOrderId(null);
         }
     }
 
@@ -97,6 +125,15 @@ export default function OrdersPage() {
                                     className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
                                 >
                                     {cartError}
+                                </p>
+                            )}
+
+                            {payError && (
+                                <p
+                                    role="alert"
+                                    className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
+                                >
+                                    {payError}
                                 </p>
                             )}
 
@@ -190,6 +227,26 @@ export default function OrdersPage() {
                                                     </div>
 
                                                     <div className="grid gap-2 sm:grid-cols-3 md:flex md:flex-col md:gap-3 md:items-end">
+                                                        {canPayNow(order) && (
+                                                            <button
+                                                                onClick={() =>
+                                                                    handleRetryPayment(
+                                                                        order
+                                                                    )
+                                                                }
+                                                                disabled={
+                                                                    payingOrderId ===
+                                                                    order.id
+                                                                }
+                                                                className="flex h-10 w-full items-center justify-center gap-2 whitespace-nowrap rounded-full bg-[var(--luxury-ink)] px-3 text-xs font-semibold uppercase tracking-[0.1em] text-[var(--luxury-paper)] shadow-[0_12px_28px_rgba(22,18,13,0.12)] transition hover:bg-[var(--luxury-moss)] disabled:bg-[var(--luxury-muted-strong)] md:w-40"
+                                                            >
+                                                                {payingOrderId ===
+                                                                order.id
+                                                                    ? "Opening..."
+                                                                    : "Pay Now"}
+                                                            </button>
+                                                        )}
+
                                                         <Link
                                                             href={`/orders/${order.id}`}
                                                             className="flex h-10 w-full items-center justify-center whitespace-nowrap rounded-full border border-[var(--luxury-line)] px-3 text-center text-xs font-semibold uppercase tracking-[0.1em] transition hover:border-[var(--luxury-gold-strong)] hover:bg-[#fffaf2] md:w-40"

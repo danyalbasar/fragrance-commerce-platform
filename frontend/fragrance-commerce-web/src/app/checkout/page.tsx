@@ -16,11 +16,7 @@ import {
     updateAddress,
 } from "@/services/addressService";
 import { createOrder } from "@/services/orderService";
-import {
-    createRazorpayOrder,
-    verifyRazorpayPayment,
-} from "@/services/paymentService";
-import { openRazorpayCheckout } from "@/lib/razorpay";
+import { payOrderPayment } from "@/lib/payOrder";
 import { getApiResponse } from "@/services/api";
 
 export default function CheckoutPage() {
@@ -156,32 +152,14 @@ export default function CheckoutPage() {
                 return;
             }
 
-            const razorpayOrder = await createRazorpayOrder(order.payment.id);
+            const { paid } = await payOrderPayment(order);
 
-            const payment = await openRazorpayCheckout({
-                key:
-                    process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ??
-                    razorpayOrder.keyId,
-                amountPaise: razorpayOrder.amountPaise,
-                currency: razorpayOrder.currency,
-                orderId: razorpayOrder.orderId,
-                name: "Fragrance Commerce",
-                description: `Order ${razorpayOrder.orderNumber}`,
-            });
-
-            if (!payment) {
+            if (!paid) {
                 setOrderError(
                     "Payment was not completed. Your order has been saved as pending."
                 );
                 return;
             }
-
-            await verifyRazorpayPayment({
-                paymentId: order.payment.id,
-                razorpayOrderId: payment.razorpay_order_id,
-                razorpayPaymentId: payment.razorpay_payment_id,
-                signature: payment.razorpay_signature,
-            });
 
             window.dispatchEvent(new Event("cartUpdated"));
 

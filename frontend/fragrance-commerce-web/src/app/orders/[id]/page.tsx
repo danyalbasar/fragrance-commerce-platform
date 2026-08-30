@@ -11,6 +11,8 @@ import type { Order } from "@/types/order";
 import { cancelOrder, getOrderById } from "@/services/orderService";
 import { getStatusClasses } from "@/utils/orderStatus";
 import { readCache, writeCache } from "@/utils/swrCache";
+import { canPayNow, payOrderPayment } from "@/lib/payOrder";
+import { getApiResponse } from "@/services/api";
 
 export default function OrderDetailsPage() {
     const params = useParams();
@@ -25,6 +27,8 @@ export default function OrderDetailsPage() {
     const [cancelling, setCancelling] = useState(false);
     const [confirmingCancel, setConfirmingCancel] = useState(false);
     const [cancelError, setCancelError] = useState("");
+    const [paying, setPaying] = useState(false);
+    const [payError, setPayError] = useState("");
 
     async function loadOrder() {
         try {
@@ -54,6 +58,32 @@ export default function OrderDetailsPage() {
             setCancelError("Failed to cancel order. Please try again.");
         } finally {
             setCancelling(false);
+        }
+    }
+
+    async function handleRetryPayment() {
+        if (!order) return;
+
+        try {
+            setPaying(true);
+            setPayError("");
+
+            const { paid } = await payOrderPayment(order);
+
+            if (paid) {
+                await loadOrder();
+            }
+        } catch (err) {
+            const response = getApiResponse(err);
+
+            setPayError(
+                typeof response?.data === "string" &&
+                    response.data.trim()
+                    ? response.data
+                    : "Failed to complete payment. Please try again."
+            );
+        } finally {
+            setPaying(false);
         }
     }
 
@@ -211,6 +241,27 @@ export default function OrderDetailsPage() {
                                 <p className="text-sm text-[var(--luxury-muted)]">
                                     Transaction ID: {order.payment.transactionId}
                                 </p>
+                            )}
+
+                            {canPayNow(order) && (
+                                <div className="mt-4">
+                                    <button
+                                        onClick={handleRetryPayment}
+                                        disabled={paying}
+                                        className="w-full rounded-full bg-[var(--luxury-ink)] px-6 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-[var(--luxury-paper)] shadow-[0_14px_30px_rgba(22,18,13,0.12)] transition hover:bg-[var(--luxury-moss)] disabled:bg-[var(--luxury-muted-strong)] sm:w-auto"
+                                    >
+                                        {paying ? "Opening..." : `Pay Now • ₹${order.payment.amount}`}
+                                    </button>
+
+                                    {payError && (
+                                        <p
+                                            role="alert"
+                                            className="mt-3 text-sm font-medium text-red-700"
+                                        >
+                                            {payError}
+                                        </p>
+                                    )}
+                                </div>
                             )}
                         </section>
                     </div>
