@@ -21,6 +21,7 @@ import {
     verifyRazorpayPayment,
 } from "@/services/paymentService";
 import { openRazorpayCheckout } from "@/lib/razorpay";
+import { getApiResponse } from "@/services/api";
 
 export default function CheckoutPage() {
     const router = useRouter();
@@ -185,8 +186,15 @@ export default function CheckoutPage() {
             window.dispatchEvent(new Event("cartUpdated"));
 
             router.push("/orders");
-        } catch {
-            setOrderError("Failed to place order. Please try again.");
+        } catch (err) {
+            const response = getApiResponse(err);
+
+            const message =
+                typeof response?.data === "string" && response.data.trim()
+                    ? response.data
+                    : "Failed to place order. Please try again.";
+
+            setOrderError(message);
         } finally {
             setPlacingOrder(false);
         }
