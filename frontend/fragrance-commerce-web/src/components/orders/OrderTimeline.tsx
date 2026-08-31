@@ -4,7 +4,7 @@ interface Props {
 
 const statuses = [
     "Pending",
-    "Processing",
+    "Confirmed",
     "Shipped",
     "Delivered",
 ];
