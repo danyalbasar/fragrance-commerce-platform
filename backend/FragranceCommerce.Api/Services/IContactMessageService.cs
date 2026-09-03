@@ -6,4 +6,6 @@ public interface IContactMessageService
 {
     Task<ContactMessageDto?> GetByIdAsync(Guid id);
     Task<ContactMessageDto> CreateAsync(CreateContactMessageDto dto);
+    Task<List<ContactMessageDto>> GetAllAsync(bool? resolved = null);
+    Task<ContactMessageDto?> MarkResolvedAsync(Guid id);
 }

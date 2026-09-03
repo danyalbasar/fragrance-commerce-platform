@@ -6,6 +6,7 @@ import {
     BarChart3,
     Boxes,
     ClipboardList,
+    Inbox,
     PackagePlus,
     ShieldCheck,
     TrendingUp,
@@ -131,6 +132,13 @@ export default function VendorDashboardPage() {
                     >
                         <ClipboardList size={16} />
                         View Orders
+                    </Link>
+                    <Link
+                        href="/vendor/messages"
+                        className="inline-flex items-center gap-2 rounded-full border border-[var(--luxury-line)] px-5 py-2.5 text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-ink)] hover:border-[var(--luxury-gold)] hover:text-[var(--luxury-gold)] transition-colors"
+                    >
+                        <Inbox size={16} />
+                        Messages
                     </Link>
                 </div>
             </section>

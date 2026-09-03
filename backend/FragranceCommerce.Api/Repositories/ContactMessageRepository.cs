@@ -13,6 +13,18 @@ public class ContactMessageRepository : IContactMessageRepository
         _context = context;
     }
 
+    public async Task<List<ContactMessage>> GetAllAsync(bool? resolved = null)
+    {
+        var query = _context.ContactMessages.AsNoTracking();
+
+        if (resolved.HasValue)
+            query = query.Where(message => message.IsResolved == resolved.Value);
+
+        return await query
+            .OrderByDescending(message => message.CreatedAt)
+            .ToListAsync();
+    }
+
     public async Task<ContactMessage?> GetByIdAsync(Guid id)
     {
         return await _context.ContactMessages

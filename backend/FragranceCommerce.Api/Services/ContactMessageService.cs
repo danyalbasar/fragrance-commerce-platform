@@ -22,6 +22,27 @@ public class ContactMessageService : IContactMessageService
             : ToDto(contactMessage);
     }
 
+    public async Task<List<ContactMessageDto>> GetAllAsync(bool? resolved = null)
+    {
+        var contactMessages = await _contactMessageRepository.GetAllAsync(resolved);
+
+        return contactMessages.Select(ToDto).ToList();
+    }
+
+    public async Task<ContactMessageDto?> MarkResolvedAsync(Guid id)
+    {
+        var contactMessage = await _contactMessageRepository.GetByIdAsync(id);
+
+        if (contactMessage == null)
+            return null;
+
+        contactMessage.IsResolved = true;
+
+        await _contactMessageRepository.SaveChangesAsync();
+
+        return ToDto(contactMessage);
+    }
+
     public async Task<ContactMessageDto> CreateAsync(CreateContactMessageDto dto)
     {
         var contactMessage = new ContactMessage

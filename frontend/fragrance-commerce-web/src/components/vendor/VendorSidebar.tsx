@@ -7,6 +7,7 @@ import {
     Boxes,
     ChevronDown,
     ClipboardList,
+    Inbox,
     LogOut,
     PanelLeftClose,
     PanelLeftOpen,
@@ -20,6 +21,7 @@ const navItems = [
     { href: "/vendor", label: "Overview", icon: BarChart3, exact: true },
     { href: "/vendor/products", label: "Products", icon: Boxes },
     { href: "/vendor/orders", label: "Orders", icon: ClipboardList },
+    { href: "/vendor/messages", label: "Messages", icon: Inbox },
 ];
 
 export default function VendorSidebar({ mobileOpen, setMobileOpen }: { mobileOpen: boolean; setMobileOpen: (v: boolean) => void }) {

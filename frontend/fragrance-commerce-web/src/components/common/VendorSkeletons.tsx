@@ -261,3 +261,39 @@ export function VendorSettingsSkeleton() {
         </div>
     );
 }
+
+export function VendorMessagesSkeleton() {
+    return (
+        <div className="space-y-6" aria-hidden="true">
+            <div>
+                <div className={`h-3 w-32 ${bar}`} />
+                <div className={`mt-3 h-10 w-48 ${bar}`} />
+                <div className={`mt-2 h-4 w-40 ${bar}`} />
+            </div>
+
+            <div className="flex gap-2">
+                {Array.from({ length: 2 }).map((_, i) => (
+                    <div key={i} className={`h-9 w-24 rounded-full ${bar}`} />
+                ))}
+            </div>
+
+            <div className="space-y-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className={`${border} p-5 shadow-[0_18px_50px_rgba(22,18,13,0.08)]`}>
+                        <div className="flex items-start justify-between gap-4">
+                            <div>
+                                <div className={`h-5 w-32 ${bar}`} />
+                                <div className={`mt-2 h-3 w-48 ${bar}`} />
+                                <div className={`mt-2 h-3 w-40 ${bar}`} />
+                            </div>
+                            <div className="text-right">
+                                <div className={`h-5 w-16 rounded-full ${bar}`} />
+                                <div className={`mt-2 h-5 w-20 ${bar}`} />
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}

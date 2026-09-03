@@ -24,3 +24,24 @@ export async function createContactMessage(
 
     return response.data;
 }
+
+export async function getContactMessages(
+    resolved?: boolean
+): Promise<ContactMessageResponse[]> {
+    const response = await api.get<ContactMessageResponse[]>(
+        "/contactmessages",
+        { params: resolved === undefined ? {} : { resolved } }
+    );
+
+    return response.data;
+}
+
+export async function markContactMessageResolved(
+    id: string
+): Promise<ContactMessageResponse> {
+    const response = await api.put<ContactMessageResponse>(
+        `/contactmessages/${id}/resolved`
+    );
+
+    return response.data;
+}
