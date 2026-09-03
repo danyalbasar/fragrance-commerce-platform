@@ -1,28 +1,35 @@
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 
 export function useScrollLock(locked: boolean) {
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (!locked) return;
 
         const scrollY = window.scrollY;
         const html = document.documentElement;
+        const body = document.body;
 
         const origHtmlOverflow = html.style.overflow;
-        const origHtmlPosition = html.style.position;
-        const origHtmlTop = html.style.top;
-        const origHtmlWidth = html.style.width;
+        const origBodyOverflow = body.style.overflow;
+        const origBodyPosition = body.style.position;
+        const origBodyTop = body.style.top;
+        const origBodyWidth = body.style.width;
+        const origScrollBehavior = html.style.scrollBehavior;
 
         html.style.overflow = "hidden";
-        html.style.position = "fixed";
-        html.style.top = `-${scrollY}px`;
-        html.style.width = "100%";
+        body.style.overflow = "hidden";
+        body.style.position = "fixed";
+        body.style.top = `-${scrollY}px`;
+        body.style.width = "100%";
 
         return () => {
+            html.style.scrollBehavior = "auto";
             html.style.overflow = origHtmlOverflow;
-            html.style.position = origHtmlPosition;
-            html.style.top = origHtmlTop;
-            html.style.width = origHtmlWidth;
-            window.scrollTo(0, scrollY);
+            body.style.overflow = origBodyOverflow;
+            body.style.position = origBodyPosition;
+            body.style.top = origBodyTop;
+            body.style.width = origBodyWidth;
+            window.scrollTo({ top: scrollY, behavior: "instant" });
+            html.style.scrollBehavior = origScrollBehavior;
         };
     }, [locked]);
 }
