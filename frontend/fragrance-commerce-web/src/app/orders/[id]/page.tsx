@@ -1,11 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { PackageX } from "lucide-react";
+import { PackageX, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/common/ProtectedRoute";
 import OrderTimeline from "@/components/orders/OrderTimeline";
+import { useScrollLock } from "@/hooks/useScrollLock";
 import { EmptyState } from "@/components/common/EmptyState";
 import type { Order } from "@/types/order";
 import { cancelOrder, getOrderById } from "@/services/orderService";
@@ -29,6 +30,7 @@ export default function OrderDetailsPage() {
     const [cancelError, setCancelError] = useState("");
     const [paying, setPaying] = useState(false);
     const [payError, setPayError] = useState("");
+    useScrollLock(confirmingCancel);
 
     async function loadOrder() {
         try {
@@ -321,45 +323,12 @@ export default function OrderDetailsPage() {
 
                     {order.status !== "Cancelled" && order.status !== "Delivered" && (
                         <div className="mt-6">
-                            {confirmingCancel ? (
-                                <div
-                                    role="alert"
-                                    className="rounded-xl border border-red-200 bg-red-50 p-4"
-                                >
-                                    <p className="text-sm font-semibold text-red-700">
-                                        Are you sure you want to cancel this order?
-                                    </p>
-
-                                    <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                                        <button
-                                            onClick={handleCancelOrder}
-                                            disabled={cancelling}
-                                            className="rounded-full bg-red-600 px-6 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-white hover:bg-red-700 disabled:bg-[var(--luxury-muted-strong)] sm:w-auto"
-                                        >
-                                            {cancelling
-                                                ? "Cancelling..."
-                                                : "Yes, Cancel Order"}
-                                        </button>
-
-                                        <button
-                                            onClick={() =>
-                                                setConfirmingCancel(false)
-                                            }
-                                            disabled={cancelling}
-                                            className="rounded-full border border-[var(--luxury-line)] bg-[var(--luxury-paper)] px-6 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-[var(--luxury-ink)] transition hover:border-[var(--luxury-gold-strong)] sm:w-auto"
-                                        >
-                                            Keep Order
-                                        </button>
-                                    </div>
-                                </div>
-                            ) : (
-                                <button
-                                    onClick={() => setConfirmingCancel(true)}
-                                    className="w-full rounded-full bg-red-600 px-6 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-white hover:bg-red-700 sm:w-auto"
-                                >
-                                    Cancel Order
-                                </button>
-                            )}
+                            <button
+                                onClick={() => setConfirmingCancel(true)}
+                                className="w-full rounded-full bg-red-600 px-6 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-white hover:bg-red-700 sm:w-auto"
+                            >
+                                Cancel Order
+                            </button>
 
                             {cancelError && (
                                 <p
@@ -374,6 +343,52 @@ export default function OrderDetailsPage() {
                 </div>
                 </div>
             </main>
+
+            {confirmingCancel && (
+                <div
+                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+                    onClick={() => !cancelling && setConfirmingCancel(false)}
+                >
+                    <div
+                        role="alert"
+                        className="w-full max-w-sm rounded-2xl border border-red-100 bg-white p-6 shadow-xl"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="mb-1 flex items-center gap-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-50">
+                                <X size={18} className="text-red-600" />
+                            </div>
+                            <h3 className="text-lg font-semibold text-red-700">
+                                Cancel this order?
+                            </h3>
+                        </div>
+
+                        <p className="ml-[52px] text-sm leading-relaxed text-[var(--luxury-muted)]">
+                            Are you sure you want to cancel this order? This action cannot be undone.
+                        </p>
+
+                        <div className="mt-5 flex justify-end gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setConfirmingCancel(false)}
+                                disabled={cancelling}
+                                className="inline-flex h-10 items-center justify-center rounded-full border border-[var(--luxury-line)] px-5 text-sm font-semibold uppercase tracking-wider text-[var(--luxury-ink)] transition hover:border-[var(--luxury-gold-strong)] disabled:opacity-50"
+                            >
+                                Keep
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleCancelOrder}
+                                disabled={cancelling}
+                                className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-red-600 px-5 text-sm font-semibold uppercase tracking-wider text-white transition hover:bg-red-700 disabled:opacity-50"
+                            >
+                                <X size={15} />
+                                {cancelling ? "Cancelling..." : "Yes, Cancel"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </ProtectedRoute>
     );
 }
