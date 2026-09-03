@@ -26,7 +26,9 @@ export function useScrollLock(locked: boolean) {
             body.style.position = origBodyPosition;
             body.style.top = origBodyTop;
             body.style.width = origBodyWidth;
-            window.scrollTo(0, scrollY);
+            requestAnimationFrame(() => {
+                window.scrollTo(0, scrollY);
+            });
         };
     }, [locked]);
 }
