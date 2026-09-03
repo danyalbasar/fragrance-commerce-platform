@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState, useCallback, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { ChevronDown, Heart, MapPin, Menu, Minus, Plus, Search, ShoppingBag, Trash2, User, X } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, Heart, MapPin, Menu, Minus, Plus, Search, ShoppingBag, Trash2, User, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { AnimatePresence, motion } from "framer-motion";
 import { getCart, removeCartItem, updateCartItem } from "@/services/cartService";
@@ -28,12 +28,9 @@ export default function Navbar() {
 
     const [showSearch, setShowSearch] = useState(false);
     const [showMobileMenu, setShowMobileMenu] = useState(false);
-    const [openMobileGender, setOpenMobileGender] = useState<Record<string, boolean>>({
-        Men: false,
-        Women: false,
-        Unisex: false,
-    });
-    const [openMobileGroups, setOpenMobileGroups] = useState<Record<string, boolean>>({});
+    const [mobileNavLevel, setMobileNavLevel] = useState<"root" | "gender" | "group">("root");
+    const [selectedGender, setSelectedGender] = useState<string | null>(null);
+    const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
     const [search, setSearch] = useState("");
     const [suggestions, setSuggestions] = useState<Product[]>([]);
     const [loadingSuggestions, setLoadingSuggestions] = useState(false);
@@ -360,24 +357,30 @@ export default function Navbar() {
         await loadCartPreview();
     }
 
-    function toggleMobileGender(gender: string) {
-        setOpenMobileGender((current) => ({
-            ...current,
-            [gender]: !current[gender],
-        }));
+    function navigateToGender(gender: string) {
+        setSelectedGender(gender);
+        setMobileNavLevel("gender");
     }
 
-    function toggleMobileGroup(gender: string, group: string) {
-        const key = `${gender}-${group}`;
-
-        setOpenMobileGroups((current) => ({
-            ...current,
-            [key]: !current[key],
-        }));
+    function navigateToGroup(group: string) {
+        setSelectedGroup(group);
+        setMobileNavLevel("group");
     }
 
-    function isMobileGroupOpen(gender: string, group: string) {
-        return openMobileGroups[`${gender}-${group}`] === true;
+    function navigateBack() {
+        if (mobileNavLevel === "group") {
+            setMobileNavLevel("gender");
+            setSelectedGroup(null);
+        } else if (mobileNavLevel === "gender") {
+            setMobileNavLevel("root");
+            setSelectedGender(null);
+        }
+    }
+
+    function resetMobileNav() {
+        setMobileNavLevel("root");
+        setSelectedGender(null);
+        setSelectedGroup(null);
     }
 
     if (pathname.startsWith("/vendor")) return null;
@@ -402,12 +405,7 @@ export default function Navbar() {
                                 const nextValue = !value;
 
                                 if (nextValue) {
-                                    setOpenMobileGender({
-                                        Men: false,
-                                        Women: false,
-                                        Unisex: false,
-                                    });
-                                    setOpenMobileGroups({});
+                                    resetMobileNav();
                                 }
 
                                 return nextValue;
@@ -693,7 +691,7 @@ export default function Navbar() {
                                 animate={{ x: 0 }}
                                 exit={{ x: "-100%" }}
                                 transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-                                className="absolute left-0 top-0 h-full w-[86vw] max-w-[430px] overflow-y-auto overscroll-contain bg-[var(--luxury-paper)] px-5 py-6 text-[var(--luxury-ink)] shadow-[0_24px_70px_rgba(22,18,13,0.24)]"
+                                className="absolute left-0 top-0 flex h-full w-[86vw] max-w-[430px] flex-col overscroll-contain bg-[var(--luxury-paper)] px-5 py-6 text-[var(--luxury-ink)] shadow-[0_24px_70px_rgba(22,18,13,0.24)]"
                             >
                                 <div className="mb-5 flex items-center justify-between">
                                     <Link
@@ -706,7 +704,10 @@ export default function Navbar() {
 
                                     <button
                                         type="button"
-                                        onClick={() => setShowMobileMenu(false)}
+                                        onClick={() => {
+                                            resetMobileNav();
+                                            setShowMobileMenu(false);
+                                        }}
                                         className="flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-[#efe3d0]"
                                         aria-label="Close navigation menu"
                                     >
@@ -714,160 +715,156 @@ export default function Navbar() {
                                     </button>
                                 </div>
 
-                                <nav aria-label="Mobile navigation" className="text-base">
-                                    {["Men", "Women", "Unisex"].map((item) => (
-                                        <section key={item} className="border-b border-[#d8c8ad] py-4">
-                                            <button
-                                                type="button"
-                                                onClick={() => toggleMobileGender(item)}
-                                                className="group flex w-full items-center justify-between text-left font-semibold uppercase tracking-[0.16em] transition-colors duration-200 hover:text-[var(--luxury-gold)]"
-                                                aria-expanded={openMobileGender[item]}
+                                <nav aria-label="Mobile navigation" className="text-base overflow-hidden relative flex-1">
+                                    <AnimatePresence initial={false} mode="wait">
+                                        {mobileNavLevel === "root" && (
+                                            <motion.div
+                                                key="root"
+                                                initial={{ x: "-100%", opacity: 0 }}
+                                                animate={{ x: 0, opacity: 1 }}
+                                                exit={{ x: "-100%", opacity: 0 }}
+                                                transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                                                className="absolute inset-0"
                                             >
-                                                <span>{item}</span>
-                                                <ChevronDown
-                                                    size={18}
-                                                    className={`shrink-0 transition-transform duration-200 ${openMobileGender[item] ? "rotate-180 text-[var(--luxury-gold)]" : "text-[var(--luxury-muted)] group-hover:text-[var(--luxury-gold)]"}`}
-                                                />
-                                            </button>
+                                                {["Men", "Women", "Unisex"].map((item) => (
+                                                    <section key={item} className="border-b border-[#d8c8ad]">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => navigateToGender(item)}
+                                                            className="group flex w-full items-center justify-between py-4 text-left font-semibold uppercase tracking-[0.16em] transition-colors duration-200 hover:text-[var(--luxury-gold)]"
+                                                        >
+                                                            <span>{item}</span>
+                                                            <ChevronRight
+                                                                size={18}
+                                                                className="shrink-0 text-[var(--luxury-muted)] group-hover:text-[var(--luxury-gold)]"
+                                                            />
+                                                        </button>
+                                                    </section>
+                                                ))}
+                                            </motion.div>
+                                        )}
 
-                                            <AnimatePresence initial={false}>
-                                                {openMobileGender[item] && (
-                                                    <motion.div
-                                                        initial={{ height: 0, opacity: 0 }}
-                                                        animate={{ height: "auto", opacity: 1 }}
-                                                        exit={{ height: 0, opacity: 0 }}
-                                                        transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                                                        className="overflow-hidden"
-                                                    >
-                                                        <div className="mt-5 grid gap-5 pl-4">
-                                                            <div>
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => toggleMobileGroup(item, "Fragrances")}
-                                                                    className="mb-3 flex w-full items-center justify-between text-left text-xs font-bold uppercase tracking-[0.22em] text-[var(--luxury-gold-strong)]"
-                                                                    aria-expanded={isMobileGroupOpen(item, "Fragrances")}
-                                                                >
-                                                                    <span>Fragrances</span>
-                                                                    <ChevronDown
-                                                                        size={16}
-                                                                        className={`shrink-0 transition-transform duration-200 ${isMobileGroupOpen(item, "Fragrances") ? "rotate-180" : ""}`}
-                                                                    />
-                                                                </button>
-                                                                <AnimatePresence initial={false}>
-                                                                    {isMobileGroupOpen(item, "Fragrances") && (
-                                                                        <motion.div
-                                                                            initial={{ height: 0, opacity: 0 }}
-                                                                            animate={{ height: "auto", opacity: 1 }}
-                                                                            exit={{ height: 0, opacity: 0 }}
-                                                                            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                                                                            className="overflow-hidden"
-                                                                        >
-                                                                            <div className="grid gap-3 pl-3 text-sm text-[var(--luxury-muted)]">
-                                                                                <Link href={`/products?gender=${item}`} onClick={() => setShowMobileMenu(false)} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
-                                                                                    Shop All
-                                                                                </Link>
-                                                                                <Link href={`/products?gender=${item}&category=Perfume`} onClick={() => setShowMobileMenu(false)} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
-                                                                                    Perfumes
-                                                                                </Link>
-                                                                                <Link href={`/products?gender=${item}&category=Attar`} onClick={() => setShowMobileMenu(false)} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
-                                                                                    Attars
-                                                                                </Link>
-                                                                                <Link href={`/products?gender=${item}&category=Customised%20Perfume`} onClick={() => setShowMobileMenu(false)} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
-                                                                                    Customised Perfumes
-                                                                                </Link>
-                                                                            </div>
-                                                                        </motion.div>
-                                                                    )}
-                                                                </AnimatePresence>
-                                                            </div>
+                                        {mobileNavLevel === "gender" && selectedGender && (
+                                            <motion.div
+                                                key={`gender-${selectedGender}`}
+                                                initial={{ x: "100%", opacity: 0 }}
+                                                animate={{ x: 0, opacity: 1 }}
+                                                exit={{ x: "100%", opacity: 0 }}
+                                                transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                                                className="absolute inset-0"
+                                            >
+                                                <button
+                                                    type="button"
+                                                    onClick={navigateBack}
+                                                    className="flex w-full items-center gap-2 py-4 text-sm font-medium text-[var(--luxury-muted)] transition-colors hover:text-[var(--luxury-gold)]"
+                                                >
+                                                    <ChevronLeft size={18} />
+                                                    <span>Back</span>
+                                                </button>
 
-                                                            <div>
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => toggleMobileGroup(item, "Cosmetics")}
-                                                                    className="mb-3 flex w-full items-center justify-between text-left text-xs font-bold uppercase tracking-[0.22em] text-[var(--luxury-gold-strong)]"
-                                                                    aria-expanded={isMobileGroupOpen(item, "Cosmetics")}
-                                                                >
-                                                                    <span>Cosmetics</span>
-                                                                    <ChevronDown
-                                                                        size={16}
-                                                                        className={`shrink-0 transition-transform duration-200 ${isMobileGroupOpen(item, "Cosmetics") ? "rotate-180" : ""}`}
-                                                                    />
-                                                                </button>
-                                                                <AnimatePresence initial={false}>
-                                                                    {isMobileGroupOpen(item, "Cosmetics") && (
-                                                                        <motion.div
-                                                                            initial={{ height: 0, opacity: 0 }}
-                                                                            animate={{ height: "auto", opacity: 1 }}
-                                                                            exit={{ height: 0, opacity: 0 }}
-                                                                            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                                                                            className="overflow-hidden"
-                                                                        >
-                                                                            <div className="grid gap-3 pl-3 text-sm text-[var(--luxury-muted)]">
-                                                                                <Link href={`/products?gender=${item}&category=Face%20Wash`} onClick={() => setShowMobileMenu(false)} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
-                                                                                    Face Wash
-                                                                                </Link>
-                                                                                <Link href={`/products?gender=${item}&category=Fairness%20Cream`} onClick={() => setShowMobileMenu(false)} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
-                                                                                    Fairness Cream
-                                                                                </Link>
-                                                                                <Link href={`/products?gender=${item}&category=Lens`} onClick={() => setShowMobileMenu(false)} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
-                                                                                    Lens
-                                                                                </Link>
-                                                                                <Link href={`/products?gender=${item}&category=Nails`} onClick={() => setShowMobileMenu(false)} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
-                                                                                    Nails
-                                                                                </Link>
-                                                                            </div>
-                                                                        </motion.div>
-                                                                    )}
-                                                                </AnimatePresence>
-                                                            </div>
+                                                <div className="border-b border-[#d8c8ad] pb-2 mb-2">
+                                                    <span className="text-xs font-bold uppercase tracking-[0.22em] text-[var(--luxury-gold-strong)]">
+                                                        {selectedGender}
+                                                    </span>
+                                                </div>
 
-                                                            <div>
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => toggleMobileGroup(item, "Brands")}
-                                                                    className="mb-3 flex w-full items-center justify-between text-left text-xs font-bold uppercase tracking-[0.22em] text-[var(--luxury-gold-strong)]"
-                                                                    aria-expanded={isMobileGroupOpen(item, "Brands")}
-                                                                >
-                                                                    <span>Brands</span>
-                                                                    <ChevronDown
-                                                                        size={16}
-                                                                        className={`shrink-0 transition-transform duration-200 ${isMobileGroupOpen(item, "Brands") ? "rotate-180" : ""}`}
-                                                                    />
-                                                                </button>
-                                                                <AnimatePresence initial={false}>
-                                                                    {isMobileGroupOpen(item, "Brands") && (
-                                                                        <motion.div
-                                                                            initial={{ height: 0, opacity: 0 }}
-                                                                            animate={{ height: "auto", opacity: 1 }}
-                                                                            exit={{ height: 0, opacity: 0 }}
-                                                                            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                                                                            className="overflow-hidden"
-                                                                        >
-                                                                            <div className="grid gap-3 pl-3 text-sm text-[var(--luxury-muted)]">
-                                                                                <Link href="/products?search=Aurelian%20Atelier" onClick={() => setShowMobileMenu(false)} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
-                                                                                    Aurelian Atelier
-                                                                                </Link>
-                                                                                <Link href="/products?search=Nocturne%20Vale" onClick={() => setShowMobileMenu(false)} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
-                                                                                    Nocturne Vale
-                                                                                </Link>
-                                                                                <Link href="/products?search=Mira%20Solace" onClick={() => setShowMobileMenu(false)} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
-                                                                                    Mira Solace
-                                                                                </Link>
-                                                                                <Link href="/products?search=Vellum%20%26%20Dew" onClick={() => setShowMobileMenu(false)} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
-                                                                                    Vellum & Dew
-                                                                                </Link>
-                                                                            </div>
-                                                                        </motion.div>
-                                                                    )}
-                                                                </AnimatePresence>
-                                                            </div>
-                                                        </div>
-                                                    </motion.div>
-                                                )}
-                                            </AnimatePresence>
-                                        </section>
-                                    ))}
+                                                {["Fragrances", "Cosmetics", "Brands"].map((group) => (
+                                                    <section key={group} className="border-b border-[#d8c8ad]">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => navigateToGroup(group)}
+                                                            className="group flex w-full items-center justify-between py-4 text-left font-semibold uppercase tracking-[0.16em] transition-colors duration-200 hover:text-[var(--luxury-gold)]"
+                                                        >
+                                                            <span>{group}</span>
+                                                            <ChevronRight
+                                                                size={18}
+                                                                className="shrink-0 text-[var(--luxury-muted)] group-hover:text-[var(--luxury-gold)]"
+                                                            />
+                                                        </button>
+                                                    </section>
+                                                ))}
+                                            </motion.div>
+                                        )}
+
+                                        {mobileNavLevel === "group" && selectedGender && selectedGroup && (
+                                            <motion.div
+                                                key={`group-${selectedGender}-${selectedGroup}`}
+                                                initial={{ x: "100%", opacity: 0 }}
+                                                animate={{ x: 0, opacity: 1 }}
+                                                exit={{ x: "100%", opacity: 0 }}
+                                                transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                                                className="absolute inset-0"
+                                            >
+                                                <button
+                                                    type="button"
+                                                    onClick={navigateBack}
+                                                    className="flex w-full items-center gap-2 py-4 text-sm font-medium text-[var(--luxury-muted)] transition-colors hover:text-[var(--luxury-gold)]"
+                                                >
+                                                    <ChevronLeft size={18} />
+                                                    <span>Back</span>
+                                                </button>
+
+                                                <div className="border-b border-[#d8c8ad] pb-2 mb-2">
+                                                    <span className="text-xs font-bold uppercase tracking-[0.22em] text-[var(--luxury-gold-strong)]">
+                                                        {selectedGender} / {selectedGroup}
+                                                    </span>
+                                                </div>
+
+                                                <div className="grid gap-3 py-2 text-sm text-[var(--luxury-muted)]">
+                                                    {selectedGroup === "Fragrances" && (
+                                                        <>
+                                                            <Link href={`/products?gender=${selectedGender}`} onClick={() => { resetMobileNav(); setShowMobileMenu(false); }} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
+                                                                Shop All
+                                                            </Link>
+                                                            <Link href={`/products?gender=${selectedGender}&category=Perfume`} onClick={() => { resetMobileNav(); setShowMobileMenu(false); }} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
+                                                                Perfumes
+                                                            </Link>
+                                                            <Link href={`/products?gender=${selectedGender}&category=Attar`} onClick={() => { resetMobileNav(); setShowMobileMenu(false); }} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
+                                                                Attars
+                                                            </Link>
+                                                            <Link href={`/products?gender=${selectedGender}&category=Customised%20Perfume`} onClick={() => { resetMobileNav(); setShowMobileMenu(false); }} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
+                                                                Customised Perfumes
+                                                            </Link>
+                                                        </>
+                                                    )}
+
+                                                    {selectedGroup === "Cosmetics" && (
+                                                        <>
+                                                            <Link href={`/products?gender=${selectedGender}&category=Face%20Wash`} onClick={() => { resetMobileNav(); setShowMobileMenu(false); }} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
+                                                                Face Wash
+                                                            </Link>
+                                                            <Link href={`/products?gender=${selectedGender}&category=Fairness%20Cream`} onClick={() => { resetMobileNav(); setShowMobileMenu(false); }} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
+                                                                Fairness Cream
+                                                            </Link>
+                                                            <Link href={`/products?gender=${selectedGender}&category=Lens`} onClick={() => { resetMobileNav(); setShowMobileMenu(false); }} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
+                                                                Lens
+                                                            </Link>
+                                                            <Link href={`/products?gender=${selectedGender}&category=Nails`} onClick={() => { resetMobileNav(); setShowMobileMenu(false); }} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
+                                                                Nails
+                                                            </Link>
+                                                        </>
+                                                    )}
+
+                                                    {selectedGroup === "Brands" && (
+                                                        <>
+                                                            <Link href="/products?search=Aurelian%20Atelier" onClick={() => { resetMobileNav(); setShowMobileMenu(false); }} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
+                                                                Aurelian Atelier
+                                                            </Link>
+                                                            <Link href="/products?search=Nocturne%20Vale" onClick={() => { resetMobileNav(); setShowMobileMenu(false); }} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
+                                                                Nocturne Vale
+                                                            </Link>
+                                                            <Link href="/products?search=Mira%20Solace" onClick={() => { resetMobileNav(); setShowMobileMenu(false); }} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
+                                                                Mira Solace
+                                                            </Link>
+                                                            <Link href="/products?search=Vellum%20%26%20Dew" onClick={() => { resetMobileNav(); setShowMobileMenu(false); }} className="transition-colors duration-200 hover:text-[var(--luxury-ink)]">
+                                                                Vellum & Dew
+                                                            </Link>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
                                 </nav>
                             </motion.aside>
                         </motion.div>
