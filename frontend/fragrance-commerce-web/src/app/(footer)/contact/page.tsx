@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { createContactMessage } from "@/services/contactService";
 import { getPublicSettings } from "@/services/siteSettingsService";
+import { ContactPageSkeleton } from "@/components/common/ContactPageSkeleton";
 
 const initialForm = {
     fullName: "",
@@ -18,10 +19,18 @@ export default function ContactPage() {
     const [submitting, setSubmitting] = useState(false);
     const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
     const [cms, setCms] = useState<Record<string, string>>({});
+    const [loaded, setLoaded] = useState(false);
 
     useEffect(() => {
-        getPublicSettings().then(setCms).catch(() => {});
+        getPublicSettings()
+            .then(setCms)
+            .catch(() => {})
+            .finally(() => setLoaded(true));
     }, []);
+
+    if (!loaded) {
+        return <ContactPageSkeleton />;
+    }
 
     function updateField(
         field: keyof typeof initialForm,

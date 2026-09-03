@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import InfoPage from "./InfoPage";
+import { FAQPageSkeleton } from "./FAQPageSkeleton";
 import { getPublicSettings } from "@/services/siteSettingsService";
 
 interface CmsInfoPageProps {
@@ -12,10 +13,16 @@ interface CmsInfoPageProps {
 
 export default function CmsInfoPage({ prefix, contactCta = true, sectionType = "title" }: CmsInfoPageProps) {
   const [settings, setSettings] = useState<Record<string, string>>({});
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    getPublicSettings().then(setSettings).catch(() => {});
+    getPublicSettings()
+      .then(setSettings)
+      .catch(() => {})
+      .finally(() => setLoaded(true));
   }, []);
+
+  if (!loaded) return <FAQPageSkeleton />;
 
   const get = (key: string, fallback = "") => settings[key] || fallback;
 
