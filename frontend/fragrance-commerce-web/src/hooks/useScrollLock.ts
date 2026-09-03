@@ -6,29 +6,23 @@ export function useScrollLock(locked: boolean) {
 
         const scrollY = window.scrollY;
         const html = document.documentElement;
-        const body = document.body;
 
         const origHtmlOverflow = html.style.overflow;
-        const origBodyOverflow = body.style.overflow;
-        const origBodyPosition = body.style.position;
-        const origBodyTop = body.style.top;
-        const origBodyWidth = body.style.width;
+        const origHtmlPosition = html.style.position;
+        const origHtmlTop = html.style.top;
+        const origHtmlWidth = html.style.width;
 
         html.style.overflow = "hidden";
-        body.style.overflow = "hidden";
-        body.style.position = "fixed";
-        body.style.top = `-${scrollY}px`;
-        body.style.width = "100%";
+        html.style.position = "fixed";
+        html.style.top = `-${scrollY}px`;
+        html.style.width = "100%";
 
         return () => {
             html.style.overflow = origHtmlOverflow;
-            body.style.overflow = origBodyOverflow;
-            body.style.position = origBodyPosition;
-            body.style.top = origBodyTop;
-            body.style.width = origBodyWidth;
-            requestAnimationFrame(() => {
-                window.scrollTo(0, scrollY);
-            });
+            html.style.position = origHtmlPosition;
+            html.style.top = origHtmlTop;
+            html.style.width = origHtmlWidth;
+            window.scrollTo(0, scrollY);
         };
     }, [locked]);
 }
