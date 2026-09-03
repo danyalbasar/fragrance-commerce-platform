@@ -325,7 +325,7 @@ export default function OrderDetailsPage() {
                         <div className="mt-6">
                             <button
                                 onClick={() => setConfirmingCancel(true)}
-                                className="w-full rounded-full bg-red-600 px-5 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-white hover:bg-red-700 sm:w-auto"
+                                className="w-full rounded-full bg-red-600 px-5 py-2.5 text-[13px] font-semibold uppercase tracking-[0.12em] text-white hover:bg-red-700 sm:w-auto"
                             >
                                 Cancel Order
                             </button>
