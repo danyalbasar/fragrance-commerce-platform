@@ -73,6 +73,40 @@ function createDraftVariant(): DraftVariant {
     };
 }
 
+function slugPart(text: string, max = 6) {
+    const cleaned = text
+        .trim()
+        .toUpperCase()
+        .replace(/[^A-Z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+    return cleaned.slice(0, max) || "SRC";
+}
+
+function suggestSku(
+    brandName: string,
+    productName: string,
+    variantName: string
+) {
+    const brand = slugPart(brandName, 5);
+    const name = slugPart(productName, 6);
+    const size = slugPart(variantName, 5);
+    return `${brand}-${name}-${size}`;
+}
+
+function makeUniqueSku(base: string, existing: string[]) {
+    let candidate = base;
+    let n = 2;
+    while (existing.includes(candidate)) {
+        candidate = `${base}-${n}`;
+        n += 1;
+    }
+    return candidate;
+}
+
+function normalizeSku(value: string) {
+    return value.toUpperCase();
+}
+
 export default function VendorProductEditor({
     productId,
 }: {
@@ -381,6 +415,52 @@ export default function VendorProductEditor({
                 [field]: value,
             },
         }));
+    }
+
+    function currentBrandName() {
+        return brands.find((b) => b.id === form.brandId)?.name || "";
+    }
+
+    function generateDraftSku(id: string) {
+        const variant = draftVariants.find((v) => v.id === id);
+        if (!variant) return;
+        const otherSkus = draftVariants
+            .map((v) => v.sku)
+            .filter((s) => normalizeSku(s));
+        const base = suggestSku(currentBrandName(), form.name, variant.variantName);
+        updateDraftVariant(id, "sku", makeUniqueSku(base, otherSkus));
+    }
+
+    function generateEditSku(id: string) {
+        const editForm = variantEditForms[id];
+        if (!editForm || !product) return;
+        const otherSkus = product.variants
+            .map((v) => variantEditForms[v.id]?.sku || v.sku)
+            .filter((s) => normalizeSku(s));
+        const base = suggestSku(
+            currentBrandName(),
+            form.name,
+            editForm.variantName
+        );
+        updateVariantEditForm(id, "sku", makeUniqueSku(base, otherSkus));
+    }
+
+    function isDraftSkuDuplicate(id: string, sku: string) {
+        if (!sku) return false;
+        const target = normalizeSku(sku);
+        return draftVariants.some(
+            (v) => v.id !== id && normalizeSku(v.sku) === target
+        );
+    }
+
+    function isEditSkuDuplicate(id: string, sku: string) {
+        if (!sku) return false;
+        const target = normalizeSku(sku);
+        return product!.variants.some((v) => {
+            if (v.id === id) return false;
+            const other = normalizeSku(variantEditForms[v.id]?.sku || v.sku);
+            return other === target;
+        });
     }
 
     function updateProductImageForm(
@@ -696,13 +776,14 @@ export default function VendorProductEditor({
                                                         }
                                                         required
                                                     />
-                                                    <Field
+                                                    <SkuField
                                                         label="SKU"
                                                         value={variant.sku}
                                                         onChange={(value) =>
-                                                            updateDraftVariant(variant.id, "sku", value)
+                                                            updateDraftVariant(variant.id, "sku", normalizeSku(value))
                                                         }
-                                                        required
+                                                        onGenerate={() => generateDraftSku(variant.id)}
+                                                        duplicate={isDraftSkuDuplicate(variant.id, variant.sku)}
                                                     />
                                                     <Field
                                                         label="MRP"
@@ -795,13 +876,14 @@ export default function VendorProductEditor({
                                                                 }
                                                                 required
                                                             />
-                                                            <Field
+                                                            <SkuField
                                                                 label="SKU"
                                                                 value={editForm.sku}
                                                                 onChange={(value) =>
-                                                                    updateVariantEditForm(variant.id, "sku", value)
+                                                                    updateVariantEditForm(variant.id, "sku", normalizeSku(value))
                                                                 }
-                                                                required
+                                                                onGenerate={() => generateEditSku(variant.id)}
+                                                                duplicate={isEditSkuDuplicate(variant.id, editForm.sku)}
                                                             />
                                                             <SelectField
                                                                 label="Status"
@@ -1013,6 +1095,55 @@ function Field({
                 className="mt-2 h-11 w-full border border-[#d8c8ad] bg-[#fffaf2] px-3 text-base outline-none transition focus:border-[var(--luxury-gold)]"
             />
         </label>
+    );
+}
+
+function SkuField({
+    label,
+    value,
+    onChange,
+    onGenerate,
+    duplicate = false,
+}: {
+    label: string;
+    value: string;
+    onChange: (value: string) => void;
+    onGenerate: () => void;
+    duplicate?: boolean;
+}) {
+    return (
+        <div className="block">
+            <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--luxury-muted)] sm:tracking-[0.16em]">
+                {label}
+            </span>
+            <div className="mt-2 flex gap-2">
+                <input
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    spellCheck={false}
+                    className={`h-11 w-full border bg-[#fffaf2] px-3 text-base uppercase outline-none transition focus:border-[var(--luxury-gold)] ${
+                        duplicate ? "border-red-400" : "border-[#d8c8ad]"
+                    }`}
+                />
+                <button
+                    type="button"
+                    onClick={onGenerate}
+                    title="Generate a suggested SKU (you can still edit it)"
+                    className="h-11 shrink-0 rounded-full border border-[var(--luxury-gold)] px-4 text-xs font-semibold uppercase tracking-[0.1em] text-[var(--luxury-gold)] transition hover:bg-[var(--luxury-gold)] hover:text-[var(--luxury-paper)]"
+                >
+                    Generate
+                </button>
+            </div>
+            {duplicate ? (
+                <p className="mt-1 text-xs text-red-600">
+                    This SKU is already used by another variant.
+                </p>
+            ) : !value ? (
+                <p className="mt-1 text-xs text-[var(--luxury-muted)]">
+                    Leave the SKU blank and click Generate to auto-fill it.
+                </p>
+            ) : null}
+        </div>
     );
 }
 
