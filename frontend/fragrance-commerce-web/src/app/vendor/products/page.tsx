@@ -7,6 +7,7 @@ import { ArrowDown, ArrowUp, ArrowUpDown, Boxes, PackagePlus, SlidersHorizontal,
 import { productService } from "@/services/productService";
 import { EmptyState } from "@/components/common/EmptyState";
 import { VendorProductsSkeleton } from "@/components/common/VendorSkeletons";
+import Pagination from "@/components/common/Pagination";
 import type { Product } from "@/types/product";
 import { readCache, writeCache } from "@/utils/swrCache";
 
@@ -52,6 +53,8 @@ export default function VendorProductsPage() {
     });
     const [sortKey, setSortKey] = useState<"name" | "price" | "stock" | null>(null);
     const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+    const [page, setPage] = useState(1);
+    const pageSize = 8;
 
     const categories = useMemo(
         () =>
@@ -125,6 +128,14 @@ export default function VendorProductsPage() {
     }
 
     const hasActiveFilters = Object.values(filters).some(Boolean);
+    const pageCount = useMemo(
+        () => Math.max(1, Math.ceil(sorted.length / pageSize)),
+        [sorted, pageSize]
+    );
+    const paginated = useMemo(() => {
+        const start = (page - 1) * pageSize;
+        return sorted.slice(start, start + pageSize);
+    }, [sorted, page, pageSize]);
     const lowStockCount = useMemo(
         () =>
             products.filter((p) =>
@@ -151,6 +162,11 @@ export default function VendorProductsPage() {
         load();
         return () => { active = false; };
     }, []);
+
+    useEffect(() => {
+        setPage((p) => (p > pageCount ? pageCount : p));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [sorted.length]);
 
     return (
         <div className="space-y-6">
@@ -329,7 +345,7 @@ export default function VendorProductsPage() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {sorted.map((product) => (
+                                    {paginated.map((product) => (
                                         <tr key={product.id} className="border-b border-[#d8c8ad] last:border-0 hover:bg-[var(--luxury-sand)]/50">
                                             <td className="px-5 py-4">
                                                 <div className="flex items-center gap-3">
@@ -397,7 +413,7 @@ export default function VendorProductsPage() {
 
                         {/* Mobile cards */}
                         <div className="grid gap-3 p-4 md:hidden">
-                            {sorted.map((product) => (
+                            {paginated.map((product) => (
                                 <Link
                                     key={product.id}
                                     href={`/vendor/products/${product.id}`}
@@ -436,10 +452,12 @@ export default function VendorProductsPage() {
                                                 Stock: {totalStock(product)}
                                             </span>
                                         </div>
-                                    </div>
-                                </Link>
-                            ))}
+                                        </div>
+                                    </Link>
+                                ))}
                         </div>
+
+                        <Pagination page={page} pageCount={pageCount} onChange={setPage} />
                     </>
                 )}
             </div>

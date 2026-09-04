@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowDown, ArrowUp, ArrowUpDown, ClipboardList } from "lucide-react";
 import { getVendorOrders, updateOrderStatus } from "@/services/orderService";
 import { getApiResponse } from "@/services/api";
 import { EmptyState } from "@/components/common/EmptyState";
 import { VendorOrdersSkeleton } from "@/components/common/VendorSkeletons";
+import Pagination from "@/components/common/Pagination";
 import type { Order } from "@/types/order";
 import { getStatusClasses } from "@/utils/orderStatus";
 import { readCache, writeCache } from "@/utils/swrCache";
@@ -42,6 +43,8 @@ export default function VendorOrdersPage() {
     const [updatingId, setUpdatingId] = useState<string | null>(null);
     const [sortKey, setSortKey] = useState<"date" | "total" | "orderNumber">("date");
     const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+    const [page, setPage] = useState(1);
+    const pageSize = 8;
 
     useEffect(() => {
         let active = true;
@@ -123,6 +126,20 @@ export default function VendorOrdersPage() {
             ? <ArrowUp size={13} className="ml-1 inline-block" />
             : <ArrowDown size={13} className="ml-1 inline-block" />;
     }
+
+    const pageCount = useMemo(
+        () => Math.max(1, Math.ceil(sortedOrders.length / pageSize)),
+        [sortedOrders, pageSize]
+    );
+    const paginatedOrders = useMemo(() => {
+        const start = (page - 1) * pageSize;
+        return sortedOrders.slice(start, start + pageSize);
+    }, [sortedOrders, page, pageSize]);
+
+    useEffect(() => {
+        setPage((p) => (p > pageCount ? pageCount : p));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [sortedOrders.length]);
 
     return (
         <div className="space-y-6">
@@ -210,7 +227,7 @@ export default function VendorOrdersPage() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {sortedOrders.map((order) => (
+                                        {paginatedOrders.map((order) => (
                                             <tr key={order.id} className="border-b border-[#d8c8ad] last:border-0 hover:bg-[var(--luxury-sand)]/50">
                                                 <td className="px-5 py-4 font-semibold">
                                                     #{order.orderNumber}
@@ -266,7 +283,7 @@ export default function VendorOrdersPage() {
 
                         {/* Mobile cards */}
                         <div className="space-y-3 md:hidden">
-                            {sortedOrders.map((order) => (
+                            {paginatedOrders.map((order) => (
                                 <div
                                     key={order.id}
                                     className="border border-[#d8c8ad] bg-[var(--luxury-paper)] p-4 shadow-[0_18px_50px_rgba(22,18,13,0.08)]"
@@ -313,10 +330,12 @@ export default function VendorOrdersPage() {
                                         >
                                             Details
                                         </Link>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                ))}
                         </div>
+
+                        <Pagination page={page} pageCount={pageCount} onChange={setPage} />
                     </>
                 )}
             </div>
