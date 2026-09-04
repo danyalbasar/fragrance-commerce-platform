@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { me, logout as logoutRequest } from "@/services/authService";
 import { clearUserCache } from "@/utils/swrCache";
 
@@ -21,6 +21,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const router = useRouter();
+    const pathname = usePathname();
     const [email, setEmail] = useState<string | null>(null);
     const [roles, setRoles] = useState<string[]>([]);
     const [emailVerified, setEmailVerifiedState] = useState(true);
@@ -46,10 +47,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
                 if (!data.emailVerified) {
                     router.replace("/verify-email");
-                } else if (data.roles.includes("Admin") || data.roles.includes("SuperAdmin")) {
-                    router.replace("/admin");
-                } else if (data.roles.includes("Vendor")) {
-                    router.replace("/vendor");
+                } else if (pathname === "/") {
+                    if (data.roles.includes("Admin") || data.roles.includes("SuperAdmin")) {
+                        router.replace("/admin");
+                    } else if (data.roles.includes("Vendor")) {
+                        router.replace("/vendor");
+                    }
                 }
             })
             .catch(() => {
