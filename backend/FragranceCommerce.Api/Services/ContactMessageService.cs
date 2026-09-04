@@ -7,10 +7,14 @@ namespace FragranceCommerce.Api.Services;
 public class ContactMessageService : IContactMessageService
 {
     private readonly IContactMessageRepository _contactMessageRepository;
+    private readonly IEmailService _emailService;
 
-    public ContactMessageService(IContactMessageRepository contactMessageRepository)
+    public ContactMessageService(
+        IContactMessageRepository contactMessageRepository,
+        IEmailService emailService)
     {
         _contactMessageRepository = contactMessageRepository;
+        _emailService = emailService;
     }
 
     public async Task<ContactMessageDto?> GetByIdAsync(Guid id)
@@ -35,6 +39,26 @@ public class ContactMessageService : IContactMessageService
 
         if (contactMessage == null)
             return null;
+
+        contactMessage.IsResolved = true;
+
+        await _contactMessageRepository.SaveChangesAsync();
+
+        return ToDto(contactMessage);
+    }
+
+    public async Task<ContactMessageDto?> ReplyAsync(Guid id, string reply)
+    {
+        var contactMessage = await _contactMessageRepository.GetByIdAsync(id);
+
+        if (contactMessage == null)
+            return null;
+
+        await _emailService.SendContactReplyAsync(
+            contactMessage.Email,
+            contactMessage.FullName,
+            contactMessage.Subject,
+            reply);
 
         contactMessage.IsResolved = true;
 

@@ -8,4 +8,5 @@ public interface IContactMessageService
     Task<ContactMessageDto> CreateAsync(CreateContactMessageDto dto);
     Task<List<ContactMessageDto>> GetAllAsync(bool? resolved = null);
     Task<ContactMessageDto?> MarkResolvedAsync(Guid id);
+    Task<ContactMessageDto?> ReplyAsync(Guid id, string reply);
 }

@@ -224,4 +224,99 @@ public class ResendEmailService : IEmailService
             throw new InvalidOperationException("We could not send the password reset email. Please try again later.");
         }
     }
+
+    public async Task SendContactReplyAsync(
+        string recipientEmail,
+        string recipientName,
+        string subject,
+        string reply)
+    {
+        if (string.IsNullOrWhiteSpace(_settings.ApiKey))
+        {
+            _logger.LogWarning(
+                "EmailSettings:ApiKey is not configured. Could not send reply to {Email}",
+                recipientEmail);
+
+            return;
+        }
+
+        var displayName = string.IsNullOrWhiteSpace(recipientName)
+            ? "there"
+            : recipientName.Trim();
+
+        var plainText = $"""
+            Hello {displayName},
+
+            Thank you for contacting Fragrance Commerce. Here is our response to your recent inquiry:
+
+            ---
+            {reply}
+            ---
+
+            If you have any further questions, feel free to reach out to us anytime.
+
+            With gratitude,
+            The Fragrance Commerce Team
+            valentinemackenzie.site
+            """;
+
+        var html = $"""
+            <div style="font-family: Arial, Helvetica, sans-serif; max-width: 520px; margin: 0 auto; color: #16120d;">
+                <div style="border-bottom: 1px solid #e5ddcf; padding-bottom: 16px;">
+                    <h2 style="letter-spacing: 0.08em; color: #80661e; margin: 0;">FRAGRANCE COMMERCE</h2>
+                </div>
+
+                <p style="font-size: 15px; line-height: 1.6;">Hello {displayName},</p>
+                <p style="font-size: 15px; line-height: 1.6;">
+                    Thank you for contacting Fragrance Commerce. Here is our response to your recent inquiry:
+                </p>
+
+                <div style="border: 1px solid #e5ddcf; background: #fdfaf2; border-radius: 6px; padding: 20px; margin: 24px 0; font-size: 14px; line-height: 1.7; white-space: pre-wrap; color: #16120d;">
+                    {reply}
+                </div>
+
+                <p style="font-size: 15px; line-height: 1.6;">
+                    If you have any further questions, feel free to reach out to us anytime.
+                </p>
+
+                <div style="border-top: 1px solid #e5ddcf; margin-top: 32px; padding-top: 16px; font-size: 12px; color: #5f574e; line-height: 1.6;">
+                    <p style="margin: 0;">The Fragrance Commerce Team</p>
+                    <p style="margin: 4px 0 0;">valentinemackenzie.site</p>
+                </div>
+            </div>
+            """;
+
+        var cleanSubject = string.IsNullOrWhiteSpace(subject)
+            ? "Your inquiry"
+            : subject.Trim();
+
+        var body = new
+        {
+            from = $"{_settings.FromName} <{_settings.FromAddress}>",
+            to = new[] { recipientEmail },
+            subject = $"Re: {cleanSubject}",
+            html,
+            text = plainText
+        };
+
+        var request = new HttpRequestMessage(HttpMethod.Post, ResendApiUrl);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _settings.ApiKey);
+        request.Content = new StringContent(
+            JsonSerializer.Serialize(body),
+            Encoding.UTF8,
+            "application/json");
+
+        var response = await _httpClient.SendAsync(request);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var responseBody = await response.Content.ReadAsStringAsync();
+            _logger.LogError(
+                "Resend failed with status {Status}: {Body}",
+                (int)response.StatusCode,
+                responseBody);
+
+            throw new InvalidOperationException("We could not send the reply email. Please try again later.");
+        }
+    }
 }

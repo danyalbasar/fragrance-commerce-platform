@@ -7,10 +7,12 @@ import {
     Mail,
     MailCheck,
     Phone,
+    Send,
 } from "lucide-react";
 import {
     getContactMessages,
     markContactMessageResolved,
+    replyToContactMessage,
 } from "@/services/contactService";
 import { getApiResponse } from "@/services/api";
 import { EmptyState } from "@/components/common/EmptyState";
@@ -36,6 +38,9 @@ export default function VendorMessagesPage() {
     const [error, setError] = useState("");
     const [message, setMessage] = useState("");
     const [resolvingId, setResolvingId] = useState<string | null>(null);
+    const [replyOpenId, setReplyOpenId] = useState<string | null>(null);
+    const [replyText, setReplyText] = useState<Record<string, string>>({});
+    const [sendingReplyId, setSendingReplyId] = useState<string | null>(null);
 
     useEffect(() => {
         let active = true;
@@ -78,6 +83,37 @@ export default function VendorMessagesPage() {
             setError("Could not mark the message as resolved.");
         } finally {
             setResolvingId(null);
+        }
+    }
+
+    async function handleReply(id: string) {
+        const text = replyText[id]?.trim();
+        if (!text) return;
+
+        setMessage("");
+        setError("");
+        setSendingReplyId(id);
+        try {
+            await replyToContactMessage(id, text);
+            setMessages((prev) =>
+                prev.map((m) => (m.id === id ? { ...m, isResolved: true } : m))
+            );
+            setReplyOpenId(null);
+            setReplyText((prev) => {
+                const next = { ...prev };
+                delete next[id];
+                return next;
+            });
+            setMessage("Reply sent via email and message marked as resolved.");
+        } catch (err) {
+            const res = getApiResponse(err);
+            setError(
+                typeof res?.data === "string"
+                    ? res.data
+                    : "Could not send the reply. Please try again."
+            );
+        } finally {
+            setSendingReplyId(null);
         }
     }
 
@@ -205,22 +241,85 @@ export default function VendorMessagesPage() {
                                     <p className="mt-3 text-sm leading-7 text-[var(--luxury-muted)]">
                                         {item.message}
                                     </p>
-                                </div>
 
-                                {!item.isResolved && (
                                     <button
                                         type="button"
-                                        onClick={() => handleResolve(item.id)}
-                                        disabled={resolvingId === item.id}
-                                        className="inline-flex shrink-0 items-center gap-2 rounded-full bg-[var(--luxury-ink)] px-4 py-2.5 text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-paper)] transition-colors hover:bg-[var(--luxury-moss)] disabled:cursor-not-allowed disabled:bg-[var(--luxury-muted-strong)]"
+                                        onClick={() =>
+                                            setReplyOpenId(
+                                                replyOpenId === item.id
+                                                    ? null
+                                                    : item.id
+                                            )
+                                        }
+                                        className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-[var(--luxury-gold-strong)] hover:text-[var(--luxury-gold)]"
                                     >
-                                        <Check size={16} />
-                                        {resolvingId === item.id
-                                            ? "Resolving..."
-                                            : "Mark Resolved"}
+                                        <Send size={14} />
+                                        {replyOpenId === item.id
+                                            ? "Cancel reply"
+                                            : "Reply via email"}
                                     </button>
-                                )}
+                                </div>
+
+                                <div className="flex shrink-0 flex-col gap-2">
+                                    {!item.isResolved && (
+                                        <button
+                                            type="button"
+                                            onClick={() => handleResolve(item.id)}
+                                            disabled={resolvingId === item.id}
+                                            className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--luxury-ink)] px-4 py-2.5 text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-paper)] transition-colors hover:bg-[var(--luxury-moss)] disabled:cursor-not-allowed disabled:bg-[var(--luxury-muted-strong)]"
+                                        >
+                                            <Check size={16} />
+                                            {resolvingId === item.id
+                                                ? "Resolving..."
+                                                : "Mark Resolved"}
+                                        </button>
+                                    )}
+                                </div>
                             </div>
+
+                            {replyOpenId === item.id && (
+                                <div className="mt-4 border-t border-[#d8c8ad] pt-4">
+                                    <label
+                                        htmlFor={`reply-${item.id}`}
+                                        className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-[var(--luxury-muted)]"
+                                    >
+                                        Reply to {item.fullName} ({item.email})
+                                    </label>
+                                    <textarea
+                                        id={`reply-${item.id}`}
+                                        rows={5}
+                                        maxLength={2000}
+                                        value={replyText[item.id] ?? ""}
+                                        onChange={(event) =>
+                                            setReplyText((prev) => ({
+                                                ...prev,
+                                                [item.id]: event.target.value,
+                                            }))
+                                        }
+                                        className="w-full resize-none border border-[#d8c8ad] bg-[#fffaf2] px-4 py-3 text-sm leading-7 outline-none transition focus:border-[var(--luxury-gold)]"
+                                        placeholder="Type your response... this will be emailed to the customer."
+                                    />
+                                    <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                                        <span className="text-xs text-[var(--luxury-muted)]">
+                                            Sends from the Fragrance Commerce store email.
+                                        </span>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleReply(item.id)}
+                                            disabled={
+                                                sendingReplyId === item.id ||
+                                                !replyText[item.id]?.trim()
+                                            }
+                                            className="inline-flex items-center gap-2 rounded-full bg-[var(--luxury-ink)] px-4 py-2.5 text-sm font-semibold uppercase tracking-[0.1em] text-[var(--luxury-paper)] transition-colors hover:bg-[var(--luxury-moss)] disabled:cursor-not-allowed disabled:bg-[var(--luxury-muted-strong)]"
+                                        >
+                                            <Send size={16} />
+                                            {sendingReplyId === item.id
+                                                ? "Sending..."
+                                                : "Send Reply"}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </article>
                     ))}
                 </div>

@@ -45,3 +45,15 @@ export async function markContactMessageResolved(
 
     return response.data;
 }
+
+export async function replyToContactMessage(
+    id: string,
+    reply: string
+): Promise<ContactMessageResponse> {
+    const response = await api.post<ContactMessageResponse>(
+        `/contactmessages/${id}/reply`,
+        { reply }
+    );
+
+    return response.data;
+}

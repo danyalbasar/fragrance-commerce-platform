@@ -47,6 +47,27 @@ public class ContactMessagesController : ControllerBase
         return Ok(contactMessage);
     }
 
+    [Authorize(Roles = "Vendor,Admin,SuperAdmin")]
+    [HttpPost("{id}/reply")]
+    public async Task<ActionResult<ContactMessageDto>> Reply(
+        Guid id,
+        ReplyContactMessageDto dto)
+    {
+        try
+        {
+            var contactMessage = await _contactMessageService.ReplyAsync(id, dto.Reply);
+
+            if (contactMessage == null)
+                return NotFound();
+
+            return Ok(contactMessage);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
     [HttpGet("{id}")]
     public async Task<ActionResult<ContactMessageDto>> Get(Guid id)
     {
