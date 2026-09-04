@@ -867,6 +867,7 @@ export default function VendorProductEditor({
                                                     </div>
 
                                                     {editForm && (
+                                                        <>
                                                         <div className="mt-5 grid gap-4 md:grid-cols-2 md:gap-5 xl:grid-cols-3">
                                                             <Field
                                                                 label="Size / Variant"
@@ -884,17 +885,6 @@ export default function VendorProductEditor({
                                                                 }
                                                                 onGenerate={() => generateEditSku(variant.id)}
                                                                 duplicate={isEditSkuDuplicate(variant.id, editForm.sku)}
-                                                            />
-                                                            <SelectField
-                                                                label="Status"
-                                                                value={editForm.isActive}
-                                                                onChange={(value) =>
-                                                                    updateVariantEditForm(variant.id, "isActive", value)
-                                                                }
-                                                                options={[
-                                                                    { value: "true", label: "Active" },
-                                                                    { value: "false", label: "Inactive" },
-                                                                ]}
                                                             />
                                                             <Field
                                                                 label="MRP"
@@ -933,6 +923,23 @@ export default function VendorProductEditor({
                                                                 required
                                                             />
                                                         </div>
+
+                                                        <div className="mt-5 flex justify-end">
+                                                            <div className="w-full sm:w-64">
+                                                                <SelectField
+                                                                    label="Status"
+                                                                    value={editForm.isActive}
+                                                                    onChange={(value) =>
+                                                                        updateVariantEditForm(variant.id, "isActive", value)
+                                                                    }
+                                                                    options={[
+                                                                        { value: "true", label: "Active" },
+                                                                        { value: "false", label: "Inactive" },
+                                                                    ]}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                        </>
                                                     )}
 
                                                     <div className="mt-6 border-t border-[#d8c8ad] pt-5">
@@ -963,7 +970,7 @@ export default function VendorProductEditor({
                             )}
                         </form>
 
-                        <aside className="order-1 space-y-6 xl:order-2 xl:sticky xl:top-24 xl:self-start">
+                        <aside className="order-1 space-y-6 xl:order-2">
                             <section className="border border-[#d8c8ad] bg-[var(--luxury-paper)] p-4 shadow-[0_18px_50px_rgba(22,18,13,0.08)] sm:p-5">
                                 <h2 className="text-2xl font-normal [font-family:var(--font-serif)]">
                                     Media
