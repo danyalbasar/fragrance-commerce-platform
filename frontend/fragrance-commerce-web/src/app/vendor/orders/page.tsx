@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ClipboardList } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, ClipboardList } from "lucide-react";
 import { getVendorOrders, updateOrderStatus } from "@/services/orderService";
 import { getApiResponse } from "@/services/api";
 import { EmptyState } from "@/components/common/EmptyState";
@@ -40,6 +40,8 @@ export default function VendorOrdersPage() {
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
     const [updatingId, setUpdatingId] = useState<string | null>(null);
+    const [sortKey, setSortKey] = useState<"date" | "total" | "orderNumber">("date");
+    const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
     useEffect(() => {
         let active = true;
@@ -91,9 +93,36 @@ export default function VendorOrdersPage() {
         }
     }
 
-    const sortedOrders = [...orders].sort(
-        (a, b) => new Date(b.orderedAt).getTime() - new Date(a.orderedAt).getTime()
-    );
+    const sortedOrders = [...orders].sort((a, b) => {
+        const dir = sortDir === "asc" ? 1 : -1;
+
+        if (sortKey === "total") {
+            return (a.finalAmount - b.finalAmount) * dir;
+        }
+        if (sortKey === "orderNumber") {
+            return a.orderNumber.localeCompare(b.orderNumber) * dir;
+        }
+        return (
+            new Date(a.orderedAt).getTime() - new Date(b.orderedAt).getTime()
+        ) * dir;
+    });
+
+    function toggleSort(key: "date" | "total" | "orderNumber") {
+        if (sortKey === key) {
+            setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+        } else {
+            setSortKey(key);
+            setSortDir(key === "date" ? "desc" : "asc");
+        }
+    }
+
+    function SortIcon({ column }: { column: "date" | "total" | "orderNumber" }) {
+        if (sortKey !== column)
+            return <ArrowUpDown size={13} className="ml-1 inline-block" />;
+        return sortDir === "asc"
+            ? <ArrowUp size={13} className="ml-1 inline-block" />
+            : <ArrowDown size={13} className="ml-1 inline-block" />;
+    }
 
     return (
         <div className="space-y-6">
@@ -145,11 +174,38 @@ export default function VendorOrdersPage() {
                                 <table className="w-full min-w-[800px] border-collapse text-left text-sm">
                                     <thead>
                                         <tr className="border-b border-[#d8c8ad] bg-[var(--luxury-sand)] text-xs uppercase tracking-[0.18em] text-[var(--luxury-muted-strong)]">
-                                            <th className="px-5 py-4 font-semibold">Order</th>
-                                            <th className="px-5 py-4 font-semibold">Date</th>
+                                            <th className="px-5 py-4 font-semibold">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => toggleSort("orderNumber")}
+                                                    className="inline-flex items-center hover:text-[var(--luxury-ink)] transition-colors"
+                                                >
+                                                    Order
+                                                    <SortIcon column="orderNumber" />
+                                                </button>
+                                            </th>
+                                            <th className="px-5 py-4 font-semibold">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => toggleSort("date")}
+                                                    className="inline-flex items-center hover:text-[var(--luxury-ink)] transition-colors"
+                                                >
+                                                    Date
+                                                    <SortIcon column="date" />
+                                                </button>
+                                            </th>
                                             <th className="px-5 py-4 font-semibold">Customer</th>
                                             <th className="px-5 py-4 font-semibold">Status</th>
-                                            <th className="px-5 py-4 text-right font-semibold">Total</th>
+                                            <th className="px-5 py-4 text-right font-semibold">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => toggleSort("total")}
+                                                    className="inline-flex items-center hover:text-[var(--luxury-ink)] transition-colors"
+                                                >
+                                                    Total
+                                                    <SortIcon column="total" />
+                                                </button>
+                                            </th>
                                             <th className="px-5 py-4 text-right font-semibold">Actions</th>
                                         </tr>
                                     </thead>

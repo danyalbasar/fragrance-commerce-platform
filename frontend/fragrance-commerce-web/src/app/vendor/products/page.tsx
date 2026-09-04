@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { Boxes, PackagePlus, SlidersHorizontal, X } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, Boxes, PackagePlus, SlidersHorizontal, X } from "lucide-react";
 import { productService } from "@/services/productService";
 import { EmptyState } from "@/components/common/EmptyState";
 import { VendorProductsSkeleton } from "@/components/common/VendorSkeletons";
@@ -50,6 +50,8 @@ export default function VendorProductsPage() {
         status: "",
         stock: "",
     });
+    const [sortKey, setSortKey] = useState<"name" | "price" | "stock" | null>(null);
+    const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
     const categories = useMemo(
         () =>
@@ -85,6 +87,42 @@ export default function VendorProductsPage() {
             return true;
         });
     }, [products, filters]);
+
+    const sorted = useMemo(() => {
+        const list = [...filtered];
+        if (!sortKey) return list;
+
+        const dir = sortDir === "asc" ? 1 : -1;
+        list.sort((a, b) => {
+            if (sortKey === "name") {
+                return a.name.localeCompare(b.name) * dir;
+            }
+            if (sortKey === "stock") {
+                return (totalStock(a) - totalStock(b)) * dir;
+            }
+            const priceA = a.variants[0]?.sellingPrice || 0;
+            const priceB = b.variants[0]?.sellingPrice || 0;
+            return (priceA - priceB) * dir;
+        });
+        return list;
+    }, [filtered, sortKey, sortDir]);
+
+    function toggleSort(key: "name" | "price" | "stock") {
+        if (sortKey === key) {
+            setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+        } else {
+            setSortKey(key);
+            setSortDir("asc");
+        }
+    }
+
+    function SortIcon({ column }: { column: "name" | "price" | "stock" }) {
+        if (sortKey !== column)
+            return <ArrowUpDown size={13} className="ml-1 inline-block" />;
+        return sortDir === "asc"
+            ? <ArrowUp size={13} className="ml-1 inline-block" />
+            : <ArrowDown size={13} className="ml-1 inline-block" />;
+    }
 
     const hasActiveFilters = Object.values(filters).some(Boolean);
     const lowStockCount = useMemo(
@@ -255,16 +293,43 @@ export default function VendorProductsPage() {
                             <table className="w-full min-w-[900px] border-collapse text-left text-sm">
                                 <thead>
                                     <tr className="border-b border-[#d8c8ad] bg-[var(--luxury-sand)] text-xs uppercase tracking-[0.18em] text-[var(--luxury-muted-strong)]">
-                                        <th className="px-5 py-4 font-semibold">Product</th>
+                                        <th className="px-5 py-4 font-semibold">
+                                            <button
+                                                type="button"
+                                                onClick={() => toggleSort("name")}
+                                                className="inline-flex items-center hover:text-[var(--luxury-ink)] transition-colors"
+                                            >
+                                                Product
+                                                <SortIcon column="name" />
+                                            </button>
+                                        </th>
                                         <th className="px-5 py-4 font-semibold">SKU</th>
-                                        <th className="px-5 py-4 font-semibold">Price</th>
-                                        <th className="px-5 py-4 font-semibold">Stock</th>
+                                        <th className="px-5 py-4 font-semibold">
+                                            <button
+                                                type="button"
+                                                onClick={() => toggleSort("price")}
+                                                className="inline-flex items-center hover:text-[var(--luxury-ink)] transition-colors"
+                                            >
+                                                Price
+                                                <SortIcon column="price" />
+                                            </button>
+                                        </th>
+                                        <th className="px-5 py-4 font-semibold">
+                                            <button
+                                                type="button"
+                                                onClick={() => toggleSort("stock")}
+                                                className="inline-flex items-center hover:text-[var(--luxury-ink)] transition-colors"
+                                            >
+                                                Stock
+                                                <SortIcon column="stock" />
+                                            </button>
+                                        </th>
                                         <th className="px-5 py-4 font-semibold">Status</th>
                                         <th className="px-5 py-4 font-semibold"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {filtered.map((product) => (
+                                    {sorted.map((product) => (
                                         <tr key={product.id} className="border-b border-[#d8c8ad] last:border-0 hover:bg-[var(--luxury-sand)]/50">
                                             <td className="px-5 py-4">
                                                 <div className="flex items-center gap-3">
@@ -332,7 +397,7 @@ export default function VendorProductsPage() {
 
                         {/* Mobile cards */}
                         <div className="grid gap-3 p-4 md:hidden">
-                            {filtered.map((product) => (
+                            {sorted.map((product) => (
                                 <Link
                                     key={product.id}
                                     href={`/vendor/products/${product.id}`}
