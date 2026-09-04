@@ -7,5 +7,6 @@ public interface IContactMessageRepository
     Task<List<ContactMessage>> GetAllAsync(bool? resolved = null);
     Task<ContactMessage?> GetByIdAsync(Guid id);
     Task AddAsync(ContactMessage contactMessage);
+    Task UpdateAsync(ContactMessage contactMessage);
     Task SaveChangesAsync();
 }

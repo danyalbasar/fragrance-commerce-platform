@@ -37,6 +37,12 @@ public class ContactMessageRepository : IContactMessageRepository
         await _context.ContactMessages.AddAsync(contactMessage);
     }
 
+    public Task UpdateAsync(ContactMessage contactMessage)
+    {
+        _context.ContactMessages.Update(contactMessage);
+        return Task.CompletedTask;
+    }
+
     public async Task SaveChangesAsync()
     {
         await _context.SaveChangesAsync();

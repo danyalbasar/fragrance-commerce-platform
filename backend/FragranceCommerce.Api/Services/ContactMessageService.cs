@@ -42,6 +42,7 @@ public class ContactMessageService : IContactMessageService
 
         contactMessage.IsResolved = true;
 
+        await _contactMessageRepository.UpdateAsync(contactMessage);
         await _contactMessageRepository.SaveChangesAsync();
 
         return ToDto(contactMessage);
@@ -62,6 +63,7 @@ public class ContactMessageService : IContactMessageService
 
         contactMessage.IsResolved = true;
 
+        await _contactMessageRepository.UpdateAsync(contactMessage);
         await _contactMessageRepository.SaveChangesAsync();
 
         return ToDto(contactMessage);
