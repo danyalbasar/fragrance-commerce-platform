@@ -31,11 +31,12 @@ function formatDate(dateStr: string) {
 }
 
 export default function VendorOrdersPage() {
-    const [orders, setOrders] = useState<Order[]>(() =>
-        readCache<Order[]>("vendor-orders") ?? []
-    );
+    const [orders, setOrders] = useState<Order[]>(() => {
+        const cached = readCache<Order[]>("vendor-orders");
+        return Array.isArray(cached) ? cached : [];
+    });
     const [loading, setLoading] = useState(
-        () => readCache<Order[]>("vendor-orders") === null
+        () => !Array.isArray(readCache<Order[]>("vendor-orders"))
     );
     const [statusForms, setStatusForms] = useState<Record<string, string>>({});
     const [message, setMessage] = useState("");
@@ -53,10 +54,11 @@ export default function VendorOrdersPage() {
                 setLoading(true);
                 const data = await getVendorOrders();
                 if (!active) return;
-                setOrders(data);
-                writeCache("vendor-orders", data);
+                const list = Array.isArray(data) ? data : [];
+                setOrders(list);
+                writeCache("vendor-orders", list);
                 setStatusForms(
-                    data.reduce<Record<string, string>>((acc, order) => {
+                    list.reduce<Record<string, string>>((acc, order) => {
                         acc[order.id] = order.status;
                         return acc;
                     }, {})

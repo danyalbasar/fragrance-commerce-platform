@@ -36,11 +36,12 @@ function totalStock(product: Product) {
 }
 
 export default function VendorProductsPage() {
-    const [products, setProducts] = useState<Product[]>(() =>
-        readCache<Product[]>("vendor-products") ?? []
-    );
+    const [products, setProducts] = useState<Product[]>(() => {
+        const cached = readCache<Product[]>("vendor-products");
+        return Array.isArray(cached) ? cached : [];
+    });
     const [loading, setLoading] = useState(
-        () => readCache<Product[]>("vendor-products") === null
+        () => !Array.isArray(readCache<Product[]>("vendor-products"))
     );
     const [showFilters, setShowFilters] = useState(true);
     const [filters, setFilters] = useState({
@@ -151,8 +152,9 @@ export default function VendorProductsPage() {
                 setLoading(true);
                 const data = await productService.getVendorProducts();
                 if (!active) return;
-                setProducts(data);
-                writeCache("vendor-products", data);
+                const list = Array.isArray(data) ? data : [];
+                setProducts(list);
+                writeCache("vendor-products", list);
             } catch {
                 // handled by layout
             } finally {
