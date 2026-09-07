@@ -202,10 +202,23 @@ function ProductsContent() {
     }, [searchFromUrl, genderFromUrl, categoryFromUrl, categories]);
 
     useEffect(() => {
-        const timer = window.setTimeout(
-            loadProducts,
-            minPrice !== "" || maxPrice !== "" ? 350 : 0
-        );
+        const timer = window.setTimeout(() => {
+            const urlCategoryPending =
+                Boolean(categoryFromUrl) &&
+                categories.length === 0 &&
+                categoryId === "";
+
+            const urlGenderPending = Boolean(genderFromUrl) && !gender;
+
+            const urlSearchPending =
+                Boolean(searchFromUrl) && search !== searchFromUrl;
+
+            if (urlCategoryPending || urlGenderPending || urlSearchPending) {
+                return;
+            }
+
+            void loadProducts();
+        }, minPrice !== "" || maxPrice !== "" ? 350 : 0);
 
         return () => window.clearTimeout(timer);
     }, [
