@@ -924,22 +924,17 @@ export default function VendorProductEditor({
                                                                 }
                                                                 required
                                                             />
-                                                        </div>
-
-                                                        <div className="mt-5 flex justify-end">
-                                                            <div className="w-full sm:w-64">
-                                                                <SelectField
-                                                                    label="Status"
-                                                                    value={editForm.isActive}
-                                                                    onChange={(value) =>
-                                                                        updateVariantEditForm(variant.id, "isActive", value)
-                                                                    }
-                                                                    options={[
-                                                                        { value: "true", label: "Active" },
-                                                                        { value: "false", label: "Inactive" },
-                                                                    ]}
-                                                                />
-                                                            </div>
+                                                            <SelectField
+                                                                label="Status"
+                                                                value={editForm.isActive}
+                                                                onChange={(value) =>
+                                                                    updateVariantEditForm(variant.id, "isActive", value)
+                                                                }
+                                                                options={[
+                                                                    { value: "true", label: "Active" },
+                                                                    { value: "false", label: "Inactive" },
+                                                                ]}
+                                                            />
                                                         </div>
                                                         </>
                                                     )}
