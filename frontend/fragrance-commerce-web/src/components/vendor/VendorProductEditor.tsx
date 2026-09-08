@@ -877,15 +877,17 @@ export default function VendorProductEditor({
                                                                 }
                                                                 required
                                                             />
-                                                            <SkuField
-                                                                label="SKU"
-                                                                value={editForm.sku}
-                                                                onChange={(value) =>
-                                                                    updateVariantEditForm(variant.id, "sku", normalizeSku(value))
-                                                                }
-                                                                onGenerate={() => generateEditSku(variant.id)}
-                                                                duplicate={isEditSkuDuplicate(variant.id, editForm.sku)}
-                                                            />
+                                                            <div className="md:col-span-2 xl:col-span-2">
+                                                                <SkuField
+                                                                    label="SKU"
+                                                                    value={editForm.sku}
+                                                                    onChange={(value) =>
+                                                                        updateVariantEditForm(variant.id, "sku", normalizeSku(value))
+                                                                    }
+                                                                    onGenerate={() => generateEditSku(variant.id)}
+                                                                    duplicate={isEditSkuDuplicate(variant.id, editForm.sku)}
+                                                                />
+                                                            </div>
                                                             <Field
                                                                 label="MRP"
                                                                 type="number"
