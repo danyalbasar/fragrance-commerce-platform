@@ -251,7 +251,13 @@ export default function VendorMessagesPage() {
                                                     : item.id
                                             )
                                         }
-                                        className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-[var(--luxury-gold-strong)] hover:text-[var(--luxury-gold)]"
+                                        disabled={item.isResolved}
+                                        title={
+                                            item.isResolved
+                                                ? "This message is already resolved."
+                                                : "Send an email reply to this customer."
+                                        }
+                                        className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-[var(--luxury-gold-strong)] hover:text-[var(--luxury-gold)] disabled:cursor-not-allowed disabled:text-[var(--luxury-muted)]"
                                     >
                                         <Send size={14} />
                                         {replyOpenId === item.id
@@ -277,7 +283,7 @@ export default function VendorMessagesPage() {
                                 </div>
                             </div>
 
-                            {replyOpenId === item.id && (
+                            {replyOpenId === item.id && !item.isResolved && (
                                 <div className="mt-4 border-t border-[#d8c8ad] pt-4">
                                     <label
                                         htmlFor={`reply-${item.id}`}
