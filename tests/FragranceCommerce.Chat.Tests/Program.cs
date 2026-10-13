@@ -90,6 +90,7 @@ foreach (var invalidAccount in new[] { "", "../another-account", "short-id" })
 }
 Console.WriteLine("All local and Cloudflare chatbot contract checks passed.");
 await VendorChatChecks.RunAsync();
+await CustomerChatChecks.RunAsync();
 
 if (args.Contains("--live-model"))
 {

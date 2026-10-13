@@ -65,6 +65,12 @@ To disable generation, set `Chatbot__Enabled=false` on Render. To hide the widge
 
 ## Local checks and future training
 
+### Customer order access
+
+Signed-in shoppers use `POST /api/customer/chat`. Authentication claims determine the customer; request-supplied user IDs are ignored. Order questions retrieve only that customer's orders, including status, recorded purchase prices, discounts, final amount, item quantities, and payment status. Specific order IDs and order numbers are checked within the same ownership scope. Replies use database facts, require no inference quota, and do not send order records to Cloudflare. Addresses, contact information, payment transaction IDs, and product costs are excluded. General fragrance questions still use the public shopping model without order context.
+
+History loads five orders per page, with older-history controls. Each order displays up to 20 item rows and links to the complete order page. Order replies use `Cache-Control: no-store`; conversations are held only in component memory and reset on logout or account change. Login and signup pages hide the chat launcher. The assistant cannot change or cancel orders, issue refunds, or invent shipping tracking or arrival estimates.
+
 ### Vendor business assistant
 
 Vendor accounts see **Ask your business** in the vendor studio. Its separate endpoint, `POST /api/vendor/chat`, requires the Vendor role and derives ownership from the authenticated user claim. Requests contain only `message` and `period`; callers cannot choose a vendor ID. Every database query is scoped before information reaches Cloudflare.

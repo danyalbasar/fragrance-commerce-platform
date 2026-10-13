@@ -34,6 +34,9 @@ public class ChatService(
 
     public async Task<ChatResponseDto> ReplyAsync(string message, CancellationToken cancellationToken)
     {
+        if (System.Text.RegularExpressions.Regex.IsMatch(message,
+                @"\b(my (?:orders?|purchases?|order history)|ORD-\d{14}-\d{4})\b", System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+            return new("Please sign in to ask about your own order history and details, or open My orders from your account.", "reviewed-reference", false, []);
         if (!settings.Value.Enabled)
             throw new ChatUnavailableException("The fragrance assistant is currently unavailable.");
         if (!IsLocal && !IsCloudflare)

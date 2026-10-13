@@ -78,6 +78,8 @@ Re-deploy the frontend. The API CORS policy only allows the origins listed in `C
 
 ### Troubleshooting
 
+Signed-in shoppers can ask the assistant about their own order history, latest status, purchased items, payment status, and recorded totals. `/api/customer/chat` enforces ownership from the authenticated user claim. Order facts are retrieved directly from the database and never sent to the AI provider. History is paginated; order cards link to the complete order page. Conversations reset when the account changes. The chat launcher is hidden on login and signup pages, and the clear button appears only once a conversation exists.
+
 - **CORS errors in the browser**: confirm the exact origin (no trailing slash) is in `CORS__AllowedOrigins`.
 - **API cold start**: Render free tier wakes on demand; first hit after sleep is slow but then responsive.
 - **DB migration**: applied automatically on each deploy via `context.Database.MigrateAsync()` in `Program.cs`.

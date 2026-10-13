@@ -3,18 +3,20 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { FlaskConical, LoaderCircle, MessageCircle, Send, Trash2, X } from "lucide-react";
-import { chatErrorMessage, chatService, vendorChatPeriods, type ChatReply, type VendorChatData, type VendorChatPeriod } from "@/services/chatService";
+import { chatErrorMessage, chatService, vendorChatPeriods, type ChatReply, type CustomerChatData, type VendorChatData, type VendorChatPeriod } from "@/services/chatService";
 import { formatPrice } from "@/utils/format";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useScrollLock } from "@/hooks/useScrollLock";
 
-type Message = { id: number; role: "user" | "assistant"; text: string; products?: ChatReply["products"]; source?: ChatReply["source"]; vendorData?: VendorChatData };
+type Message = { id: number; role: "user" | "assistant"; text: string; products?: ChatReply["products"]; source?: ChatReply["source"]; vendorData?: VendorChatData; customerData?: CustomerChatData };
 
-export default function ChatWidget({ audience = "shopper" }: { audience?: "shopper" | "vendor" }) {
+export default function ChatWidget({ audience = "shopper" }: { audience?: "shopper" | "customer" | "vendor" }) {
     const vendor = audience === "vendor";
+    const customer = audience === "customer";
     const dialogId = vendor ? "vendor-chat" : "fragrance-chat";
     const suggestions = vendor
         ? ["Summarize my sales and orders", "Which SKUs are low on stock?", "What are my top-selling products?"]
+        : customer ? ["Show my order history", "What is the status of my latest order?", "How do I choose an office scent?"]
         : ["What is attar?", "How do I choose an office scent?", "What are base notes?"];
     const [period, setPeriod] = useState<VendorChatPeriod>("30days");
     const [open, setOpen] = useState(false);
@@ -23,6 +25,7 @@ export default function ChatWidget({ audience = "shopper" }: { audience?: "shopp
     const [pending, setPending] = useState(false);
     const [error, setError] = useState("");
     const [failedQuestion, setFailedQuestion] = useState("");
+    const failedOptions = useRef<{ orderId?: string; offset?: number }>({});
     const dialogRef = useRef<HTMLElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -38,13 +41,14 @@ export default function ChatWidget({ audience = "shopper" }: { audience?: "shopp
         if (open) scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
     }, [messages, pending, error, open]);
 
-    async function send(question: string, retry = false) {
+    async function send(question: string, retry = false, options: { orderId?: string; offset?: number } = {}) {
         const text = question.trim();
         if (!text || sending.current) return;
         sending.current = true;
         setPending(true);
         setError("");
         setFailedQuestion("");
+        failedOptions.current = options;
         setInput("");
         if (!retry) {
             const message: Message = { id: nextId.current++, role: "user", text };
@@ -53,10 +57,12 @@ export default function ChatWidget({ audience = "shopper" }: { audience?: "shopp
         const controller = new AbortController();
         requestRef.current = controller;
         try {
-            const reply = vendor ? await chatService.sendVendor(text, period, controller.signal) : await chatService.send(text, controller.signal);
+            const reply = vendor ? await chatService.sendVendor(text, period, controller.signal)
+                : customer ? await chatService.sendCustomer(text, controller.signal, options.orderId, options.offset)
+                : await chatService.send(text, controller.signal);
             if (!controller.signal.aborted) {
                 const message: Message = {
-                    id: nextId.current++, role: "assistant", text: reply.reply, products: reply.products, source: reply.source, vendorData: reply.vendorData,
+                    id: nextId.current++, role: "assistant", text: reply.reply, products: reply.products, source: reply.source, vendorData: reply.vendorData, customerData: reply.customerData,
                 };
                 setMessages(previous => [...previous, message]);
             }
@@ -109,9 +115,9 @@ export default function ChatWidget({ audience = "shopper" }: { audience?: "shopp
                             <FlaskConical size={22} className="text-[var(--luxury-gold-strong)]" aria-hidden="true" />
                             <div className="flex-1">
                                 <h2 id={`${dialogId}-title`} className="font-serif text-xl">{vendor ? "Your vendor assistant" : "The fragrance lab"}</h2>
-                                <p className="text-xs text-[var(--luxury-muted-strong)]">{vendor ? "Sales, inventory, and orders" : "Your fragrance shopping assistant"}</p>
+                                <p className="text-xs text-[var(--luxury-muted-strong)]">{vendor ? "Sales, inventory, and orders" : customer ? "Fragrances and your orders" : "Your fragrance shopping assistant"}</p>
                             </div>
-                            <button type="button" aria-label="Clear conversation" onClick={clear} className="rounded-full p-2 hover:bg-[var(--luxury-sand)]"><Trash2 size={17} /></button>
+                            {messages.length > 0 && <button type="button" aria-label="Clear conversation" onClick={clear} className="rounded-full p-2 hover:bg-[var(--luxury-sand)]"><Trash2 size={17} /></button>}
                             <button type="button" aria-label="Close assistant" onClick={() => setOpen(false)} className="rounded-full p-2 hover:bg-[var(--luxury-sand)]"><X size={20} /></button>
                         </header>
                         <div className="border-b border-[var(--luxury-line)] bg-[var(--luxury-sand)] px-5 py-3 text-xs leading-relaxed">
@@ -129,8 +135,8 @@ export default function ChatWidget({ audience = "shopper" }: { audience?: "shopp
                         <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto overscroll-contain px-5 py-5">
                             {messages.length === 0 && (
                                 <div className="space-y-4">
-                                    <p className="font-serif text-2xl">{vendor ? "Understand your business." : "Find your fragrance vocabulary."}</p>
-                                    <p className="text-sm leading-relaxed text-[var(--luxury-muted-strong)]">{vendor ? "Ask about delivered sales, order statuses, stock levels, and top sellers. Inventory always reflects current stock." : "Ask a short question about fragrance notes, styles, or wearing a scent."}</p>
+                                    <p className="font-serif text-2xl">{vendor ? "Understand your business." : customer ? "Your scents. Your orders." : "Find your fragrance vocabulary."}</p>
+                                    <p className="text-sm leading-relaxed text-[var(--luxury-muted-strong)]">{vendor ? "Ask about delivered sales, order statuses, stock levels, and top sellers. Inventory always reflects current stock." : customer ? "Ask about fragrances, your order history, or the status and items in a specific order." : "Ask a short question about fragrance notes, styles, or wearing a scent."}</p>
                                     <div className="flex flex-col items-start gap-2">
                                         {suggestions.map(question => <button key={question} type="button" onClick={() => void send(question)} disabled={pending}
                                             className="rounded-xl border border-[var(--luxury-line)] px-3 py-2 text-left text-sm hover:bg-[var(--luxury-sand)]">{question}</button>)}
@@ -143,6 +149,8 @@ export default function ChatWidget({ audience = "shopper" }: { audience?: "shopp
                                         <p className="mb-1 text-[10px] uppercase tracking-widest text-[var(--luxury-muted-strong)]">{message.role === "user" ? "You" : message.source === "reviewed-reference" ? "Reviewed reference" : "AI assistant · experimental"}</p>
                                         <p className={`whitespace-pre-wrap break-words rounded-2xl px-4 py-3 text-sm leading-relaxed ${message.role === "user" ? "bg-[var(--luxury-ink)] text-[var(--luxury-paper)]" : "bg-[var(--luxury-sand)]"}`}>{message.text}</p>
                                         {message.vendorData && <VendorFigures data={message.vendorData} close={() => setOpen(false)} />}
+                                        {message.customerData && <CustomerOrders data={message.customerData} close={() => setOpen(false)} pending={pending}
+                                            ask={(question, options) => void send(question, false, options)} />}
                                         {!!message.products?.length && (
                                             <div className="mt-3 space-y-2">
                                                 <p className="text-xs text-[var(--luxury-muted-strong)]">Catalog matches · live store data</p>
@@ -160,21 +168,22 @@ export default function ChatWidget({ audience = "shopper" }: { audience?: "shopp
                                 ))}
                             </div>
                             {pending && <p role="status" className="flex items-center gap-2 text-sm text-[var(--luxury-muted-strong)]"><LoaderCircle size={16} className="animate-spin" aria-hidden="true" /> The assistant is thinking…</p>}
-                            {error && <div role="alert" className="space-y-2 text-sm"><p>{error}</p><button type="button" onClick={() => void send(failedQuestion, true)} disabled={pending} className="underline">Try again</button></div>}
+                            {error && <div role="alert" className="space-y-2 text-sm"><p>{error}</p><button type="button" onClick={() => void send(failedQuestion, true, failedOptions.current)} disabled={pending} className="underline">Try again</button></div>}
                         </div>
                         <footer className="border-t border-[var(--luxury-line)] px-4 py-3">
                             <form onSubmit={submit} className="flex gap-2">
                                 <label htmlFor={`${dialogId}-question`} className="sr-only">{vendor ? "Your business question" : "Your fragrance question"}</label>
                                 <input ref={inputRef} id={`${dialogId}-question`} value={input} onChange={event => setInput(event.target.value)} maxLength={600}
-                                    placeholder={vendor ? "Ask about your sales or stock…" : "Ask a short fragrance question…"}
+                                    placeholder={vendor ? "Ask about your sales or stock…" : customer ? "Ask about fragrances or your orders…" : "Ask a short fragrance question…"}
                                     className="min-w-0 flex-1 border border-[var(--luxury-line)] bg-[var(--luxury-input)] px-3 py-2 text-base sm:text-sm" />
                                 <button type="submit" disabled={pending || !input.trim()} aria-label="Send question"
                                     className="rounded-xl bg-[var(--luxury-ink)] px-3 text-[var(--luxury-paper)] disabled:opacity-40"><Send size={18} /></button>
                             </form>
-                            <p className="mt-2 text-[10px] text-[var(--luxury-muted-strong)]">{vendor ? "Read-only. Your business summaries are processed by Cloudflare AI. Avoid customer personal details." : "This starter model answers one question at a time. Avoid sharing personal details."}</p>
+                            <p className="mt-2 text-[10px] text-[var(--luxury-muted-strong)]">{vendor ? "Read-only. Your business summaries are processed by Cloudflare AI. Avoid customer personal details." : customer ? "Order facts come from your account. Order records are not sent to AI. Questions are answered independently." : "This starter model answers one question at a time. Avoid sharing personal details."}</p>
                             <nav aria-label={vendor ? "Vendor tools" : "Store help"} className="mt-2 flex gap-4 text-xs underline">
                                 <Link href={vendor ? "/vendor/products" : "/products"} onClick={() => setOpen(false)}>{vendor ? "Products" : "Browse products"}</Link>
                                 <Link href={vendor ? "/vendor/orders" : "/return-policy"} onClick={() => setOpen(false)}>{vendor ? "Orders" : "Returns"}</Link>
+                                {customer && <Link href="/orders" onClick={() => setOpen(false)}>My orders</Link>}
                                 <Link href={vendor ? "/vendor" : "/contact"} onClick={() => setOpen(false)}>{vendor ? "Dashboard" : "Contact us"}</Link>
                             </nav>
                         </footer>
@@ -183,6 +192,29 @@ export default function ChatWidget({ audience = "shopper" }: { audience?: "shopp
             )}
         </>
     );
+}
+
+function CustomerOrders({ data, close, pending, ask }: {
+    data: CustomerChatData; close: () => void; pending: boolean;
+    ask: (question: string, options: { orderId?: string; offset?: number }) => void;
+}) {
+    return <div className="mt-3 space-y-3 text-xs">
+        <p className="text-[var(--luxury-muted-strong)]">Your recorded orders · {data.totalOrders} total</p>
+        {data.orders.map(order => <div key={order.id} className="space-y-2 rounded-xl border border-[var(--luxury-line)] p-3">
+            <p className="break-all font-medium">{order.orderNumber}</p>
+            <p>{new Date(order.orderedAtUtc).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata" })} · {order.status}</p>
+            <p>Total {formatPrice(order.finalAmount)} · Payment: {order.paymentStatus}</p>
+            {order.discountAmount > 0 && <p>Subtotal {formatPrice(order.totalAmount)} · Discount {formatPrice(order.discountAmount)}</p>}
+            {order.items.map((item, index) => <p key={index}>{item.productName} · {item.variantName} · {item.quantity} × {formatPrice(item.unitPrice)}</p>)}
+            {order.itemCount > order.items.length && <p>Showing {order.items.length} of {order.itemCount} items. Open the full order for all items.</p>}
+            <div className="flex flex-wrap gap-3 underline">
+                <button type="button" disabled={pending} onClick={() => ask(`Show details for order ${order.orderNumber}`, { orderId: order.id })}>Order details</button>
+                <Link href={`/orders/${order.id}`} onClick={close}>Open full order</Link>
+            </div>
+        </div>)}
+        {data.hasMore && <button type="button" disabled={pending} onClick={() => ask("Show more of my order history", { offset: data.offset + data.orders.length })} className="underline">Show older orders</button>}
+        <Link href="/orders" onClick={close} className="block underline">View all my orders</Link>
+    </div>;
 }
 
 function VendorFigures({ data, close }: { data: VendorChatData; close: () => void }) {

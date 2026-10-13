@@ -123,6 +123,7 @@ builder.Services.AddScoped<ISiteSettingsService, SiteSettingsService>();
 
 builder.Services.Configure<ChatbotSettings>(builder.Configuration.GetSection("Chatbot"));
 builder.Services.AddScoped<IChatCatalogProvider, ChatCatalogProvider>();
+builder.Services.AddScoped<ICustomerChatService, CustomerChatService>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<IVendorChatDataProvider, VendorChatDataProvider>();
 builder.Services.AddHttpClient<IVendorChatService, VendorChatService>(client => client.Timeout = TimeSpan.FromSeconds(90))

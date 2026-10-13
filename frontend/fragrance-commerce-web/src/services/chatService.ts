@@ -25,11 +25,23 @@ export interface VendorChatData {
     recentOrders: Array<{ orderNumber: string; orderedAtUtc: string; status: string; vendorUnits: number; vendorItemAmount: number }>;
 }
 
+export interface CustomerChatData {
+    totalOrders: number;
+    offset: number;
+    hasMore: boolean;
+    orders: Array<{
+        id: string; orderNumber: string; orderedAtUtc: string; status: string;
+        totalAmount: number; discountAmount: number; finalAmount: number; paymentStatus: string; itemCount: number;
+        items: Array<{ productName: string; variantName: string; quantity: number; unitPrice: number }>;
+    }>;
+}
+
 export interface ChatReply {
     reply: string;
     source: "open-model" | "reviewed-reference";
     experimental: boolean;
     vendorData?: VendorChatData;
+    customerData?: CustomerChatData;
     products: Array<{
         id: string;
         name: string;
@@ -40,6 +52,10 @@ export interface ChatReply {
 }
 
 export const chatService = {
+    async sendCustomer(message: string, signal: AbortSignal, orderId?: string, offset = 0): Promise<ChatReply> {
+        const response = await api.post<ChatReply>("/customer/chat", { message, orderId, offset }, { signal, timeout: 100000 });
+        return response.data;
+    },
     async send(message: string, signal: AbortSignal): Promise<ChatReply> {
         const response = await api.post<ChatReply>("/chat", { message }, { signal, timeout: 100000 });
         return response.data;
@@ -52,7 +68,7 @@ export const chatService = {
 
 export function chatErrorMessage(error: unknown): string {
     const response = getApiResponse(error);
-    if (response?.status === 401) return "Please sign in again to use your vendor assistant.";
+    if (response?.status === 401) return "Please sign in again to access your account in the assistant.";
     if (response?.status === 403) return "This assistant requires a vendor account.";
     if (response?.status === 404) return "Your vendor profile is unavailable. Check your vendor account settings.";
     if (response?.status === 429 && typeof response.data === "object" && response.data !== null &&
