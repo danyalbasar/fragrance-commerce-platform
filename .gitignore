@@ -4,3 +4,10 @@ obj/
 .env
 .vs/
 appsettings.Development.json
+
+# Local AI learning environment and generated training artifacts
+ai/fragrance-chatbot/.venv/
+ai/fragrance-chatbot/.tmp/
+ai/fragrance-chatbot/artifacts/
+__pycache__/
+*.pyc

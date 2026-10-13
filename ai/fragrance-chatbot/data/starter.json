@@ -1,0 +1,302 @@
+[
+  {
+    "topic": "greeting",
+    "questions": [
+      "Hello",
+      "Hi there",
+      "Hey",
+      "Good morning"
+    ],
+    "answer": "Hello! Ask me about fragrance notes, perfume styles, or choosing a scent."
+  },
+  {
+    "topic": "help",
+    "questions": [
+      "What can you do?",
+      "How can you help me?",
+      "What do you know?",
+      "What should I ask you?"
+    ],
+    "answer": "I can explain fragrance notes and help you explore scents. Product pages provide current store details."
+  },
+  {
+    "topic": "perfume",
+    "questions": [
+      "What is perfume?",
+      "Explain perfume",
+      "Tell me about perfume",
+      "What does perfume mean?"
+    ],
+    "answer": "Perfume is a blend of aromatic ingredients. Its character changes as top, heart, and base notes unfold."
+  },
+  {
+    "topic": "attar",
+    "questions": [
+      "What is attar?",
+      "Explain attar",
+      "Tell me about attar",
+      "What does attar mean?"
+    ],
+    "answer": "Attar is a concentrated fragrance oil. Apply a small amount and check the product details for its ingredients."
+  },
+  {
+    "topic": "difference",
+    "questions": [
+      "Perfume or attar?",
+      "How is attar different from perfume?",
+      "Compare perfume and attar",
+      "What is the difference between attar and perfume?"
+    ],
+    "answer": "Many perfumes use an alcohol base, while attars are fragrance oils. Check each product rather than assuming its formula."
+  },
+  {
+    "topic": "top-notes",
+    "questions": [
+      "What are top notes?",
+      "Explain top notes",
+      "Tell me about opening notes",
+      "What does top note mean?"
+    ],
+    "answer": "Top notes are the first impression of a fragrance. They usually fade before the heart and base notes."
+  },
+  {
+    "topic": "heart-notes",
+    "questions": [
+      "What are heart notes?",
+      "Explain middle notes",
+      "Tell me about heart notes",
+      "What does heart note mean?"
+    ],
+    "answer": "Heart notes form the middle character of a fragrance after the opening settles. Floral and spice notes often appear here."
+  },
+  {
+    "topic": "base-notes",
+    "questions": [
+      "What are base notes?",
+      "Explain base notes",
+      "Tell me about dry down",
+      "What does base note mean?"
+    ],
+    "answer": "Base notes shape the dry down. Woods, musk, and amber accords often add depth and a lasting impression."
+  },
+  {
+    "topic": "floral",
+    "questions": [
+      "What is a floral fragrance?",
+      "Explain floral scents",
+      "I enjoy flowers",
+      "Tell me about floral perfume"
+    ],
+    "answer": "Floral fragrances feature flower-inspired notes such as rose or jasmine. Check descriptions to find a softer or richer floral style."
+  },
+  {
+    "topic": "woody",
+    "questions": [
+      "What is a woody fragrance?",
+      "Explain woody scents",
+      "I enjoy wood notes",
+      "Tell me about woody perfume"
+    ],
+    "answer": "Woody fragrances can feature cedar, sandalwood, or other wood-inspired notes. Their character may feel dry, smooth, or warm."
+  },
+  {
+    "topic": "fresh",
+    "questions": [
+      "What is a fresh fragrance?",
+      "Explain fresh scents",
+      "I like fresh smells",
+      "Tell me about fresh perfume"
+    ],
+    "answer": "Fresh fragrances often use citrus, green, or aquatic notes. Look for these notes in the product descriptions."
+  },
+  {
+    "topic": "citrus",
+    "questions": [
+      "What is a citrus fragrance?",
+      "Explain citrus notes",
+      "I like lemon scents",
+      "Tell me about citrus perfume"
+    ],
+    "answer": "Citrus notes such as lemon, bergamot, or orange can give a bright opening. The full scent also depends on its heart and base."
+  },
+  {
+    "topic": "amber",
+    "questions": [
+      "What is an amber fragrance?",
+      "Explain amber notes",
+      "I like warm scents",
+      "Tell me about amber perfume"
+    ],
+    "answer": "Amber describes a warm fragrance accord, often with resinous or sweet facets. Read the listing for the specific notes."
+  },
+  {
+    "topic": "office",
+    "questions": [
+      "How do I choose an office scent?",
+      "What scent suits work?",
+      "I need a subtle fragrance",
+      "What perfume style is good for the office?"
+    ],
+    "answer": "For shared spaces, try a subtle scent and apply lightly. Sample it first and consider the people around you."
+  },
+  {
+    "topic": "evening",
+    "questions": [
+      "How do I choose an evening scent?",
+      "What scent suits dinner?",
+      "I want a richer fragrance",
+      "What perfume style suits an evening out?"
+    ],
+    "answer": "If you enjoy richer scents, explore woody, amber, or spice notes. Choose based on your taste and sample before buying."
+  },
+  {
+    "topic": "gift",
+    "questions": [
+      "How do I choose a fragrance gift?",
+      "Help me choose a gift",
+      "I want to give perfume",
+      "What should I consider for a perfume gift?"
+    ],
+    "answer": "Ask about the person's favourite scent family and budget. A sample or discovery option can help when their preferences are unknown."
+  },
+  {
+    "topic": "apply",
+    "questions": [
+      "How do I apply perfume?",
+      "Where should I spray perfume?",
+      "How much fragrance should I wear?",
+      "Give me tips for wearing perfume"
+    ],
+    "answer": "Follow the product directions and start lightly. Avoid eyes and irritated skin, and check fabric suitability before spraying clothing."
+  },
+  {
+    "topic": "storage",
+    "questions": [
+      "How do I store perfume?",
+      "Where should I keep fragrance?",
+      "How can I protect my perfume?",
+      "What is the best place to store perfume?"
+    ],
+    "answer": "Keep fragrance away from direct sunlight and excessive heat, with the bottle closed. Follow any storage advice on the packaging."
+  },
+  {
+    "topic": "lasting",
+    "questions": [
+      "How long does perfume last?",
+      "Will a scent last all day?",
+      "Explain fragrance longevity",
+      "What affects how long fragrance lasts?"
+    ],
+    "answer": "Longevity varies with the formula, application, skin, and environment. I cannot guarantee a wear time for a product."
+  },
+  {
+    "topic": "unisex",
+    "questions": [
+      "What is a unisex fragrance?",
+      "Can anyone wear a scent?",
+      "Explain unisex perfume",
+      "Does fragrance need a gender?"
+    ],
+    "answer": "Fragrance preferences are personal. Gender labels can help browsing, but you can choose any scent you enjoy."
+  },
+  {
+    "topic": "sampling",
+    "questions": [
+      "Why should I sample a fragrance?",
+      "How do I test a perfume?",
+      "Should I try before buying?",
+      "How can I know if I like a scent?"
+    ],
+    "answer": "Try a sample if available and let it develop over time. A fragrance can smell different on skin than on a paper strip."
+  },
+  {
+    "topic": "price",
+    "questions": [
+      "What is the price?",
+      "How much does perfume cost?",
+      "Do you know current prices?",
+      "Can you tell me the price of a product?"
+    ],
+    "answer": "Use the live product cards or product page for current prices. My model weights do not contain reliable live prices."
+  },
+  {
+    "topic": "stock",
+    "questions": [
+      "Is this in stock?",
+      "What is available?",
+      "Can you check stock?",
+      "Do you know current product availability?"
+    ],
+    "answer": "Check the live product cards and product page for availability. Stock is kept in the store database, not in my model weights."
+  },
+  {
+    "topic": "orders",
+    "questions": [
+      "Where is my order?",
+      "How do I track my order?",
+      "Can you look up my order?",
+      "I want to check my delivery status"
+    ],
+    "answer": "Sign in and visit your orders page for order status. I cannot access private customer orders."
+  },
+  {
+    "topic": "returns",
+    "questions": [
+      "Can I return perfume?",
+      "What are the return rules?",
+      "How do I request a refund?",
+      "Where can I read the return policy?"
+    ],
+    "answer": "Read the store's current return policy and contact support for your purchase. I cannot approve a return or refund."
+  },
+  {
+    "topic": "delivery",
+    "questions": [
+      "When will delivery arrive?",
+      "What are shipping times?",
+      "How fast is shipping?",
+      "Can you promise a delivery date?"
+    ],
+    "answer": "Check the store's current delivery information or ask support. I cannot promise a shipping price or arrival date."
+  },
+  {
+    "topic": "support",
+    "questions": [
+      "How do I contact support?",
+      "I need help with a purchase",
+      "Can a person help me?",
+      "Where is customer support?"
+    ],
+    "answer": "Visit the contact page to reach the store team. Include your order number there if your question concerns a purchase."
+  },
+  {
+    "topic": "unknown",
+    "questions": [
+      "Write a computer program",
+      "Who won the football match?",
+      "Tell me a stock to buy",
+      "What is the weather tomorrow?"
+    ],
+    "answer": "My small training set covers fragrance shopping. Please ask a fragrance question or use the contact page for store support."
+  },
+  {
+    "topic": "health",
+    "questions": [
+      "Will perfume cure my headache?",
+      "Is this safe for my allergy?",
+      "Will this skincare cure acne?",
+      "Can you give medical advice?"
+    ],
+    "answer": "I cannot assess medical conditions or promise a product is safe for an allergy. Check ingredients and ask a qualified clinician."
+  },
+  {
+    "topic": "thanks",
+    "questions": [
+      "Thank you",
+      "Thanks for helping",
+      "That helps",
+      "Thanks a lot"
+    ],
+    "answer": "You are welcome! Explore the product pages for current details and enjoy discovering your fragrance preferences."
+  }
+]

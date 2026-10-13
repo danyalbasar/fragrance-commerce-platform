@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { Suspense } from "react";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import ChatWidget from "@/components/chat/ChatWidget";
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
@@ -28,6 +29,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
                 {children}
             </div>
             {!isVendor && !isAdmin && <Footer />}
+            {!isVendor && !isAdmin && <ChatWidget />}
         </>
     );
 }

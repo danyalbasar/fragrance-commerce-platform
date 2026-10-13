@@ -1,0 +1,6 @@
+{$AI_HOST} {
+    request_body {
+        max_size 64KB
+    }
+    reverse_proxy model:8001
+}

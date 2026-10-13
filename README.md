@@ -31,6 +31,10 @@ npm run dev
 
 `src/services/api.ts` points to `http://localhost:5203/api` by default. Override with `NEXT_PUBLIC_API_BASE_URL`.
 
+## AI Shopping Assistant
+
+For the free live chatbot on your existing Vercel and Render services, follow [the Cloudflare setup guide](ai/fragrance-chatbot/CLOUDFLARE_DEPLOYMENT.md). The API calls Cloudflare Workers AI with current public catalog data; credentials stay on Render. Local Qwen inference and Colab fine-tuning remain available in [the chatbot learning lab](ai/fragrance-chatbot/README.md).
+
 ## Free Hosting (Render + Neon)
 
 The API and database are hosted for free. The frontend stays on Vercel.

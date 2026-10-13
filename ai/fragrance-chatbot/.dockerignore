@@ -1,0 +1,9 @@
+# Explicit build inputs; exclude .env, local weights, virtualenvs, and datasets.
+**
+!Dockerfile
+!requirements.txt
+!download_model.py
+!inference.py
+!serve.py
+!healthcheck.py
+!knowledge.json

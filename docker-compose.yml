@@ -36,6 +36,12 @@ services:
       EmailSettings__FromAddress: ${RESEND_FROM_ADDRESS:-onboarding@resend.dev}
       EmailSettings__FromName: Fragrance Commerce
       EmailSettings__FrontendBaseUrl: http://localhost:3000
+      Chatbot__BaseUrl: ${CHATBOT_BASE_URL:-http://host.docker.internal:8001/}
+      Chatbot__ServiceKey: ${CHATBOT_SERVICE_KEY:-}
+      Chatbot__Enabled: ${CHATBOT_ENABLED:-true}
+      Chatbot__Provider: ${CHATBOT_PROVIDER:-local}
+      Chatbot__CloudflareAccountId: ${CLOUDFLARE_ACCOUNT_ID:-}
+      Chatbot__CloudflareApiToken: ${CLOUDFLARE_API_TOKEN:-}
 
   frontend:
     build:

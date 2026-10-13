@@ -121,6 +121,16 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 builder.Services.AddScoped<ISiteSettingsService, SiteSettingsService>();
 
+builder.Services.Configure<ChatbotSettings>(builder.Configuration.GetSection("Chatbot"));
+builder.Services.AddScoped<IChatCatalogProvider, ChatCatalogProvider>();
+builder.Services.AddHttpClient<IChatService, ChatService>((services, client) =>
+{
+    var settings = services.GetRequiredService<Microsoft.Extensions.Options.IOptions<ChatbotSettings>>().Value;
+    if (string.Equals(settings.Provider, "local", StringComparison.OrdinalIgnoreCase))
+        client.BaseAddress = new Uri(settings.BaseUrl.TrimEnd('/') + "/");
+    client.Timeout = TimeSpan.FromSeconds(90);
+}).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
+
 builder.Services.AddScoped<IVendorRepository, VendorRepository>();
 builder.Services.AddScoped<IVendorService, VendorService>();
 
@@ -193,6 +203,16 @@ builder.Services.AddCors(options =>
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.AddPolicy("ChatPerIp", context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 15,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0
+            }));
 
     options.AddPolicy("AuthPerIp", context =>
         RateLimitPartition.GetFixedWindowLimiter(
@@ -290,7 +310,13 @@ static void LoadEnvFile(ConfigurationManager configuration)
     {
         ["RAZORPAY_KEY_ID"] = "RazorpaySettings:KeyId",
         ["RAZORPAY_KEY_SECRET"] = "RazorpaySettings:KeySecret",
-        ["RAZORPAY_WEBHOOK_SECRET"] = "RazorpaySettings:WebhookSecret"
+        ["RAZORPAY_WEBHOOK_SECRET"] = "RazorpaySettings:WebhookSecret",
+        ["CHATBOT_BASE_URL"] = "Chatbot:BaseUrl",
+        ["CHATBOT_SERVICE_KEY"] = "Chatbot:ServiceKey",
+        ["CHATBOT_ENABLED"] = "Chatbot:Enabled",
+        ["CHATBOT_PROVIDER"] = "Chatbot:Provider",
+        ["CLOUDFLARE_ACCOUNT_ID"] = "Chatbot:CloudflareAccountId",
+        ["CLOUDFLARE_API_TOKEN"] = "Chatbot:CloudflareApiToken"
     };
 
     foreach (var line in File.ReadAllLines(envPath))

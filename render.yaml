@@ -30,3 +30,11 @@ services:
         sync: false
       - key: CORS__AllowedOrigins
         sync: false
+      - key: Chatbot__Enabled
+        value: "true"
+      - key: Chatbot__Provider
+        value: cloudflare
+      - key: Chatbot__CloudflareAccountId
+        sync: false
+      - key: Chatbot__CloudflareApiToken
+        sync: false
