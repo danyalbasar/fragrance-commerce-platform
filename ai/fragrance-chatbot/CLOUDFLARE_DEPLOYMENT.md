@@ -31,7 +31,7 @@ Push the updated code to the GitHub branch used by Render and Vercel, then deplo
 
 Use your existing `NEXT_PUBLIC_API_BASE_URL` pointing to `https://YOUR-RENDER-SERVICE.onrender.com/api`. Set `NEXT_PUBLIC_CHATBOT_ENABLED=true` if it was previously disabled, then redeploy the frontend. Keep the exact Vercel origin in Render's existing `CORS__AllowedOrigins` setting.
 
-No Cloudflare credentials belong in Vercel. The browser sends questions only to Render. Public product names, descriptions, prices, availability, and public policy excerpts are sent to Cloudflare to answer the question. Private customer records are not retrieved. Cloudflare processes those questions and context on its infrastructure; see [data usage](https://developers.cloudflare.com/workers-ai/platform/data-usage/).
+No Cloudflare credentials belong in Vercel. The browser sends questions only to Render. Public product names, descriptions, prices, availability, and public policy excerpts are sent to Cloudflare for shopping questions. The authenticated vendor assistant sends only the signed-in vendor's business summaries, SKU records, and bounded order summaries. Customer names, addresses, emails, payment credentials, and other vendors' items are not retrieved for that context. Cloudflare processes those questions and context on its infrastructure; see [data usage](https://developers.cloudflare.com/workers-ai/platform/data-usage/).
 
 ## 4. Verify the deployed website
 
@@ -64,6 +64,20 @@ Workers AI currently includes **10,000 Neurons per day**, reset at **00:00 UTC (
 To disable generation, set `Chatbot__Enabled=false` on Render. To hide the widget, set `NEXT_PUBLIC_CHATBOT_ENABLED=false` on Vercel and rebuild.
 
 ## Local checks and future training
+
+### Vendor business assistant
+
+Vendor accounts see **Ask your business** in the vendor studio. Its separate endpoint, `POST /api/vendor/chat`, requires the Vendor role and derives ownership from the authenticated user claim. Requests contain only `message` and `period`; callers cannot choose a vendor ID. Every database query is scoped before information reaches Cloudflare.
+
+The assistant reads current inventory, recorded inventory cost, delivered item sales, top sellers, order-status counts, and recent order summaries. Sales windows are today, yesterday, last 7 days, last 30 days, this month, or all time. Calendar days and months use India time; query boundaries and timestamps are stored in UTC. Inventory remains current regardless of the selected sales period.
+
+Sales follow the existing vendor dashboard definition: gross delivered item sales by order date, before order-level discounts and refunds. They are not net revenue or profit. Mixed-vendor orders contribute only the signed-in vendor's items and item amounts, never the whole basket total. Status is shared at order level in the current schema. Low-stock alerts include active SKUs on active products with 5 or fewer units. Detailed lists are bounded samples, while summary counts and totals cover every scoped matching record.
+
+The UI displays independent recorded figures alongside generated answers and links to the vendor's own product editor and Orders page. The assistant is read-only and cannot modify stock, orders, prices, or sales. Conversations are held in component memory and reset when the signed-in account changes or the vendor session ends. Questions are independent; past messages are not sent to the model.
+
+This is authenticated live data grounding. It does not train or fine-tune model weights. A future adapter should teach business vocabulary and response style using sanitized examples, while live sales, order, and stock facts should continue to come from scoped queries. Public and vendor conversations share the same Cloudflare free allocation.
+
+Tests use an isolated in-memory database with two vendors, mixed-vendor orders, cancellations, old/future records, and private-data sentinels. An isolated HTTP host runs the real controller and authorization middleware to verify 401/403 rejection and resistance to client-supplied ownership IDs. Cloudflare is stubbed in those checks, so no real business records or model allowance are consumed. A signed-in live vendor session verifies the actual PostgreSQL queries and hosted inference after deployment.
 
 To test this provider locally, add to the API's ignored `.env`:
 

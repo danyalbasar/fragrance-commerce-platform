@@ -3,9 +3,12 @@
 import { useState } from "react";
 import { Menu } from "lucide-react";
 import VendorSidebar from "./VendorSidebar";
+import ChatWidget from "@/components/chat/ChatWidget";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function VendorShell({ children }: { children: React.ReactNode }) {
     const [mobileOpen, setMobileOpen] = useState(false);
+    const { email } = useAuth();
 
     return (
         <div className="flex h-screen overflow-hidden bg-[var(--luxury-ivory)] text-[var(--luxury-ink)]">
@@ -24,6 +27,7 @@ export default function VendorShell({ children }: { children: React.ReactNode })
                     {children}
                 </div>
             </main>
+            <ChatWidget key={email ?? "vendor"} audience="vendor" />
         </div>
     );
 }

@@ -123,6 +123,10 @@ builder.Services.AddScoped<ISiteSettingsService, SiteSettingsService>();
 
 builder.Services.Configure<ChatbotSettings>(builder.Configuration.GetSection("Chatbot"));
 builder.Services.AddScoped<IChatCatalogProvider, ChatCatalogProvider>();
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddScoped<IVendorChatDataProvider, VendorChatDataProvider>();
+builder.Services.AddHttpClient<IVendorChatService, VendorChatService>(client => client.Timeout = TimeSpan.FromSeconds(90))
+    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
 builder.Services.AddHttpClient<IChatService, ChatService>((services, client) =>
 {
     var settings = services.GetRequiredService<Microsoft.Extensions.Options.IOptions<ChatbotSettings>>().Value;

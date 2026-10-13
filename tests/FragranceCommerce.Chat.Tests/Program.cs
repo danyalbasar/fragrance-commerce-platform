@@ -89,6 +89,7 @@ foreach (var invalidAccount in new[] { "", "../another-account", "short-id" })
     Assert(noCall.Calls == 0, "Invalid configuration must not make HTTP requests.");
 }
 Console.WriteLine("All local and Cloudflare chatbot contract checks passed.");
+await VendorChatChecks.RunAsync();
 
 if (args.Contains("--live-model"))
 {

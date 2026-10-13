@@ -35,6 +35,8 @@ npm run dev
 
 For the free live chatbot on your existing Vercel and Render services, follow [the Cloudflare setup guide](ai/fragrance-chatbot/CLOUDFLARE_DEPLOYMENT.md). The API calls Cloudflare Workers AI with current public catalog data; credentials stay on Render. Local Qwen inference and Colab fine-tuning remain available in [the chatbot learning lab](ai/fragrance-chatbot/README.md).
 
+Vendor accounts also have **Ask your business** in the vendor studio. It reads their own live sales, stock, and order summaries through a separate authenticated endpoint. Ownership is enforced in database queries; other vendors' items and customer personal details stay out of the AI context. This uses live data grounding rather than training model weights.
+
 ## Free Hosting (Render + Neon)
 
 The API and database are hosted for free. The frontend stays on Vercel.
