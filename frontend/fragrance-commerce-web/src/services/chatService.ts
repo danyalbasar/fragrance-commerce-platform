@@ -48,6 +48,7 @@ export interface ChatReply {
         brandName: string;
         price: number;
         inStock: boolean;
+        imageUrl?: string | null;
     }>;
 }
 

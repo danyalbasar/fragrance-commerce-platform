@@ -46,7 +46,12 @@ public class ChatCatalogProvider(ApplicationDbContext context) : IChatCatalogPro
                 p.Variants.Where(v => v.IsActive).Min(v => v.SellingPrice),
                 p.Variants.Any(v => v.IsActive && v.StockQuantity > 0),
                 p.Description == null ? "" : p.Description.Substring(0, Math.Min(p.Description.Length, 250)),
-                p.Category.Name))
+                p.Category.Name,
+                p.Images.Where(i => i.ImageUrl != "").OrderByDescending(i => i.IsPrimary)
+                    .ThenBy(i => i.DisplayOrder).ThenBy(i => i.Id).Select(i => (string?)i.ImageUrl).FirstOrDefault()
+                ?? p.Variants.Where(v => v.IsActive).SelectMany(v => v.Images).Where(i => i.ImageUrl != "")
+                    .OrderByDescending(i => i.IsPrimary).ThenBy(i => i.DisplayOrder).ThenBy(i => i.Id)
+                    .Select(i => (string?)i.ImageUrl).FirstOrDefault()))
             .ToListAsync(cancellationToken);
     }
 

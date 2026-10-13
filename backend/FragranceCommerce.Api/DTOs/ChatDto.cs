@@ -9,6 +9,6 @@ public class ChatRequestDto
 }
 
 public record ChatProductDto(Guid Id, string Name, string BrandName, decimal Price, bool InStock,
-    string Description = "", string CategoryName = "");
+    string Description = "", string CategoryName = "", string? ImageUrl = null);
 public record ChatResponseDto(string Reply, string Source, bool Experimental, List<ChatProductDto> Products);
 public record ChatStatusDto(bool Ready);

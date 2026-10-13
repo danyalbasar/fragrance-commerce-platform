@@ -43,7 +43,9 @@ public class ChatService(
             throw new ChatUnavailableException("The fragrance assistant is unavailable.");
         var products = await catalog.GetMatchesAsync(message, cancellationToken);
         var information = await catalog.GetStoreInformationAsync(cancellationToken);
-        var context = JsonSerializer.Serialize(new { currency = "INR", products, information },
+        // Image URLs are presentation metadata; the text model only needs product facts.
+        var context = JsonSerializer.Serialize(new { currency = "INR", products = products.Select(p => new
+            { p.Id, p.Name, p.BrandName, p.Price, p.InStock, p.Description, p.CategoryName }), information },
             new JsonSerializerOptions(JsonSerializerDefaults.Web)
             {
                 Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping

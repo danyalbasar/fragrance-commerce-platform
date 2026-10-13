@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { FlaskConical, LoaderCircle, MessageCircle, Send, Trash2, X } from "lucide-react";
 import { chatErrorMessage, chatService, vendorChatPeriods, type ChatReply, type CustomerChatData, type VendorChatData, type VendorChatPeriod } from "@/services/chatService";
 import { formatPrice } from "@/utils/format";
@@ -155,12 +156,7 @@ export default function ChatWidget({ audience = "shopper" }: { audience?: "shopp
                                             <div className="mt-3 space-y-2">
                                                 <p className="text-xs text-[var(--luxury-muted-strong)]">Catalog matches · live store data</p>
                                                 {message.products.map(product => (
-                                                    <Link key={product.id} href={`/products/${product.id}`} onClick={() => setOpen(false)}
-                                                        className="block rounded-xl border border-[var(--luxury-line)] px-3 py-2 hover:bg-[var(--luxury-sand)]">
-                                                        <span className="block text-xs text-[var(--luxury-muted-strong)]">{product.brandName}</span>
-                                                        <span className="block text-sm font-medium">{product.name}</span>
-                                                        <span className="text-xs">From {formatPrice(product.price)} · {product.inStock ? "In stock" : "Out of stock"}</span>
-                                                    </Link>
+                                                    <ProductRecommendation key={product.id} product={product} close={() => setOpen(false)} />
                                                 ))}
                                             </div>
                                         )}
@@ -192,6 +188,24 @@ export default function ChatWidget({ audience = "shopper" }: { audience?: "shopp
             )}
         </>
     );
+}
+
+function ProductRecommendation({ product, close }: { product: ChatReply["products"][number]; close: () => void }) {
+    const [imageFailed, setImageFailed] = useState(false);
+    const imageUrl = product.imageUrl && /^https:\/\/res\.cloudinary\.com\//.test(product.imageUrl) ? product.imageUrl : null;
+    return <Link href={`/products/${product.id}`} onClick={close}
+        className="flex items-center gap-3 rounded-xl border border-[var(--luxury-line)] p-3 hover:bg-[var(--luxury-sand)]">
+        <span className="relative flex h-20 w-[72px] shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[var(--luxury-sand)]">
+            {imageUrl && !imageFailed
+                ? <Image src={imageUrl} alt="" fill sizes="72px" className="object-cover" onError={() => setImageFailed(true)} />
+                : <FlaskConical size={25} className="text-[var(--luxury-muted-strong)]" aria-hidden="true" />}
+        </span>
+        <span className="min-w-0">
+            <span className="block text-xs text-[var(--luxury-muted-strong)]">{product.brandName}</span>
+            <span className="block break-words text-sm font-medium">{product.name}</span>
+            <span className="text-xs">From {formatPrice(product.price)} · {product.inStock ? "In stock" : "Out of stock"}</span>
+        </span>
+    </Link>;
 }
 
 function CustomerOrders({ data, close, pending, ask }: {
