@@ -10,12 +10,12 @@ using Microsoft.Extensions.Options;
 var catalog = new FakeCatalog();
 var handler = new FakeHandler(HttpStatusCode.OK, "{\"reply\":\"Try a citrus scent.\"}");
 var service = Create(handler, catalog);
-var result = await service.ReplyAsync("Find citrus perfume", CancellationToken.None);
+var result = await service.ReplyAsync("Explain citrus notes", CancellationToken.None);
 Assert(result.Source == "open-model" && result.Experimental, "Source must identify the open model.");
 Assert(result.Products.Count == 1 && result.Products[0].Price == 1250, "Prices must come from the catalog.");
 Assert(handler.Key == "backend-only-key", "Service key must be sent to the model service.");
 var body = JsonDocument.Parse(handler.Body!);
-Assert(body.RootElement.GetProperty("message").GetString() == "Find citrus perfume", "Message must be passed intact.");
+Assert(body.RootElement.GetProperty("message").GetString() == "Explain citrus notes", "Message must be passed intact.");
 Assert(body.RootElement.GetProperty("context").GetString()!.Contains("1250"), "Live context must reach inference.");
 Assert(body.RootElement.GetProperty("context").GetString()!.Contains("return_sections"), "Public policies must reach inference.");
 var reviewed = await Create(new FakeHandler(HttpStatusCode.OK, "{\"reply\":\"Attar is a fragrant oil.\",\"source\":\"reviewed-reference\"}"), catalog)
@@ -37,7 +37,7 @@ Assert(!Validator.TryValidateObject(dto, new ValidationContext(dto), [], true), 
 var cloudflareHandler = new FakeHandler(HttpStatusCode.OK,
     "{\"success\":true,\"result\":{\"response\":\" Citrus costs 1250 INR. \"},\"errors\":[]}");
 var cloudflare = CreateCloudflare(cloudflareHandler);
-var cloudflareReply = await cloudflare.ReplyAsync("Price of Citrus?", CancellationToken.None);
+var cloudflareReply = await cloudflare.ReplyAsync("Explain citrus notes", CancellationToken.None);
 Assert(cloudflareReply.Reply == "Citrus costs 1250 INR." && cloudflareReply.Experimental,
     "Cloudflare replies must be parsed and identified as generated.");
 Assert(cloudflareReply.Products.Single().Price == 1250, "Cloudflare product cards must use live catalog prices.");
@@ -91,6 +91,7 @@ foreach (var invalidAccount in new[] { "", "../another-account", "short-id" })
 Console.WriteLine("All local and Cloudflare chatbot contract checks passed.");
 await VendorChatChecks.RunAsync();
 await CustomerChatChecks.RunAsync();
+await CatalogRecommendationChecks.RunAsync();
 
 if (args.Contains("--live-model"))
 {
@@ -98,7 +99,7 @@ if (args.Contains("--live-model"))
     var live = new ChatService(
         new HttpClient { BaseAddress = new Uri("http://127.0.0.1:8001/"), Timeout = TimeSpan.FromSeconds(90) },
         catalog, Options.Create(new ChatbotSettings()));
-    var liveResult = await live.ReplyAsync("What is the price of Citrus?", CancellationToken.None);
+    var liveResult = await live.ReplyAsync("Explain citrus notes", CancellationToken.None);
     Assert(!string.IsNullOrWhiteSpace(liveResult.Reply), "Live model must return a reply.");
     Assert(liveResult.Products.Single().Price == 1250, "Fixture price must be preserved in the product card.");
     Console.WriteLine("Live backend-to-model fixture reply: " + liveResult.Reply);

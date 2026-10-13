@@ -42,6 +42,19 @@ public class ChatService(
         if (!IsLocal && !IsCloudflare)
             throw new ChatUnavailableException("The fragrance assistant is unavailable.");
         var products = await catalog.GetMatchesAsync(message, cancellationToken);
+        // Product names, prices, and recommendation cards share one trusted source.
+        // A free-form model response must not invent inventory when search is empty.
+        if (ChatShoppingIntent.IsCatalogRequest(message))
+        {
+            if (products.Count == 0)
+                return new("I couldn't find a matching product in the current catalog. Try a scent note, product name, or browse the collection.", "reviewed-reference", false, []);
+            var first = products[0];
+            var price = first.Price.ToString(first.Price % 1 == 0 ? "N0" : "N2", System.Globalization.CultureInfo.GetCultureInfo("en-IN"));
+            var intro = ChatShoppingIntent.FragranceRequest(message) && ChatShoppingIntent.OccasionTerms(message).Length > 0
+                ? "Here are real fragrances from our catalog to consider for that occasion."
+                : "Here are matching products from our current catalog.";
+            return new($"{intro} {first.Name} by {first.BrandName} starts at ₹{price}. Compare the photos, prices, and availability below.", "reviewed-reference", false, products);
+        }
         var information = await catalog.GetStoreInformationAsync(cancellationToken);
         // Image URLs are presentation metadata; the text model only needs product facts.
         var context = JsonSerializer.Serialize(new { currency = "INR", products = products.Select(p => new
